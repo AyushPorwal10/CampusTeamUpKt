@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">CAMPUS_TEAMUP</string>
+    <string name="logo_description">App Logo</string>
+    <string name="login_here">Login Here</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="welcomeGreeting">Welcome to Campus TeamUp !</string>
+    <string name="hidePassword">Hide Password</string>
+    <string name="showPassword">Show Password</string>
+    <string name="login">Login</string>
+    <string name="forgotPassword">Forgot Password ?</string>
+    <string name="signUp">Sign Up</string>
+    <string name="Login">Login</string>
+</resources>
