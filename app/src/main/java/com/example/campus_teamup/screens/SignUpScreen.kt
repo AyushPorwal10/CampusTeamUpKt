@@ -41,8 +41,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import com.example.campus_teamup.myAnimation.TextAnimation
 import com.example.campus_teamup.R
+//import com.example.campus_teamup.myAnimation.TextAnimation
 import com.example.campus_teamup.myThemes.PrimaryBlack
 import com.example.campus_teamup.myThemes.PrimaryWhiteGradient
 import com.example.campus_teamup.myThemes.TextFieldStyle
@@ -83,7 +83,7 @@ fun SignUpHeader( appLogo: Int) {
         Spacer(modifier = Modifier.height(10.dp))
 
 
-        TextAnimation.AnimatedText()
+        //TextAnimation.AnimatedText()
 
     }
 }
@@ -129,7 +129,7 @@ fun SignUpBox(textColor: Color, backgroundColor: Color, navigateToHomeScreen: ()
                 colors = TextFieldStyle.myTextFieldColor(),
                 shape = TextFieldStyle.defaultShape,
                 label = {
-                    Text("Enter Email ", style = TextStyle(color = Black))
+                    Text("Enter Email ", style = TextStyle(color = textColor))
                 },
                 leadingIcon = {
                     Icon(
@@ -147,7 +147,7 @@ fun SignUpBox(textColor: Color, backgroundColor: Color, navigateToHomeScreen: ()
                 colors = TextFieldStyle.myTextFieldColor(),
                 shape = TextFieldStyle.defaultShape,
                 label = {
-                    Text("Enter Password ", style = TextStyle(color = Black))
+                    Text("Enter Password ", style = TextStyle(color = textColor))
                 },
                 leadingIcon = {
                     Icon(
@@ -175,7 +175,7 @@ fun SignUpBox(textColor: Color, backgroundColor: Color, navigateToHomeScreen: ()
                 colors = TextFieldStyle.myTextFieldColor(),
                 shape = TextFieldStyle.defaultShape,
                 label = {
-                    Text("Enter Your Name ", style = TextStyle(color = Black))
+                    Text("Enter Your Name ", style = TextStyle(color = textColor))
                 },
                 leadingIcon = {
                     Icon(
@@ -192,7 +192,7 @@ fun SignUpBox(textColor: Color, backgroundColor: Color, navigateToHomeScreen: ()
                 colors = TextFieldStyle.myTextFieldColor(),
                 shape = TextFieldStyle.defaultShape,
                 label = {
-                    Text("Enter Your Name ", style = TextStyle(color = Black))
+                    Text("Enter Your Name ", style = TextStyle(color = textColor))
                 },
                 leadingIcon = {
                     Icon(
@@ -205,7 +205,7 @@ fun SignUpBox(textColor: Color, backgroundColor: Color, navigateToHomeScreen: ()
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedButton(onClick = { navigateToHomeScreen() }, modifier = Modifier.fillMaxWidth(0.8f),
+            OutlinedButton(onClick = { navigateToHomeScreen() }, modifier = Modifier.fillMaxWidth(0.4f),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if(isSystemInDarkTheme()) Black else White,
                     contentColor = textColor

@@ -41,18 +41,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-
-import com.example.campus_teamup.myAnimation.TextAnimation
 import com.example.campus_teamup.R
+//import com.example.campus_teamup.myAnimation.TextAnimation
 import com.example.campus_teamup.myThemes.PrimaryBlack
 import com.example.campus_teamup.myThemes.PrimaryWhiteGradient
 import com.example.campus_teamup.myThemes.TextFieldStyle
 import com.example.campus_teamup.ui.theme.Black
 import com.example.campus_teamup.ui.theme.White
 
-@Preview
+
 @Composable
 fun LoginScreen(
     navigateToSignUpScreen : () -> Unit= {},
@@ -91,8 +89,7 @@ fun LoginHeader(textColor: Color, appLogo: Int) {
         Spacer(modifier = Modifier.height(10.dp))
 
 
-        TextAnimation.AnimatedText()
-
+      //  TextAnimation.AnimatedText()
     }
 }
 
@@ -135,7 +132,7 @@ fun LoginFields(
                 colors = TextFieldStyle.myTextFieldColor(),
                 shape = TextFieldStyle.defaultShape,
                 label = {
-                    Text("Enter Email ", style = TextStyle(color = Black))
+                    Text("Enter Email ", style = TextStyle(color = textColor))
                 },
                 leadingIcon = {
                     Icon(
@@ -153,7 +150,7 @@ fun LoginFields(
                 colors = TextFieldStyle.myTextFieldColor(),
                 shape = TextFieldStyle.defaultShape,
                 label = {
-                    Text("Enter Password ", style = TextStyle(color = Black))
+                    Text("Enter Password ", style = TextStyle(textColor))
                 },
                 leadingIcon = {
                     Icon(
@@ -178,7 +175,7 @@ fun LoginFields(
 
 
             OutlinedButton(onClick = {navigateToHomeScreen() },
-                modifier = Modifier.fillMaxWidth(0.5f),
+                modifier = Modifier.fillMaxWidth(0.3f),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if(isSystemInDarkTheme()) Black else White,
                     contentColor = textColor

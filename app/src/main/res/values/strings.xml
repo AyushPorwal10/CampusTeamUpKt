@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">CAMPUS_TEAMUP</string>
+    <string name="app_name">Campus TeamUp</string>
     <string name="logo_description">App Logo</string>
     <string name="login_here">Login Here</string>
     <string name="email">Email</string>
@@ -11,4 +11,9 @@
     <string name="forgotPassword">Forgot Password ?</string>
     <string name="signUp">Sign Up</string>
     <string name="Login">Login</string>
+    <string name="teamDetails">Team Details</string>
+    <string name="roles">Roles</string>
+    <string name="vacancies">Vacancy</string>
+    <string name="projects">Projects</string>
+    <string name="searchRoles">Search Role...</string>
 </resources>

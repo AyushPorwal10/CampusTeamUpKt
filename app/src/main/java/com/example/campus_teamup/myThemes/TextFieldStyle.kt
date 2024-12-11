@@ -15,7 +15,7 @@ object TextFieldStyle {
     @Composable
 
     fun myTextFieldColor() = OutlinedTextFieldDefaults.colors(
-        unfocusedContainerColor = if(isSystemInDarkTheme()) Black else White,
+
 
         cursorColor = if(isSystemInDarkTheme()) White else Black,
 

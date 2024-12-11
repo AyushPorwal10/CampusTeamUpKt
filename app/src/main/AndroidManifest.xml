@@ -13,6 +13,9 @@
         android:theme="@style/Theme.CAMPUS_TEAMUP"
         tools:targetApi="31">
         <activity
+            android:name=".myactivities.DrawerItemActivity"
+            android:exported="false" />
+        <activity
             android:name=".myactivities.SignUp"
             android:exported="false" />
         <activity
