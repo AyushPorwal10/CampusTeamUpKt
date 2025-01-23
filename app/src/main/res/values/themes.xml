@@ -2,5 +2,8 @@
 <resources>
 
     <style name="Theme.CAMPUS_TEAMUP" parent="android:Theme.Material.Light.NoActionBar" >
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@color/appBgColor</item>
+        <item name="android:navigationBarColor">@color/appBgColor</item>
     </style>
 </resources>

@@ -20,9 +20,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,16 +38,14 @@ import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.LightWhite
 import com.example.campus_teamup.ui.theme.White
 
-
-
-
+@Preview
 @Composable
-fun RolesScreen() {
+fun VacanciesScreen() {
     val textColor = White
     val bgColor = BackGroundColor
 
-
     var queryText by remember { mutableStateOf("") }
+
 
     Box(
         modifier = Modifier
@@ -59,13 +56,13 @@ fun RolesScreen() {
 
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
 
-            val (searchBar, filterIcon, divider, rolesList) = createRefs()
+            val (searchBar , filterIcon , divider, vacancyList) = createRefs()
 
             OutlinedTextField(value = queryText,
                 onValueChange = { searchQuery -> queryText = searchQuery },
                 colors = TextFieldStyle.myTextFieldColor(),
                 shape = TextFieldStyle.defaultShape,
-                modifier = Modifier.constrainAs(searchBar) {
+                modifier = Modifier.constrainAs(searchBar){
                     start.linkTo(parent.start)
                     top.linkTo(parent.top)
 
@@ -82,6 +79,7 @@ fun RolesScreen() {
 
                         painter = painterResource(id = R.drawable.search),
                         contentDescription = null,
+                        tint = White,
                         modifier = Modifier.size(22.dp)
                     )
                 })
@@ -89,6 +87,7 @@ fun RolesScreen() {
             Icon(
                 painter = painterResource(id = R.drawable.filter),
                 contentDescription = null,
+                tint = White,
                 modifier = Modifier
                     .size(26.dp)
                     .constrainAs(filterIcon) {
@@ -100,35 +99,47 @@ fun RolesScreen() {
             )
 
             // horizontal arrangement of search items
-            createHorizontalChain(searchBar, filterIcon, chainStyle = ChainStyle.Spread)
+            createHorizontalChain(searchBar , filterIcon , chainStyle = ChainStyle.Spread)
 
-            HorizontalDivider(thickness = 1.dp, color = BorderColor,
-                modifier = Modifier.constrainAs(divider) {
+            HorizontalDivider(thickness = 1.dp , color = BorderColor ,
+                modifier = Modifier.constrainAs(divider){
                     start.linkTo(parent.start)
-                    top.linkTo(searchBar.bottom, margin = 16.dp)
+                    top.linkTo(searchBar.bottom , margin = 16.dp)
                     end.linkTo(parent.end)
                 })
 
 
-            // Showing list of roles
+            // showing list of vacancies
+
+            ShowListOfVacancies(
+                modifier = Modifier.padding(5.dp).constrainAs(vacancyList) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(divider.bottom , margin = 5.dp)
+                }
+            )
 
 
-            ShowListOfRoles(modifier = Modifier.constrainAs(rolesList) {
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                top.linkTo(divider.bottom, margin = 10.dp)
-            })
+
+
+
         }
+
     }
 }
 
 @Composable
-fun ShowListOfRoles(modifier: Modifier) {
-    LazyColumn(modifier = modifier , verticalArrangement = Arrangement.spacedBy(16.dp)) {
+fun ShowListOfVacancies(modifier: Modifier) {
+
+    LazyColumn(modifier = modifier , verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         items(10) {
-            SingleRole()
+            SingleVacancy(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
         }
     }
+
 }
-
-

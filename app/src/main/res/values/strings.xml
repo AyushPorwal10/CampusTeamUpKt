@@ -15,5 +15,15 @@
     <string name="roles">Roles</string>
     <string name="vacancies">Vacancy</string>
     <string name="projects">Projects</string>
-    <string name="searchRoles">Search Role...</string>
+    <string name="search">Search…</string>
+    <string name="collgeDetailsBtn">College Details</string>
+    <string name="codingProfileBtn">Coding Profiles</string>
+    <string name="enter_email">Enter Your Email</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="enter_college_name">Enter College Name</string>
+    <string name="college_icon">College Icon</string>
+    <string name="enter_name">Enter Your Name</string>
+    <string name="user_profile_icon">User Profile Icon</string>
+    <string name="notifications">Notifications</string>
+    <string name="chats">Chats</string>
 </resources>

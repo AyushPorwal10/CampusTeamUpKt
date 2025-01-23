@@ -6,6 +6,8 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import com.example.campus_teamup.ui.theme.Black
+import com.example.campus_teamup.ui.theme.BorderColor
+import com.example.campus_teamup.ui.theme.LightTextColor
 import com.example.campus_teamup.ui.theme.LightWhite
 import com.example.campus_teamup.ui.theme.White
 
@@ -17,22 +19,22 @@ object TextFieldStyle {
     fun myTextFieldColor() = OutlinedTextFieldDefaults.colors(
 
 
-        cursorColor = if(isSystemInDarkTheme()) White else Black,
+        cursorColor = White,
 
-        unfocusedPlaceholderColor = if(isSystemInDarkTheme()) White else Black,
-        focusedPlaceholderColor = if(isSystemInDarkTheme()) White else Black,
+        unfocusedPlaceholderColor = LightTextColor,
+        focusedPlaceholderColor = LightTextColor,
 
-        unfocusedBorderColor = if(isSystemInDarkTheme()) LightWhite else Black,
-        focusedBorderColor = if(isSystemInDarkTheme()) LightWhite else Black,
+        unfocusedBorderColor = BorderColor,
+        focusedBorderColor = BorderColor,
 
-        unfocusedTextColor = if(isSystemInDarkTheme()) White else Black ,
-        focusedTextColor = if(isSystemInDarkTheme()) White else Black,
+        unfocusedTextColor = White ,
+        focusedTextColor = White,
 
-        focusedLabelColor = if(isSystemInDarkTheme()) White else Black,
-        unfocusedLabelColor = if(isSystemInDarkTheme()) White else Black
+        focusedLabelColor = White,
+        unfocusedLabelColor = LightTextColor
 
 
     )
-    val defaultShape = RoundedCornerShape(24.dp)
+    val defaultShape = RoundedCornerShape(20.dp)
 
 }

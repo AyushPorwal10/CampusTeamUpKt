@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.StatusBarColor
+import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.Black
 import com.example.campus_teamup.ui.theme.White
 import kotlinx.coroutines.delay
@@ -40,7 +41,6 @@ class MySplash : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            StatusBarColor(theme = isSystemInDarkTheme())
             SplashScreen {
                 startActivity(Intent(this , Login::class.java))
                 finish()
@@ -53,11 +53,11 @@ class MySplash : ComponentActivity() {
 @Composable
 fun SplashScreen(onSplashFinished: () -> Unit = {}) {
 
-    val textColor = if(isSystemInDarkTheme()) White else Black
+    val textColor = White
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(if (isSystemInDarkTheme()) Black else White)
+            .background(BackGroundColor)
             .padding(10.dp),
         contentAlignment = Alignment.Center
     ){

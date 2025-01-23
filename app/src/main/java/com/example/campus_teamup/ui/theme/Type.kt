@@ -47,8 +47,10 @@ val Typography = Typography(
     headlineSmall = TextStyle(
         fontFamily = Roboto,
         fontWeight = FontWeight.Normal,
-        fontSize = 8.sp
+        fontSize = 6.sp
     ),
+
+
     // this is for button
     titleLarge = TextStyle(
         fontFamily = Roboto,
@@ -66,7 +68,7 @@ val Typography = Typography(
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp
     ),
-    // this is for small text
+
 
 
 )

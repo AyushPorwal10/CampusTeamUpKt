@@ -1,22 +1,11 @@
 package com.example.campus_teamup.screens
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,224 +14,244 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.campus_teamup.R
-//import com.example.campus_teamup.myAnimation.TextAnimation
-import com.example.campus_teamup.myThemes.PrimaryBlack
-import com.example.campus_teamup.myThemes.PrimaryWhiteGradient
 import com.example.campus_teamup.myThemes.TextFieldStyle
-import com.example.campus_teamup.ui.theme.Black
+import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.White
 
-@Composable
-fun SignUpScreen(navigateToHomeScreen : ()-> Unit) {
-    val theme = isSystemInDarkTheme()
-    val textColor = if (theme) White else Black
-    val appLogo = if (theme) R.drawable.dark_theme_logo else R.drawable.white_theme_logo
-    val backgroundColor = if (theme) Black else White
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize(1f)
-    ) {
-        SignUpHeader( appLogo)
-        SignUpBox(textColor, backgroundColor) { navigateToHomeScreen() }
-    }
-
-
-}
 
 @Composable
-fun SignUpHeader( appLogo: Int) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(0.dp, 40.dp)
-    ) {
-        Image(
-            painter = painterResource(id = appLogo),
-            contentDescription = "", modifier = Modifier
-                .clip(CircleShape)
-                .size(100.dp)
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
+fun SignUpRedesign(
+    navigateToHomeScreen : () -> Unit = {}
+) {
 
 
-        //TextAnimation.AnimatedText()
-
-    }
-}
 
 
-@Composable
-fun SignUpBox(textColor: Color, backgroundColor: Color, navigateToHomeScreen: () -> Unit) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
-    var collegeName by remember { mutableStateOf("") }
-
-    var passwordVisible by remember { mutableStateOf(false) }
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(22.dp))
-            .background(
-                if (isSystemInDarkTheme())
-                    PrimaryBlack
-                else
-                    PrimaryWhiteGradient
-            )
-            .border(1.dp, color = Black, shape = RoundedCornerShape(22.dp))
+    val textColor = White
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(BackGroundColor) , contentAlignment = Alignment.Center){
 
 
-            .padding(15.dp, 25.dp, 15.dp, 25.dp)
+        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+            val (appLogo , welcomeMessage , loginHeading , emailField , passwordField , nameField , collegeField , signUp, login ) = createRefs()
 
 
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Image(painterResource(id = R.drawable.app_logo) ,
+                contentDescription = stringResource(id = R.string.app_name),
+                modifier = Modifier
+                    .constrainAs(appLogo) {
+                        top.linkTo(parent.top, margin = 20.dp)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }
+                    .size(100.dp))
+
+            Text(
+                text = stringResource(id = R.string.welcomeGreeting) ,
+                color = textColor ,
+                modifier = Modifier.constrainAs(welcomeMessage){
+                    top.linkTo(appLogo.bottom , margin = 20.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                } , style = MaterialTheme.typography.titleMedium)
+
             Text(
                 text = stringResource(id = R.string.login_here),
-                style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier.constrainAs(loginHeading){
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(welcomeMessage.bottom , margin = 40.dp)
+                },
+                color = textColor,
                 fontWeight = FontWeight.Bold,
-                color = textColor
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-
-            OutlinedTextField(
-                value = email,
-                onValueChange = { emailInput -> email = emailInput },
-                colors = TextFieldStyle.myTextFieldColor(),
-                shape = TextFieldStyle.defaultShape,
-                label = {
-                    Text("Enter Email ", style = TextStyle(color = textColor))
-                },
-                leadingIcon = {
-                    Icon(
-                        painterResource(id = R.drawable.email), contentDescription = "Email Icon",
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
+                style = MaterialTheme.typography.headlineLarge
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            // email
 
-            OutlinedTextField(
-                value = password,
-                onValueChange = { passInput -> password = passInput },
-                colors = TextFieldStyle.myTextFieldColor(),
-                shape = TextFieldStyle.defaultShape,
-                label = {
-                    Text("Enter Password ", style = TextStyle(color = textColor))
-                },
-                leadingIcon = {
-                    Icon(
-                        painterResource(id = R.drawable.password), contentDescription = "Pass Icon",
-                        modifier = Modifier.size(22.dp)
-                    )
-                },
-                trailingIcon = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(
-                            painterResource(if (passwordVisible) R.drawable.hidepass else R.drawable.showpass),
-                            contentDescription = if (passwordVisible) stringResource(id = R.string.hidePassword) else stringResource(
-                                id = R.string.showPassword
-                            ), modifier = Modifier.size(22.dp)
-                        )
-                    }
-                },
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = name,
-                onValueChange = { nameInput -> name = nameInput },
-                colors = TextFieldStyle.myTextFieldColor(),
-                shape = TextFieldStyle.defaultShape,
-                label = {
-                    Text("Enter Your Name ", style = TextStyle(color = textColor))
-                },
-                leadingIcon = {
-                    Icon(
-                        painterResource(id = R.drawable.profile), contentDescription = "Profile Icon",
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = collegeName,
-                onValueChange = { collegeNameInput -> collegeName = collegeNameInput },
-                colors = TextFieldStyle.myTextFieldColor(),
-                shape = TextFieldStyle.defaultShape,
-                label = {
-                    Text("Enter Your Name ", style = TextStyle(color = textColor))
-                },
-                leadingIcon = {
-                    Icon(
-                        painterResource(id = R.drawable.college), contentDescription = "College Icon",
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-            )
+            EmailInputField(modifier = Modifier.constrainAs(emailField){
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                top.linkTo(loginHeading.bottom , margin = 20.dp)
+            })
 
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // pass
 
-            OutlinedButton(onClick = { navigateToHomeScreen() }, modifier = Modifier.fillMaxWidth(0.4f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if(isSystemInDarkTheme()) Black else White,
-                    contentColor = textColor
-                )
-
-            ) {
-                Text(
-                    text = stringResource(id = R.string.signUp),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = textColor
-                )
-            }
+            PasswordInputField(modifier = Modifier.constrainAs(passwordField){
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                top.linkTo(emailField.bottom , margin = 8.dp)
+            })
 
 
+            // name
+            
+            NameInputField(modifier = Modifier.constrainAs(nameField){
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                top.linkTo(passwordField.bottom , margin = 8.dp)
+            })
 
-            Spacer(modifier = Modifier.height(20.dp))
-            LoginButton(textColor)
+
+            // college
+            CollegeNameField(modifier = Modifier.constrainAs(collegeField){
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                top.linkTo(nameField.bottom, margin = 8.dp)
+            })
+
+            // signUpButton
+
+            SignUpButton(modifier = Modifier.constrainAs(signUp){
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                top.linkTo(collegeField.bottom , margin = 20.dp)
+            })
 
 
+            // login if already have account
+            LoginButtonIfAlreadyAccount(modifier = Modifier.constrainAs(login){
+                start.linkTo(signUp.end)
+                end.linkTo(parent.end)
+                top.linkTo(signUp.bottom , margin = 30.dp)
+            }.clickable { navigateToHomeScreen() })
         }
     }
 
 }
 
 @Composable
-private fun LoginButton(textColor: Color) {
-    Row(
-        horizontalArrangement = Arrangement.Absolute.SpaceEvenly
-    ) {
+fun LoginButtonIfAlreadyAccount(modifier: Modifier) {
+    Text(text = stringResource(id = R.string.login),
+        color = White , modifier = modifier)
+}
 
-        Text(
-            text = stringResource(id = R.string.Login),
-            style = MaterialTheme.typography.titleSmall.copy(
-                textDecoration = TextDecoration.Underline
-            ),
-            color = textColor,
-            modifier = Modifier.fillMaxWidth(0.5f)
+@Composable
+fun SignUpButton(modifier: Modifier) {
+
+    OutlinedButton(onClick = { /*TODO*/ },
+        modifier = modifier,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = BackGroundColor,
+            contentColor = White
         )
+        ) {
+        Text(text = stringResource(id = R.string.signUp))
+
     }
+}
+
+@Composable
+fun EmailInputField(modifier: Modifier) {
+    var email = remember {
+        mutableStateOf("")
+    }
+
+    OutlinedTextField(value = email.value, onValueChange = {email.value = it},
+        colors = TextFieldStyle.myTextFieldColor(),
+        shape = TextFieldStyle.defaultShape,
+        maxLines = 1,
+        label = {
+            Text(text = stringResource(id = R.string.enter_email))
+        },
+        leadingIcon = {
+            Icon(painterResource(id = R.drawable.email), contentDescription = stringResource(R.string.email),
+                modifier = Modifier.size(22.dp),tint = White
+            )
+        },
+        modifier = modifier)
+}
+
+@Composable
+fun CollegeNameField(modifier: Modifier) {
+
+    var collegeName = remember {
+        mutableStateOf("")
+    }
+
+    OutlinedTextField(value = collegeName.value, onValueChange = {collegeName.value = it},
+        colors = TextFieldStyle.myTextFieldColor(),
+        shape = TextFieldStyle.defaultShape,
+        maxLines = 1,
+        label = {
+            Text(text = stringResource(id = R.string.enter_college_name))
+        },
+        leadingIcon = {
+            Icon(painterResource(id = R.drawable.college), contentDescription = stringResource(R.string.college_icon),
+                modifier = Modifier.size(22.dp),tint = White
+            )
+        },
+        modifier = modifier)
+}
+
+@Composable
+fun NameInputField(modifier: Modifier) {
+
+    var name = remember {
+        mutableStateOf("")
+    }
+
+    OutlinedTextField(value = name.value, onValueChange = {name.value = it},
+        colors = TextFieldStyle.myTextFieldColor(),
+        shape = TextFieldStyle.defaultShape,
+        maxLines = 1,
+        label = {
+            Text(text = stringResource(id = R.string.enter_name))
+        },
+        leadingIcon = {
+            Icon(painterResource(id = R.drawable.profile), contentDescription = stringResource(R.string.user_profile_icon),
+                modifier = Modifier.size(22.dp),tint = White
+            )
+        },
+        modifier = modifier)
+}
+
+@Composable
+fun PasswordInputField(modifier: Modifier) {
+
+    var password = remember { mutableStateOf("") }
+    val passwordVisible = remember { mutableStateOf(false) }
+
+
+    OutlinedTextField(value = password.value,
+
+        onValueChange = {password.value = it},
+        colors = TextFieldStyle.myTextFieldColor(),
+        shape = TextFieldStyle.defaultShape,
+        maxLines = 1,
+        label = {
+            Text(text = stringResource(id = R.string.enter_password))
+        },
+        leadingIcon = {
+            Icon(painterResource(id = R.drawable.password) , contentDescription = "Password",
+                modifier = Modifier.size(22.dp),tint = White)
+
+        },
+        trailingIcon = {
+
+            IconButton(onClick = {passwordVisible.value = !passwordVisible.value}) {
+                Icon(painterResource(id =  if(passwordVisible.value) R.drawable.hidepass else R.drawable.showpass),
+                    contentDescription = if (passwordVisible.value) stringResource(id = R.string.hidePassword) else stringResource(
+                        id = R.string.showPassword
+                    ),
+                    modifier = Modifier.size(22.dp),tint = White)
+            }
+        },
+        visualTransformation = if(passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
+        modifier = modifier)
+
 }

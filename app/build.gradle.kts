@@ -70,7 +70,7 @@ dependencies {
     implementation(platform("androidx.compose:compose-bom:2024.10.01"))
 
     // google fonts
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.7.5")
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.7.6")
 
 
     // status bar color
@@ -80,6 +80,8 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:2.8.4")
 
+    // constraints layout
+    implementation ("androidx.constraintlayout:constraintlayout-compose:1.1.0")
 
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")

@@ -15,22 +15,19 @@ import com.example.campus_teamup.MainActivity
 import com.example.campus_teamup.helper.StatusBarColor
 import com.example.campus_teamup.myThemes.PrimaryBlack
 import com.example.campus_teamup.myThemes.PrimaryWhiteGradient
-import com.example.campus_teamup.screens.SignUpScreen
+import com.example.campus_teamup.screens.SignUpRedesign
 
 class SignUp : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.WHITE, Color.WHITE),
-            navigationBarStyle = SystemBarStyle.light(Color.BLACK, Color.BLACK)
-        )
+
         setContent {
 
             Box(modifier = Modifier.background(if(isSystemInDarkTheme()) PrimaryBlack else PrimaryWhiteGradient) ){
 
             }
 
-            SignUpScreen { startActivity(Intent(this , MainActivity::class.java)) }
+            SignUpRedesign { startActivity(Intent(this , MainActivity::class.java)) }
         }
     }
 }

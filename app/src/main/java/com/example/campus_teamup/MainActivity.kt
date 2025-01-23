@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.campus_teamup.helper.StatusBarColor
 import com.example.campus_teamup.screens.HomeScreen
+import com.example.campus_teamup.ui.theme.BackGroundColor
 
 import com.example.campus_teamup.ui.theme.Black
 import com.example.campus_teamup.ui.theme.MyCustomTheme
@@ -28,20 +29,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.WHITE, Color.WHITE),
-            navigationBarStyle = SystemBarStyle.light(Color.BLACK, Color.BLACK)
-        )
+//        enableEdgeToEdge(
+//            statusBarStyle = SystemBarStyle.light(Color.WHITE, Color.WHITE),
+//            navigationBarStyle = SystemBarStyle.light(Color.BLACK, Color.BLACK)
+//        )
 
         setContent {
-            MyCustomTheme {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()  // this should be commneted since we are using top app bar
-                        .background(if (isSystemInDarkTheme()) Black else White)
+                        .background(BackGroundColor)
                 ){
                     HomeScreen()
-                }
                 }
             }
         }

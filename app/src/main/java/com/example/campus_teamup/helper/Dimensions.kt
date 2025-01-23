@@ -8,4 +8,8 @@ object Dimensions {
     val MediumPadding = 12.dp
     val LargePadding = 16.dp
     val ExtraLargePadding = 20.dp
+
+
+    val smallRoundedShape = 16.dp
+    val largeRoundedShape = 22.dp
 }
