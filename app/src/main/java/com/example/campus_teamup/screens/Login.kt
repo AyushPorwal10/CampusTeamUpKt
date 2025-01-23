@@ -39,7 +39,7 @@ import com.example.campus_teamup.ui.theme.White
 
 @Preview
 @Composable
-fun LoginRedesign(
+fun LoginScreen(
     navigateToSignUpScreen : () -> Unit = {},
     navigateToHomeScreen : () -> Unit = {}
 ) {
@@ -133,7 +133,7 @@ fun LoginRedesign(
             NewAccountSignUpButton(modifier = Modifier.constrainAs(signUp){
                 end.linkTo(parent.end )
                 top.linkTo(loginButton.bottom , margin = 30.dp)
-            }.clickable { navigateToSignUpScreen() })
+            } , onClick = navigateToSignUpScreen)
 
 
             createHorizontalChain(forgotPassword , signUp , chainStyle = ChainStyle.Spread)
@@ -145,9 +145,11 @@ fun LoginRedesign(
 }
 
 @Composable
-fun NewAccountSignUpButton(modifier: Modifier) {
+fun NewAccountSignUpButton(modifier: Modifier , onClick : () -> Unit ) {
     Text(text = stringResource(id = R.string.signUp),
-        color = White , modifier = modifier)
+        color = White , modifier = modifier.clickable {
+            onClick()
+        })
 }
 
 @Composable

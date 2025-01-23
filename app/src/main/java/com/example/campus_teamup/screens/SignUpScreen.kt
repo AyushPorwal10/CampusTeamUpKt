@@ -32,7 +32,7 @@ import com.example.campus_teamup.ui.theme.White
 
 
 @Composable
-fun SignUpRedesign(
+fun SignUpScreen(
     navigateToHomeScreen : () -> Unit = {}
 ) {
 
@@ -69,7 +69,7 @@ fun SignUpRedesign(
                 } , style = MaterialTheme.typography.titleMedium)
 
             Text(
-                text = stringResource(id = R.string.login_here),
+                text = stringResource(id = R.string.signup_here),
                 modifier = Modifier.constrainAs(loginHeading){
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
@@ -120,6 +120,8 @@ fun SignUpRedesign(
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
                 top.linkTo(collegeField.bottom , margin = 20.dp)
+            }.clickable {
+                navigateToHomeScreen()
             })
 
 
@@ -128,7 +130,7 @@ fun SignUpRedesign(
                 start.linkTo(signUp.end)
                 end.linkTo(parent.end)
                 top.linkTo(signUp.bottom , margin = 30.dp)
-            }.clickable { navigateToHomeScreen() })
+            }.clickable {  })
         }
     }
 

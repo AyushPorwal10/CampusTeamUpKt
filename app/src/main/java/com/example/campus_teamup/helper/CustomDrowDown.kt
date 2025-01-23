@@ -2,6 +2,8 @@ package com.example.campus_teamup.helper
 
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.size
 
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -17,13 +19,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import com.example.campus_teamup.myThemes.TextFieldStyle
+import com.example.campus_teamup.ui.theme.BorderColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
 fun CustomDropdown(
-    label: String = "Select",
     options: List<String>,
     selectedOption: String,
     onOptionSelected: (String) -> Unit,
@@ -35,7 +38,8 @@ fun CustomDropdown(
 
     ExposedDropdownMenuBox(
         expanded = isExpanded,
-        onExpandedChange = { isExpanded = !isExpanded }
+        onExpandedChange = { isExpanded = !isExpanded },
+        modifier = Modifier.border(1.dp , BorderColor ,TextFieldStyle.defaultShape )
     ) {
         TextField(
             modifier = Modifier.menuAnchor(),
@@ -47,13 +51,12 @@ fun CustomDropdown(
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
             },
             leadingIcon = {
-                leadingIcon?.let { iconRes ->
-                    Icon(
-                        painter = painterResource(id = iconRes),
-                        contentDescription = null,
-                        tint = textColor
-                    )
-                }
+                Icon(
+                    painter = painterResource(id = leadingIcon),
+                    contentDescription = null,
+                    tint = textColor,
+                    modifier = Modifier.size(22.dp)
+                )
             },
             colors = ExposedDropdownMenuDefaults.textFieldColors(
                 focusedTextColor = textColor,

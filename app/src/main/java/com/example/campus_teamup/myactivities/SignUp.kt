@@ -15,7 +15,7 @@ import com.example.campus_teamup.MainActivity
 import com.example.campus_teamup.helper.StatusBarColor
 import com.example.campus_teamup.myThemes.PrimaryBlack
 import com.example.campus_teamup.myThemes.PrimaryWhiteGradient
-import com.example.campus_teamup.screens.SignUpRedesign
+import com.example.campus_teamup.screens.SignUpScreen
 
 class SignUp : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +27,7 @@ class SignUp : ComponentActivity() {
 
             }
 
-            SignUpRedesign { startActivity(Intent(this , MainActivity::class.java)) }
+            SignUpScreen { startActivity(Intent(this , MainActivity::class.java)) }
         }
     }
 }

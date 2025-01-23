@@ -38,7 +38,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.campus_teamup.R
 import com.example.campus_teamup.screens.CodingProfiles
 import com.example.campus_teamup.screens.CollegeDetails
-import com.example.campus_teamup.screens.CollegeDetailsRedesign
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.Black
 import com.example.campus_teamup.ui.theme.BorderColor
@@ -55,11 +54,10 @@ class DrawerItemActivity : ComponentActivity() {
     }
 }
 
+
 @Composable
 
 fun Profiles(screenToOpen: String = "") {
-    val bgColor = BackGroundColor
-    val textColor = White
 
     var isClicked by remember { mutableStateOf(false) }
 
@@ -120,7 +118,6 @@ fun Profiles(screenToOpen: String = "") {
         val verticalScroll = rememberScrollState()
 
         Box(modifier = Modifier
-            .verticalScroll(verticalScroll)
             .padding(20.dp)
             .fillMaxSize()
             .constrainAs(areaToLoadProfiles) {

@@ -26,4 +26,5 @@
     <string name="user_profile_icon">User Profile Icon</string>
     <string name="notifications">Notifications</string>
     <string name="chats">Chats</string>
+    <string name="signup_here">SignUp Here</string>
 </resources>
