@@ -1,5 +1,6 @@
 package com.example.campus_teamup.screens
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -16,10 +17,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -38,15 +42,23 @@ import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.LightWhite
 import com.example.campus_teamup.ui.theme.White
 
-@Preview
 @Composable
 fun VacanciesScreen() {
     val textColor = White
     val bgColor = BackGroundColor
 
     var queryText by remember { mutableStateOf("") }
+    val searchOption = listOf("Search by Team Name" , "Search by Role" , "Search by Hackathon")
+    var placeHolderIndex by remember {
+        mutableIntStateOf(0)
+    }
 
-
+    LaunchedEffect(Unit){
+        while (true){
+            kotlinx.coroutines.delay(2000)
+            placeHolderIndex = (placeHolderIndex + 1) % searchOption.size
+        }
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -62,17 +74,25 @@ fun VacanciesScreen() {
                 onValueChange = { searchQuery -> queryText = searchQuery },
                 colors = TextFieldStyle.myTextFieldColor(),
                 shape = TextFieldStyle.defaultShape,
-                modifier = Modifier.constrainAs(searchBar){
-                    start.linkTo(parent.start)
-                    top.linkTo(parent.top)
+                maxLines = 1,
+                modifier = Modifier
+                    .constrainAs(searchBar) {
+                        start.linkTo(parent.start)
+                        top.linkTo(parent.top)
 
-                },
+                    }
+                    .fillMaxWidth(0.8f),
                 placeholder = {
-                    Text(
-                        text = stringResource(id = R.string.search),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = textColor
-                    )
+                    Box(
+                        modifier = Modifier.animateContentSize(),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Text(
+                            text = searchOption[placeHolderIndex],
+                            style = MaterialTheme.typography.titleMedium,
+                            color = textColor
+                        )
+                    }
                 },
                 leadingIcon = {
                     Icon(
@@ -96,6 +116,7 @@ fun VacanciesScreen() {
                         top.linkTo(searchBar.top)
                         bottom.linkTo(searchBar.bottom)
                     }
+                    .fillMaxWidth(0.1f)
             )
 
             // horizontal arrangement of search items
@@ -112,11 +133,13 @@ fun VacanciesScreen() {
             // showing list of vacancies
 
             ShowListOfVacancies(
-                modifier = Modifier.padding(5.dp).constrainAs(vacancyList) {
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    top.linkTo(divider.bottom , margin = 5.dp)
-                }
+                modifier = Modifier
+                    .padding(5.dp)
+                    .constrainAs(vacancyList) {
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        top.linkTo(divider.bottom, margin = 5.dp)
+                    }
             )
 
 

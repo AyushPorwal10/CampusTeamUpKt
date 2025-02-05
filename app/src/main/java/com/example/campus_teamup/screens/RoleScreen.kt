@@ -1,5 +1,6 @@
 package com.example.campus_teamup.screens
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +17,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -41,50 +44,64 @@ import com.example.campus_teamup.ui.theme.White
 
 
 
-
 @Composable
 fun RolesScreen() {
     val textColor = White
     val bgColor = BackGroundColor
 
-
     var queryText by remember { mutableStateOf("") }
+    val placeholders = listOf("Search by Role", "Search by Name")
+    var currentPlaceholderIndex by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(2000)
+            currentPlaceholderIndex = (currentPlaceholderIndex + 1) % placeholders.size
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(bgColor)
     ) {
-
-
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-
             val (searchBar, filterIcon, divider, rolesList) = createRefs()
 
-            OutlinedTextField(value = queryText,
+            OutlinedTextField(
+                value = queryText,
                 onValueChange = { searchQuery -> queryText = searchQuery },
                 colors = TextFieldStyle.myTextFieldColor(),
                 shape = TextFieldStyle.defaultShape,
-                modifier = Modifier.constrainAs(searchBar) {
-                    start.linkTo(parent.start)
-                    top.linkTo(parent.top)
-
-                },
+                maxLines = 1,
+                modifier = Modifier
+                    .constrainAs(searchBar) {
+                        start.linkTo(parent.start)
+                        top.linkTo(parent.top)
+                    }
+                    .fillMaxWidth(0.8f),
                 placeholder = {
-                    Text(
-                        text = stringResource(id = R.string.search),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = textColor
-                    )
+
+                    Box(
+                        modifier = Modifier.animateContentSize(),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Text(
+                            text = placeholders[currentPlaceholderIndex],
+                            style = MaterialTheme.typography.titleMedium,
+                            color = textColor
+                        )
+                    }
                 },
                 leadingIcon = {
                     Icon(
-
                         painter = painterResource(id = R.drawable.search),
                         contentDescription = null,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(22.dp),
+                        tint = White
                     )
-                })
+                }
+            )
 
             Icon(
                 painter = painterResource(id = R.drawable.filter),
@@ -97,27 +114,31 @@ fun RolesScreen() {
                         top.linkTo(searchBar.top)
                         bottom.linkTo(searchBar.bottom)
                     }
+                    .fillMaxWidth(0.1f),
+                tint = White
             )
 
-            // horizontal arrangement of search items
+            // Horizontal arrangement of search items
             createHorizontalChain(searchBar, filterIcon, chainStyle = ChainStyle.Spread)
 
-            HorizontalDivider(thickness = 1.dp, color = BorderColor,
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = BorderColor,
                 modifier = Modifier.constrainAs(divider) {
                     start.linkTo(parent.start)
                     top.linkTo(searchBar.bottom, margin = 16.dp)
                     end.linkTo(parent.end)
-                })
-
+                }
+            )
 
             // Showing list of roles
-
-
-            ShowListOfRoles(modifier = Modifier.constrainAs(rolesList) {
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                top.linkTo(divider.bottom, margin = 10.dp)
-            })
+            ShowListOfRoles(
+                modifier = Modifier.constrainAs(rolesList) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(divider.bottom, margin = 10.dp)
+                }
+            )
         }
     }
 }

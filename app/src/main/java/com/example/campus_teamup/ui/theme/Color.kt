@@ -12,3 +12,4 @@ val LightWhite = Color(0xE2E2E2E2)
 val BackGroundColor = Color(0xFF101426)
 val BorderColor = Color(0xFF242D48)
 val LightTextColor = Color(0xFFA0A0A0)
+

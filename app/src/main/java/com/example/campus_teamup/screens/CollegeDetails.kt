@@ -30,7 +30,7 @@ import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.White
 
 @Composable
-fun CollegeDetails() {
+fun CollegeDetails(modifier: Modifier) {
 
     val listOfCourse = listOf("B-Tech", "M-Tech", "BBA", "MBA", "BSc", "MSc")
     val listOfBranch = listOf("CSE", "IT", "ECE", "Civil", "Mechanical", "AIML", "IOT", "Other")
@@ -49,7 +49,7 @@ fun CollegeDetails() {
         mutableStateOf("Select Year")
     }
 
-    ConstraintLayout() {
+    ConstraintLayout(modifier = modifier.fillMaxSize()) {
 
         val (userImage, userName, courseBranchYear , editOrUpdateBtn) = createRefs()
 
@@ -82,8 +82,11 @@ fun CollegeDetails() {
 
         Column(
             modifier = Modifier.constrainAs(courseBranchYear) {
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
                 top.linkTo(userName.bottom, margin = 20.dp)
             },
+            horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
 

@@ -43,87 +43,93 @@ fun SingleRole() {
     val textColor = White
     val bgColor = BackGroundColor
 
-        Box(modifier = Modifier.border(0.5.dp , BorderColor , shape = RoundedCornerShape(22.dp))
-            .background(BackGroundColor).fillMaxWidth(0.9f)
-            , contentAlignment = Alignment.Center) {
+    Box(
+        modifier = Modifier
+            .border(0.5.dp, BorderColor, shape = RoundedCornerShape(22.dp))
+            .fillMaxWidth(0.9f), contentAlignment = Alignment.Center
+    ) {
 
-            ConstraintLayout(modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp).fillMaxWidth()  ) {
-                val (userImage, userName, roleLookingFor , viewProfile , downIcon , knowMoreBtn) = createRefs()
-
-
-
-                // Photo of user who posted role
-                Image(painter = painterResource(id = R.drawable.profile),
-                    contentDescription = null,
-
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(40.dp))
-                        .constrainAs(userImage) {
-                            top.linkTo(parent.top)
-                            start.linkTo(parent.start)
-                        })
+        ConstraintLayout(
+            modifier = Modifier
+                .padding(horizontal = 20.dp, vertical = 10.dp)
+                .fillMaxWidth()
+        ) {
+            val (userImage, userName, roleLookingFor, viewProfile, downIcon, knowMoreBtn) = createRefs()
 
 
+            // Photo of user who posted role
+            Image(painter = painterResource(id = R.drawable.profile),
+                contentDescription = null,
 
-                // Name of user who posted role
-                Text(text = "Ayush Porwal",
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    softWrap = false,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = textColor,
-                    modifier = Modifier.constrainAs(userName)
-                    {
-                        start.linkTo(userImage.end, margin = 4.dp)
-                        top.linkTo(userImage.top)
-                        bottom.linkTo(userImage.bottom)
-                    })
-
-
-                // Role that user posted
-                Text(
-                    text = "Role : Android App Developer",
-                    maxLines = 1,
-                    fontWeight = FontWeight.Medium,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.titleMedium,
-                    softWrap = false,
-                    color = LightTextColor,
-                    modifier = Modifier.constrainAs(roleLookingFor) {
-                        top.linkTo(userImage.bottom, margin = 12.dp)
+                modifier = Modifier
+                    .clip(RoundedCornerShape(40.dp))
+                    .constrainAs(userImage) {
+                        top.linkTo(parent.top)
                         start.linkTo(parent.start)
-
                     })
 
 
-                // view Profile btn
-                ViewProfileBtn(Modifier.constrainAs(viewProfile){
-                    top.linkTo(roleLookingFor.bottom , margin = 10.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
+            // Name of user who posted role
+            Text(text = "Ayush Porwal",
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = textColor,
+                modifier = Modifier.constrainAs(userName)
+                {
+                    start.linkTo(userImage.end, margin = 4.dp)
+                    top.linkTo(userImage.top)
+                    bottom.linkTo(userImage.bottom)
                 })
 
-            }
+
+            // Role that user posted
+            Text(
+                text = "Role : Android App Developer",
+                maxLines = 1,
+                fontWeight = FontWeight.SemiBold,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleMedium,
+                softWrap = false,
+                color = LightTextColor,
+                modifier = Modifier.constrainAs(roleLookingFor) {
+                    top.linkTo(userImage.bottom, margin = 12.dp)
+                    start.linkTo(parent.start)
+
+                })
+
+
+            // view Profile btn
+            ViewProfileBtn(Modifier.constrainAs(viewProfile) {
+                top.linkTo(roleLookingFor.bottom, margin = 10.dp)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+            })
+
         }
-
-
+    }
 
 
 }
 
 @Composable
 fun ViewProfileBtn(modifier: Modifier) {
-    OutlinedButton(onClick = { /*TODO*/ },
+    OutlinedButton(
+        onClick = { /*TODO*/ },
         modifier = modifier,
 
         colors = ButtonDefaults.buttonColors(
             containerColor = BackGroundColor,
             contentColor = White
 
-        )) {
-        Text(text = "View Profile" ,
+        )
+    ) {
+        Text(
+            text = "View Profile",
             fontSize = 12.sp,
-            color = White)
+            color = White
+        )
     }
 }

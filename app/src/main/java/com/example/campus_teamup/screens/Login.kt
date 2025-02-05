@@ -16,12 +16,17 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -31,195 +36,169 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.campus_teamup.AskForEmailVerification
 import com.example.campus_teamup.R
+import com.example.campus_teamup.helper.CheckEmptyFields
+import com.example.campus_teamup.helper.ToastHelper
+import com.example.campus_teamup.myAnimation.TextAnimation
 import com.example.campus_teamup.myThemes.TextFieldStyle
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.White
+import com.example.campus_teamup.viewmodels.LoginViewModel
+import kotlinx.coroutines.launch
 
 
-@Preview
 @Composable
 fun LoginScreen(
-    navigateToSignUpScreen : () -> Unit = {},
-    navigateToHomeScreen : () -> Unit = {}
+    navigateToSignUpScreen: () -> Unit = {},
+    navigateToHomeScreen: () -> Unit = {},
+    loginViewModel: LoginViewModel = hiltViewModel() // here you should ask why write hiltViewModel here jab ki hum activity se pass kar rahe he
 ) {
 
-
-
+    var email = remember { mutableStateOf("") }
+    val context = LocalContext.current
     val textColor = White
+    val isEmailSent by loginViewModel._isEmailSent.collectAsState()
+    var showEmailVerificationDialog = remember { mutableStateOf(false) }
+    val loading = remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(BackGroundColor) , contentAlignment = Alignment.Center ){
+    if (isEmailSent) {
+        LaunchedEffect(Unit){
+            loginViewModel.saveUserData(email.value)
+        }
 
-        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (appLogo , welComeText , loginHeading , emailField , passwordField , loginButton , forgotPassword , signUp) = createRefs()
+        showEmailVerificationDialog.value = true
+        AskForEmailVerification {
+            showEmailVerificationDialog.value = false
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BackGroundColor), contentAlignment = Alignment.Center
+    ) {
+
+        ConstraintLayout() {
+            val (appLogo, welComeText, loginHeading, emailField, passwordField, loginButton, forgotPassword, signUp) = createRefs()
 
             Image(
-                painterResource(id = R.drawable.app_logo)  ,  contentDescription = stringResource(
-                id = R.string.app_name
-            ) , modifier = Modifier.constrainAs(appLogo){
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    top.linkTo(parent.top , margin = 20.dp)
-                }.size(100.dp) )
+                painterResource(id = R.drawable.app_logo), contentDescription = stringResource(
+                    id = R.string.app_name
+                ), modifier = Modifier
+                    .constrainAs(appLogo) {
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        top.linkTo(parent.top, margin = 20.dp)
+                    }
+                    .size(100.dp))
 
-            Text(
-                text = stringResource(id = R.string.welcomeGreeting) ,
-                color = textColor ,
-                modifier = Modifier.constrainAs(welComeText){
-                top.linkTo(appLogo.bottom , margin = 20.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-            } , style = MaterialTheme.typography.titleMedium)
+
+
+            TextAnimation.AnimatedText(modifier = Modifier.constrainAs(welComeText) {
+                top.linkTo(appLogo.bottom, margin = 20.dp)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+            })
 
             Text(
                 text = stringResource(id = R.string.login_here),
                 style = MaterialTheme.typography.headlineLarge,
-                modifier = Modifier.constrainAs(loginHeading){
+                modifier = Modifier.constrainAs(loginHeading) {
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                    top.linkTo(welComeText.bottom , margin = 40.dp)
+                    top.linkTo(welComeText.bottom, margin = 40.dp)
                 },
                 color = textColor,
                 fontWeight = FontWeight.Bold
 
             )
 
-
-            // Email and Login Fields
-
-
             // email
 
-            LoginEmailInputField(modifier = Modifier.constrainAs(emailField){
+            LoginEmailInputField(modifier = Modifier
+                .constrainAs(emailField) {
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                    top.linkTo(loginHeading.bottom , margin = 20.dp)
-            })
-
-            
-            
-            // for password
-
-            LoginPasswordInputField(modifier = Modifier.constrainAs(passwordField){
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                top.linkTo(emailField.bottom , margin = 8.dp)
-            })
-
-
-
-            LoginButton(modifier = Modifier.constrainAs(loginButton){
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                top.linkTo(passwordField.bottom, margin = 20.dp)
-            }.clickable { navigateToHomeScreen() })
+                    top.linkTo(loginHeading.bottom, margin = 20.dp)
+                }
+                .fillMaxWidth(0.85f), email)
 
 
 
 
+            LoginButton(modifier = Modifier
+                .constrainAs(loginButton) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(emailField.bottom, margin = 20.dp)
+                },
+                signInWithEmail = {
+                    val checkEmail = CheckEmptyFields.checkEmail(email.value.trim())
+                    if (checkEmail == "") {
+                        loading.value = true
+                        coroutineScope.launch {
+                            loginViewModel.signInWithEmailLink(email.value.trim() ,
+                                onSuccess = {
+                                         loading.value = false
+                            },
+                                onFailure = {
+                                    ToastHelper.showToast(context , it.message +"")
+                                    loading.value = false
+                                })
+                        }
 
-            // forgot password
+                    } else
+                        ToastHelper.showMessageForEmptyEmail(context, email.value.trim())
 
-            ForgotPassword(modifier = Modifier.constrainAs(forgotPassword){
-                start.linkTo(parent.start)
-                top.linkTo(loginButton.bottom , margin = 30.dp)
-            })
-
+                })
 
 
             // new account sign up button
-            NewAccountSignUpButton(modifier = Modifier.constrainAs(signUp){
-                end.linkTo(parent.end )
-                top.linkTo(loginButton.bottom , margin = 30.dp)
-            } , onClick = navigateToSignUpScreen)
-
-
-            createHorizontalChain(forgotPassword , signUp , chainStyle = ChainStyle.Spread)
-
-
+            NewAccountSignUpButton(modifier = Modifier.constrainAs(signUp) {
+                end.linkTo(parent.end)
+                top.linkTo(loginButton.bottom, margin = 30.dp)
+            }, onClick = navigateToSignUpScreen)
         }
     }
 
 }
 
 @Composable
-fun NewAccountSignUpButton(modifier: Modifier , onClick : () -> Unit ) {
+fun NewAccountSignUpButton(modifier: Modifier, onClick: () -> Unit) {
     Text(text = stringResource(id = R.string.signUp),
-        color = White , modifier = modifier.clickable {
+        color = White, modifier = modifier.clickable {
             onClick()
         })
 }
 
-@Composable
-fun ForgotPassword(modifier: Modifier) {
-
-    Text(text = stringResource(id = R.string.forgotPassword),
-        color = White , modifier = modifier)
-
-}
 
 @Composable
-fun LoginButton(modifier: Modifier) {
+fun LoginButton(modifier: Modifier, signInWithEmail: () -> Unit) {
 
-    OutlinedButton(onClick = { /*TODO*/ } ,
+    OutlinedButton(onClick = {
+        signInWithEmail()
+    },
         colors = ButtonDefaults.buttonColors(
             containerColor = BackGroundColor,
             contentColor = White
         ), modifier = modifier)
     {
-        Text(text = stringResource(id = R.string.Login),
-            color = White)
+        Text(
+            text = stringResource(id = R.string.Login),
+            color = White
+        )
     }
 
 }
 
 @Composable
-fun LoginPasswordInputField(modifier: Modifier) {
-
-    var password = remember { mutableStateOf("") }
-
-    var passwordVisible by remember { mutableStateOf(false) }
-
-
-
-    OutlinedTextField(value = password.value,
-        onValueChange = {password.value = it},
-        colors = TextFieldStyle.myTextFieldColor(),
-        shape = TextFieldStyle.defaultShape,
-        maxLines = 1,
-        label = {
-            Text(text = stringResource(id = R.string.enter_password))
-        },
-        leadingIcon = {
-            Icon(painterResource(id = R.drawable.password) , contentDescription = "Password",
-                modifier = Modifier.size(22.dp) ,
-                tint = White)
-
-        },
-        trailingIcon = {
-
-            IconButton(onClick = {passwordVisible = !passwordVisible}) {
-                Icon(painterResource(id =  if(passwordVisible) R.drawable.hidepass else R.drawable.showpass),
-                    contentDescription = if (passwordVisible) stringResource(id = R.string.hidePassword) else stringResource(
-                        id = R.string.showPassword
-                    ),
-                    modifier = Modifier.size(22.dp),tint = White)
-            }
-        },
-        visualTransformation = if(passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-        modifier = modifier
-        )
-}
-
-@Composable
-fun LoginEmailInputField(modifier: Modifier) {
-
-    var email = remember { mutableStateOf("") }
+fun LoginEmailInputField(modifier: Modifier, email: MutableState<String>) {
 
     OutlinedTextField(value = email.value,
-        onValueChange = { email.value = it},
+        onValueChange = { email.value = it },
         colors = TextFieldStyle.myTextFieldColor(),
         shape = TextFieldStyle.defaultShape,
         maxLines = 1,
@@ -229,8 +208,7 @@ fun LoginEmailInputField(modifier: Modifier) {
         leadingIcon = {
             Icon(
                 painterResource(id = R.drawable.email), contentDescription = "Email Icon",
-                modifier = Modifier.size(22.dp),tint = White
+                modifier = Modifier.size(22.dp), tint = White
             )
-        }
-        , modifier = modifier)
+        }, modifier = modifier)
 }

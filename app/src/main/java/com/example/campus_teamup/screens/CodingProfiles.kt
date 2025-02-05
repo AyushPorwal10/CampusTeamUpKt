@@ -21,6 +21,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -30,22 +32,22 @@ import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.White
 
 @Composable
-fun CodingProfiles() {
+fun CodingProfiles(modifier : Modifier ) {
 
     var profiles by remember {
         mutableStateOf(mutableListOf<String>())
     }
 
-    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+
+    ConstraintLayout(modifier = modifier.fillMaxSize()) {
         val (listOfProfiles , addProfilesBtn , editOrUpdateBtn) = createRefs()
 
-
-
-        LazyColumn(modifier = Modifier.constrainAs(listOfProfiles){
+        LazyColumn( modifier = Modifier.constrainAs(listOfProfiles){
             top.linkTo(parent.top)
             start.linkTo(parent.start)
             end.linkTo(parent.end)
-        } , verticalArrangement = Arrangement.spacedBy(6.dp)){
+            bottom.linkTo(addProfilesBtn.top, margin = 16.dp)
+        },verticalArrangement = Arrangement.spacedBy(6.dp)){
             items(profiles.size){ index ->
 
                 ProfileFields(
@@ -65,6 +67,8 @@ fun CodingProfiles() {
 
 
         }
+
+
 
 
 
@@ -113,9 +117,10 @@ fun ProfileFields(
             value = profileLink,
             onValueChange = onProfileChange,
             modifier = Modifier
-                .background(BackGroundColor),
+                .background(BackGroundColor)
+                .fillMaxWidth(0.75f),
             shape = TextFieldStyle.defaultShape,
-            placeholder = { Text("Enter Profile URL (Leetcode ...") },
+            placeholder = { Text("Enter URL (Leetcode , Github ..." , maxLines = 1 , overflow = TextOverflow.Ellipsis) },
             colors = TextFieldStyle.myTextFieldColor(),
         )
 

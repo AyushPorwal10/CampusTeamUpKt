@@ -1,6 +1,7 @@
 package com.example.campus_teamup.myAnimation
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -9,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import com.example.campus_teamup.R
@@ -20,8 +22,7 @@ import java.text.StringCharacterIterator
 
 object TextAnimation {
     @Composable
-     fun AnimatedText() {
-         val textColor = if(isSystemInDarkTheme()) White else Black
+     fun AnimatedText(modifier : Modifier) {
         val text = stringResource(id = R.string.welcomeGreeting)
 
         val breakIterator = remember(text) { BreakIterator.getCharacterInstance() }
@@ -42,7 +43,7 @@ object TextAnimation {
                 delay(typingDelayInMs)
             }
         }
-        Text(substringText , color = textColor , fontSize = 18.sp)
+        Text(substringText , color = White , style = MaterialTheme.typography.titleMedium , modifier = modifier)
     }
 
 }

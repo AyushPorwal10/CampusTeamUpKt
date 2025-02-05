@@ -27,4 +27,11 @@
     <string name="notifications">Notifications</string>
     <string name="chats">Chats</string>
     <string name="signup_here">SignUp Here</string>
+    <string name="notification_count">Notification Count</string>
+    <string name="your_chats">Your Chats</string>
+    <string name="logout">Log Out</string>
+    <string name="save_project">Save Project</string>
+    <string name="college">College</string>
+    <string name="skills">Skills</string>
+    <string name="coding">Coding</string>
 </resources>

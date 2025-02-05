@@ -17,22 +17,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.campus_teamup.helper.StatusBarColor
+import com.example.campus_teamup.helper.ToastHelper
 import com.example.campus_teamup.screens.HomeScreen
 import com.example.campus_teamup.ui.theme.BackGroundColor
 
 import com.example.campus_teamup.ui.theme.Black
 import com.example.campus_teamup.ui.theme.MyCustomTheme
 import com.example.campus_teamup.ui.theme.White
+import com.google.firebase.Firebase
+import com.google.firebase.auth.actionCodeSettings
+import com.google.firebase.auth.auth
 
 
 class MainActivity : ComponentActivity() {
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        enableEdgeToEdge(
-//            statusBarStyle = SystemBarStyle.light(Color.WHITE, Color.WHITE),
-//            navigationBarStyle = SystemBarStyle.light(Color.BLACK, Color.BLACK)
-//        )
 
         setContent {
                 Box(
