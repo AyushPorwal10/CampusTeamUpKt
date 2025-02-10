@@ -26,7 +26,7 @@ class LoginViewModel  @Inject constructor(
     val isEmailSent : StateFlow<Boolean> = _isEmailSent
 
 
-   suspend fun signInWithEmailLink(email : String , onSuccess : () -> Unit , onFailure : (Exception) -> Unit){
+   suspend fun signInWithEmailLink(email : String , onFailure : (Exception) -> Unit){
 
        val actionCodeSettings = actionCodeSettingsProvider.getActionCodeSettings()
 
@@ -35,7 +35,6 @@ class LoginViewModel  @Inject constructor(
            if(isEmailRegistered){
                firebaseAuth.sendSignInLinkToEmail(email , actionCodeSettings)
                _isEmailSent.value = true
-               onSuccess()
            }
            else{
                Log.d("Login","Email not Registered")

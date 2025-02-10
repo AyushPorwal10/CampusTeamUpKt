@@ -63,34 +63,22 @@ fun SignUpScreen(
     val context = LocalContext.current
     var email = remember { mutableStateOf("") }
     var name = remember { mutableStateOf("") }
-    val loading = remember { mutableStateOf(false) }
 
     val collegeName = remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     val textColor = White
+    val showProgressBar = remember { mutableStateOf(false) }
 
     val emailSentState by signUpViewModel.isEmailSent.collectAsState()
 
-    var showEmailVerificationDialog = remember { mutableStateOf(false) }
-
-
 
     if (emailSentState) {
-
-            LaunchedEffect(Unit){
-                signUpViewModel.saveUserData(email.value , name.value , collegeName.value)
-            }
-
-        showEmailVerificationDialog.value = true
-        AskForEmailVerification {
-            showEmailVerificationDialog.value = false
+        showProgressBar.value = false // end progress bar and show dialog
+        LaunchedEffect(Unit){
+            signUpViewModel.saveUserData(email.value , name.value , collegeName.value)
         }
+        AskForEmailVerification()
     }
-    if(loading.value){
-        ProgressIndicator.showProgressBar(loading)
-    }
-
-
 
     Box(
         modifier = Modifier
@@ -98,7 +86,7 @@ fun SignUpScreen(
             .background(BackGroundColor), contentAlignment = Alignment.Center
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (appLogo, welcomeMessage, signUpHeading, emailField, passwordField, collegeField, nameField, signUp, login) = createRefs()
+            val (appLogo, welcomeMessage, progressBar, signUpHeading, emailField, passwordField, collegeField, nameField, signUp, login) = createRefs()
 
 
             Image(painterResource(id = R.drawable.app_logo),
@@ -166,27 +154,36 @@ fun SignUpScreen(
 
             // signUpButton
 
+            if (showProgressBar.value) {
+                ProgressIndicator.showProgressBar(
+                    modifier = Modifier.constrainAs(progressBar) {
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        top.linkTo(collegeField.bottom, margin = 20.dp)
+                    },
+                    showProgressBar.value
+                )
+            } else {
             SignUpButton(modifier = Modifier.constrainAs(signUp) {
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
                 top.linkTo(collegeField.bottom, margin = 20.dp)
             }) {
-                // checking if fields are not empty
                 val checkEmail = CheckEmptyFields.checkEmail(email.value.trim())
                 val checkName = CheckEmptyFields.checkName(name.value.trim())
 
 
                 if (checkEmail == "" && checkName == "")
                     coroutineScope.launch {
-                        loading.value = true
+                        showProgressBar.value = true
                         signUpViewModel.signUpWithEmailLink(
                             email.value.trim(),
                             onSuccess = {
-                                loading.value = false
+
                                 Log.d("Signup", "Email Sent Success")
                             },
                             onFailure = {
-                                loading.value = false
+                                showProgressBar.value = false
                                 if (it.message == "Already registered")
                                     ToastHelper.showToast(
                                         context,
@@ -205,6 +202,7 @@ fun SignUpScreen(
                     email.value.trim()
                 )
             }
+        }
 
 
             // login if already have account
@@ -213,6 +211,10 @@ fun SignUpScreen(
                 end.linkTo(parent.end)
                 top.linkTo(signUp.bottom, margin = 30.dp)
             }, navigateToLoginScreen)
+
+
+
+
         }
     }
 

@@ -1,6 +1,8 @@
 package com.example.campus_teamup.screens
 
+import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.AlertDialog
@@ -22,6 +25,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,8 +49,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,6 +65,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.campus_teamup.R
+import com.example.campus_teamup.myactivities.CreatePost
 import com.example.campus_teamup.myactivities.DrawerItemActivity
 import com.example.campus_teamup.mysealedClass.BottomNavScreens
 import com.example.campus_teamup.ui.theme.BackGroundColor
@@ -72,15 +80,34 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 
-fun HomeScreen() {
+fun HomeScreen(context: Context = LocalContext.current) {
 
     val bgColor = BackGroundColor
     val textColor = White
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    var multifloatingState by remember {
+        mutableStateOf(MultifloatingState.Collapse)
+    }
+    val items = listOf(
+        MinFabItem(
+            icon = ImageBitmap.imageResource(id = R.drawable.vacancies),
+            label = "Vacancy",
+            identifier = Identifier.Role.name
+        ),
+        MinFabItem(
+            icon = ImageBitmap.imageResource(id = R.drawable.projects),
+            label = "Project",
+            identifier = Identifier.Vacancy.name
+        ),
+        MinFabItem(
+            icon = ImageBitmap.imageResource(id = R.drawable.roles),
+            label = "Role",
+            identifier = Identifier.Project.name
+        )
 
-
-    val navController  = rememberNavController()
+    )
+    val navController = rememberNavController()
 
     val context = LocalContext.current
 
@@ -96,10 +123,9 @@ fun HomeScreen() {
             ModalDrawerSheet(
                 modifier = Modifier
                     .fillMaxWidth(0.8f),
-                    drawerContainerColor = BackGroundColor
+                drawerContainerColor = BackGroundColor
             ) {
 
-                //ConstraintLayout(Modifier.background(BackGroundColor).fillMaxSize().padding(10.dp)) {
 
                 Box(
                     modifier = Modifier
@@ -154,7 +180,10 @@ fun HomeScreen() {
                 // Notifications menu item
 
                 NavItem(
-                    coroutineScope , drawerState ,R.drawable.notifications, stringResource(id = R.string.notifications)
+                    coroutineScope,
+                    drawerState,
+                    R.drawable.notifications,
+                    stringResource(id = R.string.notifications)
                 ) {
                     val intent = Intent(context, DrawerItemActivity::class.java)
                     intent.putExtra("DrawerItem", "notifications")
@@ -164,7 +193,10 @@ fun HomeScreen() {
                 // Team Details menu item
 
                 NavItem(
-                    coroutineScope , drawerState ,R.drawable.vacancies, stringResource(id = R.string.teamDetails)
+                    coroutineScope,
+                    drawerState,
+                    R.drawable.vacancies,
+                    stringResource(id = R.string.teamDetails)
                 ) {
                     val intent = Intent(context, DrawerItemActivity::class.java)
                     intent.putExtra("DrawerItem", "teamDetails")
@@ -175,7 +207,10 @@ fun HomeScreen() {
                 // recents chats
 
                 NavItem(
-                    coroutineScope , drawerState , R.drawable.chats, stringResource(id = R.string.chats)
+                    coroutineScope,
+                    drawerState,
+                    R.drawable.chats,
+                    stringResource(id = R.string.chats)
                 ) {
                     val intent = Intent(context, DrawerItemActivity::class.java)
                     intent.putExtra("DrawerItem", "recentchats")
@@ -184,7 +219,7 @@ fun HomeScreen() {
 
                 // logout button
 
-                LogOutButton(coroutineScope , drawerState )
+                LogOutButton(coroutineScope, drawerState)
             }
         }
     ) {
@@ -214,13 +249,21 @@ fun HomeScreen() {
                     }
                 )
             },
+            floatingActionButton = {
+                MultipleFabButton(
+                    multifloatingState = multifloatingState,
+                    onMultifloatingStateChange = {
+                        multifloatingState = it
+                    }, items = items, context = context
+                )
+            },
             bottomBar = {
-                           HorizontalDivider(modifier = Modifier.width(2.dp))
-                        BottomAppBar(
-                            containerColor = bgColor,
-                        ) {
-                            HandlingBottomAppBar(selected , navController ,  Modifier.weight(1f))
-                        }
+                HorizontalDivider(modifier = Modifier.width(2.dp))
+                BottomAppBar(
+                    containerColor = bgColor,
+                ) {
+                    HandlingBottomAppBar(selected, navController, Modifier.weight(1f))
+                }
             },
             content = { paddingValues ->
                 NavHost(
@@ -241,23 +284,29 @@ fun HomeScreen() {
 }
 
 @Composable
-fun HandlingBottomAppBar(selected: MutableIntState , navController: NavController , modifier: Modifier) {
-    IconButton(onClick = {
-        selected.intValue = R.drawable.vacancies
-        navController.navigate(BottomNavScreens.Vacancies.screen){
-            popUpTo(0)
-        }
-    },
-        modifier = modifier)
+fun HandlingBottomAppBar(
+    selected: MutableIntState,
+    navController: NavController,
+    modifier: Modifier
+) {
+    IconButton(
+        onClick = {
+            selected.intValue = R.drawable.vacancies
+            navController.navigate(BottomNavScreens.Vacancies.screen) {
+                popUpTo(0)
+            }
+        },
+        modifier = modifier
+    )
     {
 
 
         ConstraintLayout {
-            val (vacancyBtn , vacancyText) = createRefs()
+            val (vacancyBtn, vacancyText) = createRefs()
             Icon(
-                painter = painterResource(id = R.drawable.vacancies) ,
+                painter = painterResource(id = R.drawable.vacancies),
                 contentDescription = null,
-                tint = if(selected.intValue == R.drawable.vacancies ) White else BorderColor,
+                tint = if (selected.intValue == R.drawable.vacancies) White else BorderColor,
                 modifier = Modifier
                     .size(26.dp)
                     .constrainAs(vacancyBtn) {
@@ -267,23 +316,25 @@ fun HandlingBottomAppBar(selected: MutableIntState , navController: NavControlle
             Text(
                 text = stringResource(id = R.string.vacancies),
                 style = MaterialTheme.typography.titleSmall,
-                color = if(selected.intValue == R.drawable.vacancies) White else BorderColor,
-                modifier = Modifier.constrainAs(vacancyText){
+                color = if (selected.intValue == R.drawable.vacancies) White else BorderColor,
+                modifier = Modifier.constrainAs(vacancyText) {
 
                 })
 
-            createVerticalChain(vacancyBtn , vacancyText , chainStyle = ChainStyle.Packed)
+            createVerticalChain(vacancyBtn, vacancyText, chainStyle = ChainStyle.Packed)
 
         }
 
     }
-    IconButton(onClick = {
-        selected.intValue = R.drawable.roles
-        navController.navigate(BottomNavScreens.Roles.screen){
-            popUpTo(0)
-        }
-    },
-        modifier = modifier)
+    IconButton(
+        onClick = {
+            selected.intValue = R.drawable.roles
+            navController.navigate(BottomNavScreens.Roles.screen) {
+                popUpTo(0)
+            }
+        },
+        modifier = modifier
+    )
     {
         ConstraintLayout {
             val (roleBtn, roleText) = createRefs()
@@ -314,13 +365,15 @@ fun HandlingBottomAppBar(selected: MutableIntState , navController: NavControlle
 
     }
 
-    IconButton(onClick = {
-        selected.intValue = R.drawable.projects
-        navController.navigate(BottomNavScreens.Projects.screen){
-            popUpTo(0)
-        }
-    },
-        modifier = modifier)
+    IconButton(
+        onClick = {
+            selected.intValue = R.drawable.projects
+            navController.navigate(BottomNavScreens.Projects.screen) {
+                popUpTo(0)
+            }
+        },
+        modifier = modifier
+    )
     {
         ConstraintLayout {
             val (projectBtn, projectText) = createRefs()
@@ -354,7 +407,7 @@ fun HandlingBottomAppBar(selected: MutableIntState , navController: NavControlle
 }
 
 @Composable
-fun LogOutButton(coroutineScope : CoroutineScope , drawerState: DrawerState ) {
+fun LogOutButton(coroutineScope: CoroutineScope, drawerState: DrawerState) {
 
     var showDialog by remember { mutableStateOf(false) }
 
@@ -377,10 +430,10 @@ fun LogOutButton(coroutineScope : CoroutineScope , drawerState: DrawerState ) {
         }
     )
 
-    if(showDialog){
+    if (showDialog) {
         HandleLogoutDialog(
-            onDismiss ={
-                       showDialog = false
+            onDismiss = {
+                showDialog = false
             },
             onConfirm = {
                 showDialog = false

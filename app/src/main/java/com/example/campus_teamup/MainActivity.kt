@@ -2,6 +2,7 @@ package com.example.campus_teamup
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -34,6 +35,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("Post","MainActivity Created")
 
 
         setContent {
@@ -42,10 +44,15 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()  // this should be commneted since we are using top app bar
                         .background(BackGroundColor)
                 ){
-                    HomeScreen()
+                    HomeScreen(this@MainActivity)
                 }
             }
         }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("Post","MainActivity Resumed")
+    }
     }
 
 

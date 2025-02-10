@@ -6,7 +6,10 @@ import com.example.campus_teamup.screens.NotificationsScreen
 import com.example.campus_teamup.screens.RecentChatScreen
 import com.example.campus_teamup.screens.TeamDetailsScreen
 import com.example.campus_teamup.screens.UserProfiles
+import dagger.hilt.android.AndroidEntryPoint
 
+
+@AndroidEntryPoint
 class DrawerItemActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

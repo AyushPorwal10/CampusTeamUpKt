@@ -3,11 +3,9 @@ package com.example.campus_teamup.myrepository
 import android.util.Log
 import com.example.campus_teamup.mydataclass.SignupDetails
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
-import javax.inject.Singleton
 
 
 class Repository @Inject constructor(
@@ -21,7 +19,7 @@ class Repository @Inject constructor(
         return documentSnapshot.exists()
     }
 
-    suspend fun saveUserSignUpDetails(userId : String , signupDetails: SignupDetails){
+    suspend fun saveUserSignUpDetails( userId : String , signupDetails: SignupDetails){
         Log.d("Signup" , "Saving Signup data")
         firebaseFirestore.collection("all_user_id").document(userId).
         collection("all_user_details").document("signup_details").set(signupDetails).await()
@@ -34,13 +32,11 @@ class Repository @Inject constructor(
 
     suspend fun saveUserToCollege(userId: String, collegeName: String) {
         Log.d("Signup","Saving college")
-        firebaseFirestore.collection("all_college_india")
-            .document(collegeName)
-            .update("userIds", FieldValue.arrayUnion(userId)) // Add userId to array
-            .await()
+
+        firebaseFirestore.collection("all_college_india").
+        document(collegeName).collection("college_users").
+        document(userId).set(mapOf("userId" to userId)).await()
     }
-
-
     // login section
     suspend fun fetchSignUpDetails(userId: String): DocumentSnapshot {
         Log.d("Signup", "Fetching Signup data")

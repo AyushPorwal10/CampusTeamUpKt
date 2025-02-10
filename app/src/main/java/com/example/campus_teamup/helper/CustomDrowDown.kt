@@ -18,27 +18,31 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.campus_teamup.myThemes.TextFieldStyle
 import com.example.campus_teamup.ui.theme.BorderColor
 
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
 fun CustomDropdown(
+    canEdit: Boolean,
     options: List<String>,
     selectedOption: String,
     onOptionSelected: (String) -> Unit,
-    backgroundColor: androidx.compose.ui.graphics.Color,
-    textColor: androidx.compose.ui.graphics.Color,
+    backgroundColor: Color,
+    textColor: Color,
     leadingIcon: Int
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
         expanded = isExpanded,
-        onExpandedChange = { isExpanded = !isExpanded },
+        onExpandedChange = { isExpanded = !isExpanded  && canEdit},
         modifier = Modifier.border(1.dp , BorderColor ,TextFieldStyle.defaultShape )
     ) {
         TextField(

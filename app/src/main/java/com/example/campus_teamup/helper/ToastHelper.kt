@@ -11,11 +11,11 @@ object ToastHelper {
 
     fun showMessageForEmptyEmail(context : Context , email : String){
         if (email == "Empty Email")
-            ToastHelper.showToast(context, "Please enter email")
+            showToast(context, "Please enter email")
     }
     fun showMessageForEmptyName(context : Context , name : String){
            if (name == "Empty Name")
-            ToastHelper.showToast(context, "Please enter your name")
+            showToast(context, "Please enter your name")
     }
 
 }

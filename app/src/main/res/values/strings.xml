@@ -34,4 +34,7 @@
     <string name="college">College</string>
     <string name="skills">Skills</string>
     <string name="coding">Coding</string>
+    <string name="note_for_making_post">Before posting a role, please update your profile to ensure that your profile details appear correctly in your role listing.Your name, college, and other details will be automatically fetched and displayed in the role you post.</string>
+    <string name="post_role">Post</string>
+    <string name="enter_role">Enter Role</string>
 </resources>

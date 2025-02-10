@@ -21,17 +21,24 @@ class SplashViewModel @Inject constructor(
     private val repository: Repository
 ) : ViewModel() {
 
-    // checking if user data is in datastore or not , if not fetch from firestore using userId
+    private lateinit var userId : String
+    private lateinit var userEmail : String
+    private lateinit var userName : String
+    private lateinit var collegeName : String
+    private lateinit var loginOrsignUp : String
+
+    val _isAllDataSaved = MutableStateFlow<Boolean>(false)
+    val isAllDataSaved : StateFlow<Boolean> = _isAllDataSaved
 
     suspend fun checkUserDataInDataStore() {
         Log.d("Signup", "Checking status of data")
         viewModelScope.launch {
             val userData = userManager.userData.first()
-            val userId = userData.userId
-            val userEmail = userData.email
-            val userName = userData.userName
-            val collegeName = userData.collegeName
-            val loginOrsignUp = userData.loginOrSignUp
+             userId = userData.userId
+             userEmail = userData.email
+             userName = userData.userName
+             collegeName = userData.collegeName
+             loginOrsignUp = userData.loginOrSignUp
 
             // if it is signup than save it to db
             if (loginOrsignUp == "Signup") {
@@ -44,8 +51,6 @@ class SplashViewModel @Inject constructor(
                         collegeName
                     )
                 )
-                repository.saveEmail(userEmail)
-                repository.saveUserToCollege(userId , collegeName)
 
             } else {  // fetch from db using userId
                 Log.d("Signup", "User already registered  fetching data from database")
@@ -53,6 +58,8 @@ class SplashViewModel @Inject constructor(
                val userSignUpData = repository.fetchSignUpDetails(userId).toObject(SignupDetails::class.java)
 
                 if(userSignUpData != null){
+                    _isAllDataSaved.value = true
+                    userManager.saveUserData(userSignUpData.userId ,userSignUpData.userName , userSignUpData.userEmail , userSignUpData.collegeName,"Login" )
                     Log.d("Signup","Saving to datastore")
                 }
                 else{
@@ -63,6 +70,17 @@ class SplashViewModel @Inject constructor(
 
     }
 
+    suspend fun saveEmail( ){
+        Log.d("Signup","Going to save user email $userEmail")
+        repository.saveEmail(userEmail)
+    }
+
+    suspend fun saveUserIdToCollege(){
+        Log.d("Signup","Going to save collegeName $collegeName")
+        repository.saveUserToCollege(userId , collegeName)
+        _isAllDataSaved.value = true
+        Log.d("Signup","Done with saving email and collegeName")
+    }
 
 }
 

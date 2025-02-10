@@ -40,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.campus_teamup.AskForEmailVerification
 import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.CheckEmptyFields
+import com.example.campus_teamup.helper.ProgressIndicator
 import com.example.campus_teamup.helper.ToastHelper
 import com.example.campus_teamup.myAnimation.TextAnimation
 import com.example.campus_teamup.myThemes.TextFieldStyle
@@ -60,19 +61,16 @@ fun LoginScreen(
     val context = LocalContext.current
     val textColor = White
     val isEmailSent by loginViewModel._isEmailSent.collectAsState()
-    var showEmailVerificationDialog = remember { mutableStateOf(false) }
-    val loading = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    val showProgressBar = remember { mutableStateOf(false) }
 
     if (isEmailSent) {
+        showProgressBar.value = false
         LaunchedEffect(Unit){
             loginViewModel.saveUserData(email.value)
-        }
 
-        showEmailVerificationDialog.value = true
-        AskForEmailVerification {
-            showEmailVerificationDialog.value = false
         }
+        AskForEmailVerification()
     }
 
     Box(
@@ -82,7 +80,7 @@ fun LoginScreen(
     ) {
 
         ConstraintLayout() {
-            val (appLogo, welComeText, loginHeading, emailField, passwordField, loginButton, forgotPassword, signUp) = createRefs()
+            val (appLogo, welComeText, loginHeading, emailField, progressBar, loginButton, forgotPassword, signUp) = createRefs()
 
             Image(
                 painterResource(id = R.drawable.app_logo), contentDescription = stringResource(
@@ -128,32 +126,37 @@ fun LoginScreen(
 
 
 
+            if(showProgressBar.value){
+                ProgressIndicator.showProgressBar(modifier = Modifier
+                    .constrainAs(progressBar) {
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        top.linkTo(emailField.bottom, margin = 20.dp)
+                    }, showProgressBar.value)
+            }
+            else {
+                LoginButton(modifier = Modifier
+                    .constrainAs(loginButton) {
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        top.linkTo(emailField.bottom, margin = 20.dp)
+                    },
+                    signInWithEmail = {
+                        val checkEmail = CheckEmptyFields.checkEmail(email.value.trim())
+                        if (checkEmail == "") {
+                            showProgressBar.value = true
+                            coroutineScope.launch {
+                                loginViewModel.signInWithEmailLink(email.value.trim(),
+                                    onFailure = {
+                                        ToastHelper.showToast(context, it.message + "")
+                                    })
+                            }
 
-            LoginButton(modifier = Modifier
-                .constrainAs(loginButton) {
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    top.linkTo(emailField.bottom, margin = 20.dp)
-                },
-                signInWithEmail = {
-                    val checkEmail = CheckEmptyFields.checkEmail(email.value.trim())
-                    if (checkEmail == "") {
-                        loading.value = true
-                        coroutineScope.launch {
-                            loginViewModel.signInWithEmailLink(email.value.trim() ,
-                                onSuccess = {
-                                         loading.value = false
-                            },
-                                onFailure = {
-                                    ToastHelper.showToast(context , it.message +"")
-                                    loading.value = false
-                                })
-                        }
+                        } else
+                            ToastHelper.showMessageForEmptyEmail(context, email.value.trim())
 
-                    } else
-                        ToastHelper.showMessageForEmptyEmail(context, email.value.trim())
-
-                })
+                    })
+            }
 
 
             // new account sign up button

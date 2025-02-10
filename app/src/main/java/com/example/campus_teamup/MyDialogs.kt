@@ -32,11 +32,11 @@ import com.example.campus_teamup.ui.theme.White
 
 @Preview
 @Composable
-fun AskForEmailVerification(onDismiss : ()->Unit = {}) {
+fun AskForEmailVerification() {
 
 
     Dialog(
-        onDismissRequest = { onDismiss() },
+        onDismissRequest = { },
     ) {
         Box(modifier = Modifier.background(BackGroundColor).clip(RoundedCornerShape(22.dp)).padding(20.dp)) {
             ConstraintLayout {

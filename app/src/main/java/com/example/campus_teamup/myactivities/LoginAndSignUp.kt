@@ -33,6 +33,7 @@ class LoginAndSignUp : ComponentActivity() {
             ){
                 composable(LoginSignupScreens.Login.screen) {
                     LoginScreen(
+
                         navigateToSignUpScreen = {
                             navController.navigate(LoginSignupScreens.SignUp.screen){
                                 popUpTo(LoginSignupScreens.Login.screen) {inclusive = true}
