@@ -15,127 +15,155 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.campus_teamup.R
+import com.example.campus_teamup.helper.CheckEmptyFields
+import com.example.campus_teamup.helper.ProgressIndicator
+import com.example.campus_teamup.helper.ToastHelper
 import com.example.campus_teamup.myThemes.TextFieldStyle
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.White
 import com.example.campus_teamup.viewmodels.UserProfileViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun CodingProfiles(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     userProfileViewModel: UserProfileViewModel = hiltViewModel()
 ) {
-
-    var listOfCodingProfile by remember {
-        mutableStateOf(mutableListOf<String>())
-    }
-
-    var isReadOnly = remember {
-        mutableStateOf(true)
-    }
+    val codingProfiles = remember { mutableStateListOf<String>() }
+    val isLoading = remember { mutableStateOf(false) }
+    val isEditing = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
-
+    LaunchedEffect(Unit) {
+        isLoading.value = true
+        codingProfiles.addAll(userProfileViewModel.fetchCodingProfiles())
+        isLoading.value = false
+    }
 
     ConstraintLayout(modifier = modifier.fillMaxSize()) {
-        val (listOfProfiles, addProfilesBtn, editOrUpdateBtn) = createRefs()
+        val (profilesListRef, progressBarRef, addProfileBtnRef, editSaveBtnRef) = createRefs()
 
-        LazyColumn(modifier = Modifier.constrainAs(listOfProfiles) {
-            top.linkTo(parent.top)
-            start.linkTo(parent.start)
-            end.linkTo(parent.end)
-            bottom.linkTo(addProfilesBtn.top, margin = 16.dp)
-        }, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            items(listOfCodingProfile.size) { index ->
-
+        LazyColumn(
+            modifier = Modifier.constrainAs(profilesListRef) {
+                top.linkTo(parent.top , margin = 20.dp)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                bottom.linkTo(addProfileBtnRef.top, margin = 16.dp)
+            },
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            items(codingProfiles.size) { index ->
                 ProfileFields(
-                    profileLink = listOfCodingProfile[index],
+                    profileLink = codingProfiles[index],
+                    isReadOnly = !isEditing.value,
+                    isEditing,
                     onDelete = {
-                        listOfCodingProfile = listOfCodingProfile.toMutableList().apply {
-                            removeAt(index)
-                        }
+                        codingProfiles.removeAt(index)
                     },
                     onProfileChange = { newProfile ->
-                        listOfCodingProfile = listOfCodingProfile.toMutableList().apply {
-                            this[index] = newProfile
-                        }
+                        codingProfiles[index] = newProfile
                     }
                 )
             }
-
-
         }
 
+        if (isLoading.value) {
+            ProgressIndicator.showProgressBar(
+                modifier = Modifier.constrainAs(progressBarRef) {
+                    top.linkTo(parent.top, margin = 50.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
+                true
+            )
+        } else {
+            OutlinedButton(
+                onClick = {
+                    // Allow user to add a new profile entry
+                    isEditing.value = true
+                    codingProfiles.add("")
+                },
+                modifier = Modifier.constrainAs(addProfileBtnRef) {
+                    top.linkTo(profilesListRef.bottom, margin = 16.dp)
+                },
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = BackGroundColor)
+            ) {
+                Text("Add", color = White)
+            }
 
+            OutlinedButton(
+                onClick = {
+                    isEditing.value = !isEditing.value
+                    if (!isEditing.value) {
 
-
-
-
-        OutlinedButton(
-            onClick = {
-                isReadOnly.value = true // means user wants to add more profiles so allow to save
-
-                listOfCodingProfile = listOfCodingProfile.toMutableList().apply {
-                    add("")
-                }
-            },
-            modifier = Modifier.constrainAs(addProfilesBtn) {
-                top.linkTo(listOfProfiles.bottom, margin = 16.dp)
-
-            },
-            colors = ButtonDefaults.outlinedButtonColors(containerColor = BackGroundColor)
-        ) {
-            Text("Add ", color = White)
-        }
-
-        OutlinedButton(
-            onClick = {
-                isReadOnly.value = !isReadOnly.value
-                if (isReadOnly.value) { // this means fields are set to read only save it to db
-                    coroutineScope.launch(Dispatchers.IO) {
-                        Log.d("CodingProfiles", "Going to save coding profiles")
-                        userProfileViewModel.saveCodingProfiles(listOfCodingProfile)
+                        if (CheckEmptyFields.checkCodingProfiles(codingProfiles.toList())) {
+                            isLoading.value = true
+                            coroutineScope.launch {
+                                withContext(Dispatchers.IO) {
+                                    userProfileViewModel.saveCodingProfiles(codingProfiles.toList())
+                                }
+                                isLoading.value = false
+                            }
+                        } else {
+                            ToastHelper.showToast(context, "Please Enter Valid URL")
+                        }
                     }
-                }
-
-            },
-            modifier = Modifier.constrainAs(editOrUpdateBtn) {
-                top.linkTo(listOfProfiles.bottom, margin = 16.dp)
-            },
-            colors = ButtonDefaults.outlinedButtonColors(containerColor = BackGroundColor)
-        ) {
-            Text(text = if (isReadOnly.value) "Edit" else "Save", color = White)
+                },
+                modifier = Modifier.constrainAs(editSaveBtnRef) {
+                    top.linkTo(profilesListRef.bottom, margin = 16.dp)
+                },
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = BackGroundColor)
+            ) {
+                Text(text = if (isEditing.value) "Save" else "Edit", color = White)
+            }
+            createHorizontalChain(addProfileBtnRef, editSaveBtnRef, chainStyle = ChainStyle.Spread)
         }
-
-        createHorizontalChain(addProfilesBtn, editOrUpdateBtn, chainStyle = ChainStyle.Spread)
-
     }
 }
 
 @Composable
 fun ProfileFields(
     profileLink: String,
+    isReadOnly: Boolean,
+    isEditing: MutableState<Boolean>,
     onDelete: () -> Unit,
     onProfileChange: (String) -> Unit
 ) {
 
+    val iconResource = when {
+        profileLink.contains("leetcode", ignoreCase = true) -> R.drawable.leetcode
+        profileLink.contains("github", ignoreCase = true) -> R.drawable.github
+        profileLink.contains("linkedin", ignoreCase = true) -> R.drawable.linkedin
+        profileLink.contains("codechef", ignoreCase = true) -> R.drawable.codechef
+        profileLink.contains("codeforces", ignoreCase = true) -> R.drawable.codeforces
+        profileLink.contains("gfg", ignoreCase = true) || profileLink.contains(
+            "geeksforgeeks",
+            ignoreCase = true
+        ) -> R.drawable.leetcode
+
+        else -> R.drawable.coding  // Fallback icon if none of the above match
+    }
 
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -145,35 +173,41 @@ fun ProfileFields(
         OutlinedTextField(
             value = profileLink,
             onValueChange = onProfileChange,
+            readOnly = !isEditing.value,
             modifier = Modifier
                 .background(BackGroundColor)
-                .fillMaxWidth(0.8f),          //0.75
+                .fillMaxWidth(0.8f),
             shape = TextFieldStyle.defaultShape,
             placeholder = {
                 Text(
-                    "Enter URL (Leetcode , Github ...",
+                    "Enter URL (Leetcode, Github, etc.)",
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             },
             leadingIcon = {
                 Icon(
-                    painter = painterResource(id = R.drawable.profile), contentDescription = null,
+                    painter = painterResource(id = iconResource),
+                    contentDescription = "",
                     modifier = Modifier.size(20.dp)
                 )
             },
             colors = TextFieldStyle.myTextFieldColor(),
         )
 
-        IconButton(onClick = {
-            onDelete()
-        }) {
+        IconButton(
+            onClick = {
+                isEditing.value = true
+                onDelete()
+            },
+            modifier = Modifier.size(22.dp)
+        ) {
             Icon(
                 painter = painterResource(id = R.drawable.password),
-                contentDescription = null, tint = White, modifier = Modifier.size(22.dp)
+                contentDescription = "Delete Profile",
+                tint = White
             )
-
         }
     }
-
 }
+

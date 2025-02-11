@@ -423,9 +423,6 @@ fun LogOutButton(coroutineScope: CoroutineScope, drawerState: DrawerState) {
             )
         },
         onClick = {
-            coroutineScope.launch {
-                drawerState.close()
-            }
             showDialog = true
         }
     )

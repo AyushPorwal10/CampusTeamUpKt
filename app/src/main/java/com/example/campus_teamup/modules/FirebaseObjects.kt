@@ -3,6 +3,8 @@ package com.example.campus_teamup.modules
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,6 +29,11 @@ object FirebaseObjects {
         return FirebaseFirestore.getInstance()
     }
 
+    @Singleton
+    @Provides
+    fun getFirebaseStorage() : StorageReference {
+        return FirebaseStorage.getInstance().reference
+    }
     @Provides
     @Singleton
     fun provideApplicationContext(@ApplicationContext context: Context): Context{
