@@ -16,6 +16,9 @@
         android:theme="@style/Theme.CAMPUS_TEAMUP"
         tools:targetApi="31">
         <activity
+            android:name=".myactivities.UserProfile"
+            android:exported="false" />
+        <activity
             android:name=".myactivities.CreatePost"
             android:exported="false" />
         <activity

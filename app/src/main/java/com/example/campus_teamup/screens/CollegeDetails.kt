@@ -54,7 +54,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun CollegeDetails(
     modifier: Modifier = Modifier,
-    userProfileViewModel: UserProfileViewModel = hiltViewModel()
+    userProfileViewModel: UserProfileViewModel
 ) {
 
     val tag : String = "CollegeDetails"
@@ -115,8 +115,6 @@ fun CollegeDetails(
             showProgressBar.value = true
 
             Log.d(tag,"Going to fetch college details")
-            userProfileViewModel.getUserIdFromDataStore()
-
             val collegeDetails = userProfileViewModel.fetchCollegeDetails()
 
             selectedBranch = collegeDetails?.branch.toString()
@@ -239,11 +237,6 @@ fun CollegeDetails(
 
 
                         coroutineScope.launch(Dispatchers.IO) {
-
-
-                            Log.d("CollegeDetails","Going to fetch User id ")
-                            userProfileViewModel.getUserIdFromDataStore()
-
 
                             if(selectedImageFromDevice != null)
                                 downloadedImageUrl = userProfileViewModel.uploadUserImageToStorage(selectedImageFromDevice!!)

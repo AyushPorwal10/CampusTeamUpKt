@@ -29,17 +29,18 @@ class UserProfileViewModel @Inject constructor(
     private lateinit var userName: String
 
 
-    suspend fun getUserIdFromDataStore() {
-        viewModelScope.launch {
+    suspend fun fetchDataFromDataStore() {
+
             Log.d("CollegeDetails", "Fetching of data from datastore started")
             val userData = userManager.userData.first()
             userId = userData.userId
             collegeName = userData.collegeName
             userName = userData.userName
 
-            Log.d("CollegeDetails", "Updated User Id: $userId")
-            Log.d("CollegeDetails", "Fetched User Id $collegeName")
-        }
+
+            Log.d("UserProfile", "Updated User Id: $userId")
+            Log.d("UserProfile", "Fetched User Id $collegeName")
+
 
     }
 

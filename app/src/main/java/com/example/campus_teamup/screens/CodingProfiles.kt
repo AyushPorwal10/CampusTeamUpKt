@@ -47,7 +47,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun CodingProfiles(
     modifier: Modifier = Modifier,
-    userProfileViewModel: UserProfileViewModel = hiltViewModel()
+    userProfileViewModel: UserProfileViewModel
 ) {
     val codingProfiles = remember { mutableStateListOf<String>() }
     val isLoading = remember { mutableStateOf(false) }
@@ -126,6 +126,7 @@ fun CodingProfiles(
                                 isLoading.value = false
                             }
                         } else {
+                            isEditing.value = true
                             ToastHelper.showToast(context, "Please Enter Valid URL")
                         }
                     }

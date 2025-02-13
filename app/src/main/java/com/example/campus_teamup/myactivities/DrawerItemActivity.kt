@@ -16,7 +16,6 @@ class DrawerItemActivity : ComponentActivity() {
         setContent {
 
             when (intent.getStringExtra("DrawerItem")) {
-                "userProfile" -> UserProfiles()
                 "notifications" -> NotificationsScreen()
                 "teamDetails" -> TeamDetailsScreen()
                 "recentchats" -> RecentChatScreen()

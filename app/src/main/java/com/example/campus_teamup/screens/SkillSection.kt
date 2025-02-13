@@ -44,7 +44,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun SkillSection(
     modifier: Modifier = Modifier,
-    userProfileViewModel: UserProfileViewModel = hiltViewModel()
+    userProfileViewModel: UserProfileViewModel
 ) {
     val tag = "Skills"
     var listOfSkills by remember { mutableStateOf<List<String>>(emptyList()) }

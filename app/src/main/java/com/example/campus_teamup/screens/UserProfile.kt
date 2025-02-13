@@ -31,13 +31,14 @@ import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.Black
 import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.White
+import com.example.campus_teamup.viewmodels.UserProfileViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
 
-fun UserProfiles() {
+fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
 
     var isClicked by remember { mutableStateOf(false) }
 
@@ -140,7 +141,8 @@ fun UserProfiles() {
                             start.linkTo(parent.start)
                             end.linkTo(parent.end)
                             top.linkTo(collegeDetailsBtn.bottom, margin = 20.dp)
-                        })
+                        },
+                        userProfileViewModel)
                 }
 
                 else if(selectedLayout == "codingProfiles"){
@@ -150,7 +152,8 @@ fun UserProfiles() {
                         .constrainAs(codingProfilesArea) {
 
                             top.linkTo(collegeDetailsBtn.bottom, margin = 20.dp)
-                        })
+                        },
+                        userProfileViewModel)
                 }
                else {
                     SkillSection(
@@ -159,7 +162,8 @@ fun UserProfiles() {
                         .fillMaxSize()
                         .constrainAs(skillSectionArea) {
 
-                            top.linkTo(collegeDetailsBtn.bottom, margin = 20.dp) }
+                            top.linkTo(collegeDetailsBtn.bottom, margin = 20.dp) },
+                        userProfileViewModel
                     )
                 }
 

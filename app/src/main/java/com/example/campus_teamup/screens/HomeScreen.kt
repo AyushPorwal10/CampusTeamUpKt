@@ -67,6 +67,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.campus_teamup.R
 import com.example.campus_teamup.myactivities.CreatePost
 import com.example.campus_teamup.myactivities.DrawerItemActivity
+import com.example.campus_teamup.myactivities.UserProfile
 import com.example.campus_teamup.mysealedClass.BottomNavScreens
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.BorderColor
@@ -93,17 +94,17 @@ fun HomeScreen(context: Context = LocalContext.current) {
         MinFabItem(
             icon = ImageBitmap.imageResource(id = R.drawable.vacancies),
             label = "Vacancy",
-            identifier = Identifier.Role.name
+            identifier = Identifier.Vacancy.name
         ),
         MinFabItem(
             icon = ImageBitmap.imageResource(id = R.drawable.projects),
             label = "Project",
-            identifier = Identifier.Vacancy.name
+            identifier = Identifier.Project.name
         ),
         MinFabItem(
             icon = ImageBitmap.imageResource(id = R.drawable.roles),
             label = "Role",
-            identifier = Identifier.Project.name
+            identifier = Identifier.Role.name
         )
 
     )
@@ -133,8 +134,7 @@ fun HomeScreen(context: Context = LocalContext.current) {
                         .padding(start = 20.dp)
                         .height(150.dp)
                         .clickable {
-                            val intent = Intent(context, DrawerItemActivity::class.java)
-                            intent.putExtra("DrawerItem", "userProfile")
+                            val intent = Intent(context, UserProfile::class.java)
                             context.startActivity(intent)
                         },
                     contentAlignment = Alignment.CenterStart

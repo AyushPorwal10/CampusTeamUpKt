@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
         setContent {
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()  // this should be commneted since we are using top app bar
+                        .fillMaxSize()  // this should be commented since we are using top app bar
                         .background(BackGroundColor)
                 ){
                     HomeScreen(this@MainActivity)

@@ -34,7 +34,13 @@
     <string name="college">College</string>
     <string name="skills">Skills</string>
     <string name="coding">Coding</string>
-    <string name="note_for_making_post">Before posting a role, please update your profile to ensure that your profile details appear correctly in your role listing.Your name, college, and other details will be automatically fetched and displayed in the role you post.</string>
+    <string name="note_for_making_post">Before posting a role, please update your profile to ensure that your
+        profile details appear correctly when other view your profile.</string>
     <string name="post_role">Post</string>
     <string name="enter_role">Enter Role</string>
+    <string name="enter_team_name">Enter team name</string>
+    <string name="role_looking_for">Role looking for</string>
+    <string name="skills_needed">Skills needed</string>
+    <string name="hackathon_name">Hackathon Name</string>
+    <string name="describe_role">Role description</string>
 </resources>
