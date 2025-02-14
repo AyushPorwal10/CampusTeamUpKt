@@ -1,6 +1,7 @@
 package com.example.campus_teamup.modules
 
 import android.content.Context
+import com.example.campus_teamup.myactivities.UserManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -20,23 +21,28 @@ object FirebaseObjects {
 
     @Singleton
     @Provides
-    fun getFirebaseAuth() : FirebaseAuth {
+    fun getFirebaseAuth(): FirebaseAuth {
         return FirebaseAuth.getInstance()
     }
+
     @Singleton
     @Provides
-    fun getFirebaseFireStore() : FirebaseFirestore {
+    fun getFirebaseFireStore(): FirebaseFirestore {
         return FirebaseFirestore.getInstance()
     }
 
     @Singleton
     @Provides
-    fun getFirebaseStorage() : StorageReference {
+    fun getFirebaseStorage(): StorageReference {
         return FirebaseStorage.getInstance().reference
     }
+
     @Provides
     @Singleton
-    fun provideApplicationContext(@ApplicationContext context: Context): Context{
-     return context
+    fun provideApplicationContext(@ApplicationContext context: Context): Context {
+        return context
     }
+
+
+
 }

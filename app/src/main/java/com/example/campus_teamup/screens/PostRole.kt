@@ -55,7 +55,7 @@ import java.time.LocalDate
 fun PostRole(createPostViewModel: CreatePostViewModel) {
     val context = LocalContext.current
 
-    val isLoading = createPostViewModel._isLoading.collectAsState()
+    val isLoading = createPostViewModel.isLoading.collectAsState()
 
 
     ConstraintLayout {
@@ -94,7 +94,7 @@ fun PostRole(createPostViewModel: CreatePostViewModel) {
         .fillMaxWidth(0.9f)
         .padding(10.dp)
         .background(BorderColor)
-        .clip(RoundedCornerShape(22.dp))
+        .border(0.5.dp, BorderColor, shape = RoundedCornerShape(22.dp))
         .constrainAs(noteForRole) {
             start.linkTo(parent.start)
             end.linkTo(parent.end)

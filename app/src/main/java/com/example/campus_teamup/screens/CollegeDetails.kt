@@ -21,6 +21,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,17 +52,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
 @Composable
 fun CollegeDetails(
     modifier: Modifier = Modifier,
     userProfileViewModel: UserProfileViewModel
 ) {
 
-    val tag : String = "CollegeDetails"
+    val tag: String = "CollegeDetails"
     val listOfCourse = listOf("B-Tech", "M-Tech", "BBA", "MBA", "BSc", "MSc")
     val listOfBranch = listOf("CSE", "IT", "ECE", "Civil", "Mechanical", "AIML", "IOT", "Other")
     val listOfGraduationYear =
         listOf("Before 2022", "2022", "2023", "2024", "2025", "2026", "2027", "2028")
+
+
+    val isLoading = userProfileViewModel.isLoading.collectAsState()
 
 
     // if canEdit is false means user can only view , when click on save he will allowed to edit
@@ -92,48 +97,36 @@ fun CollegeDetails(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null) {
-            Log.d(tag,"Image selected $uri")
+            Log.d(tag, "Image selected $uri")
             selectedImageFromDevice = uri
-        }
-        else{
-            ToastHelper.showToast(context , "No Image Selected")
+        } else {
+            ToastHelper.showToast(context, "No Image Selected")
         }
     }
 
 
-    var downloadedImageUrl : String?
-    var showProgressBar = remember{ mutableStateOf(false) }
-
-    var coroutineScope = rememberCoroutineScope()
-
+    var downloadedImageUrl: String?
 
     // this is fetching of college details when user enter college details section
 
 
-    LaunchedEffect(Unit){
-        withContext(Dispatchers.Main){
-            showProgressBar.value = true
+    LaunchedEffect(Unit) {
 
-            Log.d(tag,"Going to fetch college details")
-            val collegeDetails = userProfileViewModel.fetchCollegeDetails()
-
+        Log.d(tag, "Going to fetch college details")
+        userProfileViewModel.fetchCollegeDetails(onResult = { collegeDetails ->
             selectedBranch = collegeDetails?.branch.toString()
             selectedCourse = collegeDetails?.course.toString()
             selectedGraduationYear = collegeDetails?.year.toString()
             collegeName = collegeDetails?.collegeName.toString()
             userName = collegeDetails?.userName.toString()
 
-            selectedImageFromDevice = collegeDetails?.userImageUrl?.toUri()
-
-            showProgressBar.value = false
-
             Log.d(tag, "$selectedBranch , $selectedCourse , $selectedGraduationYear")
-        }
+        })
     }
 
     ConstraintLayout(modifier = modifier.fillMaxSize()) {
 
-        val (userImage, editPhotoButton ,progressBar, courseBranchYear, editOrUpdateBtn) = createRefs()
+        val (userImage, editPhotoButton, progressBar, courseBranchYear, editOrUpdateBtn) = createRefs()
 
         AsyncImage(
             model = selectedImageFromDevice ?: R.drawable.profile,
@@ -149,15 +142,21 @@ fun CollegeDetails(
                     end.linkTo(parent.end)
                 })
 
-        if(isEditing){
+        if (isEditing) {
             IconButton(onClick = {
-                                 imagePickerLauncher.launch("image/*")
-            } , modifier = Modifier.constrainAs(editPhotoButton){
-                top.linkTo(userImage.bottom , margin = 6.dp)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-            }.size(30.dp)) {
-                Icon(painter = painterResource(id = R.drawable.change_photo),contentDescription = null , modifier.size(20.dp))
+                imagePickerLauncher.launch("image/*")
+            }, modifier = Modifier
+                .constrainAs(editPhotoButton) {
+                    top.linkTo(userImage.bottom, margin = 6.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
+                .size(30.dp)) {
+                Icon(
+                    painter = painterResource(id = R.drawable.change_photo),
+                    contentDescription = null,
+                    modifier.size(20.dp)
+                )
             }
         }
 
@@ -183,7 +182,8 @@ fun CollegeDetails(
                         painterResource(id = R.drawable.college), contentDescription = "",
                         modifier = Modifier.size(22.dp), tint = White
                     )
-                }, modifier = Modifier.fillMaxWidth(0.85f))
+                }, modifier = Modifier.fillMaxWidth(0.85f)
+            )
 
 
             CustomDropdown(
@@ -217,46 +217,42 @@ fun CollegeDetails(
 
         }
 
-        if(showProgressBar.value){
+        if (isLoading.value) {
             ProgressIndicator.showProgressBar(
                 Modifier.constrainAs(progressBar) {
                     top.linkTo(courseBranchYear.bottom, margin = 20.dp)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 },
-                true)
-        }else{
+                true
+            )
+        } else {
             OutlinedButton(
                 onClick = {
                     isEditing = !isEditing
                     if (!isEditing) {
-                        showProgressBar.value = true
-
-                        Log.d("CollegeDetails","Coroutine Scope Launched")
 
 
-
-                        coroutineScope.launch(Dispatchers.IO) {
-
-                            if(selectedImageFromDevice != null)
-                                downloadedImageUrl = userProfileViewModel.uploadUserImageToStorage(selectedImageFromDevice!!)
-                            else
-                                downloadedImageUrl = ""
-
-                            Log.d("CollegeDetails","$downloadedImageUrl")
+                        Log.d("CollegeDetails", "Coroutine Scope Launched")
 
 
-                            try {
-                                userProfileViewModel.saveCollegeDetails(downloadedImageUrl!! , selectedGraduationYear, selectedBranch, selectedCourse)
-                            } catch (e: Exception) {
-                                Log.e(tag, e.toString())
-                                ToastHelper.showToast(context , "Something Went Wrong")
-                            }
-                            Log.d("CollegeDetails","Done with saving college details")
+                        userProfileViewModel.uploadUserImageToStorage(
+                            selectedImageFromDevice!!,
+                            onResult = { url ->
 
-                            showProgressBar.value = false
+                                downloadedImageUrl = url ?: ""
 
-                        }
+                                Log.d("CollegeDetails", " Download url is null $downloadedImageUrl")
+                                userProfileViewModel.saveCollegeDetails(
+                                    downloadedImageUrl!!,
+                                    selectedGraduationYear,
+                                    selectedBranch,
+                                    selectedCourse
+                                )
+
+                                Log.d("CollegeDetails", "Done with saving college details")
+
+                            })
 
 
                     }

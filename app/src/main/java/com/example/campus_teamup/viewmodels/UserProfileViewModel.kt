@@ -11,9 +11,13 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -28,24 +32,23 @@ class UserProfileViewModel @Inject constructor(
     private lateinit var collegeName: String
     private lateinit var userName: String
 
+    private val _isLoading = MutableStateFlow<Boolean>(false)
+    val isLoading : StateFlow<Boolean> = _isLoading
 
     suspend fun fetchDataFromDataStore() {
-
             Log.d("CollegeDetails", "Fetching of data from datastore started")
             val userData = userManager.userData.first()
             userId = userData.userId
             collegeName = userData.collegeName
             userName = userData.userName
 
-
             Log.d("UserProfile", "Updated User Id: $userId")
             Log.d("UserProfile", "Fetched User Id $collegeName")
-
 
     }
 
     // college details
-    suspend fun saveCollegeDetails(
+     fun saveCollegeDetails(
         userImageUrl: String,
         year: String,
         branch: String,
@@ -53,40 +56,82 @@ class UserProfileViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             Log.d("CollegDetails", "Going to save collegeDetails")
-            userProfileRepo.saveCollegeDetails(
-                userId,
-                CollegeDetails(
-                    userName,
-                    collegeName,
-                    year,
-                    course,
-                    branch,
-                    userImageUrl
+
+            _isLoading.value = true
+
+            withContext(Dispatchers.IO){
+                userProfileRepo.saveCollegeDetails(
+                    userId,
+                    CollegeDetails(
+                        userName,
+                        collegeName,
+                        year,
+                        course,
+                        branch,
+                        userImageUrl
+                    )
                 )
-            )
+            }
+            _isLoading.value = false
+
         }
     }
 
-    suspend fun fetchCollegeDetails(): CollegeDetails? {
-        Log.d("CollegeDetails", "$userId data fetching process started")
-        return userProfileRepo.fetchCollegeDetails(userId).toObject(CollegeDetails::class.java)
+     fun fetchCollegeDetails(onResult: (CollegeDetails?) -> Unit) {
+
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = withContext(Dispatchers.IO){
+                Log.d("CollegeDetails", "$userId data fetching process started")
+                userProfileRepo.fetchCollegeDetails(userId).toObject(CollegeDetails::class.java)
+            }
+            _isLoading.value = false
+            onResult(result)
+        }
     }
 
     // coding profiles
 
-    suspend fun saveCodingProfiles(listOfCodingProfiles: List<String>) {
-        Log.d("CodingProfiles", "$userId saving profiles")
-        userProfileRepo.saveCodingProfiles(userId, listOfCodingProfiles)
+     fun saveCodingProfiles(listOfCodingProfiles: List<String>) {
+        viewModelScope.launch {
+            Log.d("CodingProfiles", "$userId saving profiles")
+            _isLoading.value = true
+
+            withContext(Dispatchers.IO){
+                userProfileRepo.saveCodingProfiles(userId, listOfCodingProfiles)
+            }
+            _isLoading.value = false
+        }
+
+
     }
 
-    suspend fun uploadUserImageToStorage(imageUri: Uri): String? {
-        return userProfileRepo.uploadUserImageToStorage(userId, imageUri)
+     fun uploadUserImageToStorage(imageUri: Uri , onResult : (String?) -> Unit) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = withContext(Dispatchers.IO){
+                  userProfileRepo.uploadUserImageToStorage(userId, imageUri)
+            }
+            _isLoading.value = false
+            onResult(result)
+
+        }
+
     }
 
-    suspend fun fetchCodingProfiles() : List<String>{
-        Log.d("CodingProfiles","Going to fetch coding profiles ")
-        val documentSnapshot = userProfileRepo.fetchCodingProfiles(userId)
-        return documentSnapshot.get("profilelist") as? List<String> ?: emptyList()
+    suspend fun fetchCodingProfiles(onResult: (List<String>) -> Unit){
+        viewModelScope.launch {
+            _isLoading.value = true
+
+            Log.d("CodingProfiles","Going to fetch coding profiles ")
+            val documentSnapshot = withContext(Dispatchers.IO){
+                userProfileRepo.fetchCodingProfiles(userId)
+            }
+            _isLoading.value = false
+            val result = documentSnapshot.get("profilelist") as? List<String> ?: emptyList()
+            onResult(result)
+        }
+
     }
 
     suspend fun saveSkills(listOfSkills : List<String>){

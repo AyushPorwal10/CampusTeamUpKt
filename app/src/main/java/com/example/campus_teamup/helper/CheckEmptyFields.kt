@@ -37,5 +37,17 @@ object CheckEmptyFields {
         return true
     }
 
+    fun checkVacancyDetails(
+        teamName: String,
+        hackathonName: String,
+        roleLookingFor: String,
+        skills: String
+    ) : Boolean{
+
+        if(teamName.trim().isEmpty() || hackathonName.trim().isEmpty() || roleLookingFor.trim().isEmpty() || skills.trim().isEmpty())
+            return false;
+        return true
+    }
+
 
 }

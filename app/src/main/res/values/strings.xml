@@ -38,9 +38,9 @@
         profile details appear correctly when other view your profile.</string>
     <string name="post_role">Post</string>
     <string name="enter_role">Enter Role</string>
-    <string name="enter_team_name">Enter team name</string>
-    <string name="role_looking_for">Role looking for</string>
-    <string name="skills_needed">Skills needed</string>
-    <string name="hackathon_name">Hackathon Name</string>
+    <string name="enter_team_name">*Enter team name</string>
+    <string name="role_looking_for">*Role looking for</string>
+    <string name="skills_needed">*Skills needed</string>
+    <string name="hackathon_name">*Hackathon Name</string>
     <string name="describe_role">Role description</string>
 </resources>

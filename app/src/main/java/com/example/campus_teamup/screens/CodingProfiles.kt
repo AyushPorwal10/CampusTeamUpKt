@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -50,15 +51,16 @@ fun CodingProfiles(
     userProfileViewModel: UserProfileViewModel
 ) {
     val codingProfiles = remember { mutableStateListOf<String>() }
-    val isLoading = remember { mutableStateOf(false) }
+    val isLoading = userProfileViewModel.isLoading.collectAsState()
+
     val isEditing = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        isLoading.value = true
-        codingProfiles.addAll(userProfileViewModel.fetchCodingProfiles())
-        isLoading.value = false
+        userProfileViewModel.fetchCodingProfiles {
+            codingProfiles.addAll(it)
+        }
     }
 
     ConstraintLayout(modifier = modifier.fillMaxSize()) {
@@ -66,7 +68,7 @@ fun CodingProfiles(
 
         LazyColumn(
             modifier = Modifier.constrainAs(profilesListRef) {
-                top.linkTo(parent.top , margin = 20.dp)
+                top.linkTo(parent.top, margin = 20.dp)
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
                 bottom.linkTo(addProfileBtnRef.top, margin = 16.dp)
@@ -118,15 +120,8 @@ fun CodingProfiles(
                     if (!isEditing.value) {
 
                         if (CheckEmptyFields.checkCodingProfiles(codingProfiles.toList())) {
-                            isLoading.value = true
-                            coroutineScope.launch {
-                                withContext(Dispatchers.IO) {
-                                    userProfileViewModel.saveCodingProfiles(codingProfiles.toList())
-                                }
-                                isLoading.value = false
-                            }
+                            userProfileViewModel.saveCodingProfiles(codingProfiles.toList())
                         } else {
-                            isEditing.value = true
                             ToastHelper.showToast(context, "Please Enter Valid URL")
                         }
                     }
@@ -204,7 +199,7 @@ fun ProfileFields(
             modifier = Modifier.size(22.dp)
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.password),
+                painter = painterResource(id = R.drawable.delete),
                 contentDescription = "Delete Profile",
                 tint = White
             )
