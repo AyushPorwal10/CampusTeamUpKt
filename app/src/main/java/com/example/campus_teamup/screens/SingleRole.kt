@@ -8,16 +8,23 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
@@ -29,7 +36,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
+import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.example.campus_teamup.R
+import com.example.campus_teamup.helper.ProgressIndicator
+import com.example.campus_teamup.mydataclass.RoleDetails
 import com.example.campus_teamup.ui.theme.BackGroundColor
 
 import com.example.campus_teamup.ui.theme.Black
@@ -39,7 +51,7 @@ import com.example.campus_teamup.ui.theme.White
 
 
 @Composable
-fun SingleRole() {
+fun SingleRole(roleDetails: RoleDetails) {
     val textColor = White
     val bgColor = BackGroundColor
 
@@ -58,19 +70,26 @@ fun SingleRole() {
 
 
             // Photo of user who posted role
-            Image(painter = painterResource(id = R.drawable.profile),
-                contentDescription = null,
 
+            AsyncImage(
+                model = roleDetails.userImageUrl,
+                contentDescription = "User Profile",
+                contentScale = ContentScale.Crop,
+                //placeholder = painterResource(R.drawable.profile),
+                error = painterResource(R.drawable.profile),
                 modifier = Modifier
-                    .clip(RoundedCornerShape(40.dp))
                     .constrainAs(userImage) {
                         top.linkTo(parent.top)
                         start.linkTo(parent.start)
-                    })
+                    }
+                    .size(40.dp)
+                    .clip(CircleShape)
+            )
+
 
 
             // Name of user who posted role
-            Text(text = "Ayush Porwal",
+            Text(text = roleDetails.userName,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 softWrap = false,
@@ -79,7 +98,7 @@ fun SingleRole() {
                 color = textColor,
                 modifier = Modifier.constrainAs(userName)
                 {
-                    start.linkTo(userImage.end, margin = 4.dp)
+                    start.linkTo(userImage.end, margin = 8.dp)
                     top.linkTo(userImage.top)
                     bottom.linkTo(userImage.bottom)
                 })
@@ -87,7 +106,7 @@ fun SingleRole() {
 
             // Role that user posted
             Text(
-                text = "Role : Android App Developer",
+                text = "Role : ${roleDetails.role}",
                 maxLines = 1,
                 fontWeight = FontWeight.SemiBold,
                 overflow = TextOverflow.Ellipsis,
@@ -116,7 +135,7 @@ fun SingleRole() {
 
 @Composable
 fun ViewProfileBtn(modifier: Modifier) {
-    OutlinedButton(
+    TextButton(
         onClick = { /*TODO*/ },
         modifier = modifier,
 

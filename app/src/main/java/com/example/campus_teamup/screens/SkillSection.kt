@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -43,8 +44,8 @@ import kotlinx.coroutines.withContext
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SkillSection(
-    modifier: Modifier = Modifier,
-    userProfileViewModel: UserProfileViewModel
+    userProfileViewModel: UserProfileViewModel,
+    modifier: Modifier
 ) {
     val tag = "Skills"
     var listOfSkills by remember { mutableStateOf<List<String>>(emptyList()) }
@@ -67,7 +68,7 @@ fun SkillSection(
         Log.d(tag , "Total Skills are : ${listOfSkills.size}")
 
     }
-    ConstraintLayout(modifier = modifier) {
+    ConstraintLayout(modifier = modifier.fillMaxSize()) {
         val (skillBox, progressBar , inputSkill, addSkill, saveSkill) = createRefs()
 
         Column(modifier = Modifier.constrainAs(skillBox) {}) {
@@ -99,13 +100,6 @@ fun SkillSection(
         OutlinedButton(
             onClick = {
                 isEditing = true
-//                if (CheckEmptyFields.checkSkills(listOfSkills)) {
-//                    listOfSkills = listOfSkills.toMutableList().apply {
-//                        add(currentSkill)
-//                    }
-//                } else {
-//                    ToastHelper.showToast(context, "Skill can't be Empty")
-//                }
                 if(currentSkill.trim().isEmpty()){
                     ToastHelper.showToast(context , "Skill can't be Empty")
                 }

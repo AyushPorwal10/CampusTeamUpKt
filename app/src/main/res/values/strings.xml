@@ -43,4 +43,8 @@
     <string name="skills_needed">*Skills needed</string>
     <string name="hackathon_name">*Hackathon Name</string>
     <string name="describe_role">Role description</string>
+    <string name="problem_statement">*Problem Statement</string>
+    <string name="project_github_url">Project Github URL</string>
+    <string name="hackathon_personal_project">Hackathon or Personal Project</string>
+    <string name="interested_in_project">Interested in Project ? Let\'s Collaborate</string>
 </resources>

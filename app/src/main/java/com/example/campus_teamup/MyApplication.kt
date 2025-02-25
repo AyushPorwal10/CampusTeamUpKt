@@ -4,7 +4,9 @@ import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
 import coil.ImageLoader
 import coil.ImageLoaderFactory
+import coil.annotation.ExperimentalCoilApi
 import coil.disk.DiskCache
+import coil.imageLoader
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import coil.util.DebugLogger
@@ -19,6 +21,7 @@ class MyApplication : Application() ,ImageLoaderFactory {
         // only night mode
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
     }
+
 
     override fun newImageLoader(): ImageLoader {
         return ImageLoader(this).newBuilder()
@@ -38,5 +41,12 @@ class MyApplication : Application() ,ImageLoaderFactory {
             }
             .logger(DebugLogger())
             .build()
+    }
+
+    @OptIn(ExperimentalCoilApi::class)
+    override fun onTerminate() {
+        super.onTerminate()
+        imageLoader.diskCache?.clear()
+        imageLoader.memoryCache?.clear()
     }
 }

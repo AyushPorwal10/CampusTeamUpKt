@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
@@ -40,11 +41,13 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.CustomDropdown
 import com.example.campus_teamup.helper.ProgressIndicator
 import com.example.campus_teamup.helper.ToastHelper
 import com.example.campus_teamup.myThemes.TextFieldStyle
+import com.example.campus_teamup.mydataclass.CollegeDetails
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.White
 import com.example.campus_teamup.viewmodels.UserProfileViewModel
@@ -55,8 +58,8 @@ import kotlinx.coroutines.withContext
 
 @Composable
 fun CollegeDetails(
-    modifier: Modifier = Modifier,
-    userProfileViewModel: UserProfileViewModel
+    userProfileViewModel: UserProfileViewModel,
+    modifier: Modifier
 ) {
 
     val tag: String = "CollegeDetails"
@@ -67,7 +70,7 @@ fun CollegeDetails(
 
 
     val isLoading = userProfileViewModel.isLoading.collectAsState()
-
+    val collegeDetails = userProfileViewModel.collegeDetails.collectAsState().value
 
     // if canEdit is false means user can only view , when click on save he will allowed to edit
     var isEditing by remember {
@@ -105,30 +108,42 @@ fun CollegeDetails(
     }
 
 
-    var downloadedImageUrl: String?
+    var downloadedImageUrl: String? = null
 
     // this is fetching of college details when user enter college details section
 
 
-    LaunchedEffect(Unit) {
-
-        Log.d(tag, "Going to fetch college details")
-        userProfileViewModel.fetchCollegeDetails(onResult = { collegeDetails ->
-            selectedBranch = collegeDetails?.branch.toString()
-            selectedCourse = collegeDetails?.course.toString()
-            selectedGraduationYear = collegeDetails?.year.toString()
-            collegeName = collegeDetails?.collegeName.toString()
-            userName = collegeDetails?.userName.toString()
-
-            Log.d(tag, "$selectedBranch , $selectedCourse , $selectedGraduationYear")
-        })
+    LaunchedEffect(collegeDetails) {
+        collegeDetails.let {
+            if (it != null) {
+                selectedBranch = it.branch ?: "Select Branch"
+            }
+            if (it != null) {
+                selectedCourse = it.course ?: "Select Course"
+            }
+            if (it != null) {
+                selectedGraduationYear = it.year ?: "Select Year"
+            }
+            if (it != null) {
+                collegeName = it.collegeName ?: "College"
+            }
+            if (it != null) {
+                userName = it.userName ?: "Your Name"
+            }
+            if(it != null){
+                downloadedImageUrl = it.userImageUrl
+            }
+        }
     }
+    Log.d(tag, "$selectedBranch , $selectedCourse , $selectedGraduationYear , $downloadedImageUrl")
+
+
 
     ConstraintLayout(modifier = modifier.fillMaxSize()) {
 
         val (userImage, editPhotoButton, progressBar, courseBranchYear, editOrUpdateBtn) = createRefs()
 
-        AsyncImage(
+        SubcomposeAsyncImage(
             model = selectedImageFromDevice ?: R.drawable.profile,
             contentDescription = "User Profile",
             contentScale = ContentScale.Crop,
@@ -140,22 +155,24 @@ fun CollegeDetails(
                     top.linkTo(parent.top)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                })
+                }, loading = {
+                    CircularProgressIndicator(modifier = Modifier.size(30.dp))
+            })
 
         if (isEditing) {
             IconButton(onClick = {
                 imagePickerLauncher.launch("image/*")
             }, modifier = Modifier
                 .constrainAs(editPhotoButton) {
-                    top.linkTo(userImage.bottom, margin = 6.dp)
+                    top.linkTo(parent.top)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 }
-                .size(30.dp)) {
+                .size(80.dp)) {
                 Icon(
                     painter = painterResource(id = R.drawable.change_photo),
                     contentDescription = null,
-                    modifier.size(20.dp)
+                    Modifier.size(20.dp)
                 )
             }
         }
@@ -171,7 +188,8 @@ fun CollegeDetails(
         ) {
 
 
-            OutlinedTextField(value = collegeName,
+            OutlinedTextField(
+                value = collegeName,
                 onValueChange = { collegeName = it },
                 colors = TextFieldStyle.myTextFieldColor(),
                 shape = TextFieldStyle.defaultShape,
@@ -242,7 +260,7 @@ fun CollegeDetails(
 
                                 downloadedImageUrl = url ?: ""
 
-                                Log.d("CollegeDetails", " Download url is null $downloadedImageUrl")
+                                Log.d("CollegeDetails", " Download url is  $downloadedImageUrl")
                                 userProfileViewModel.saveCollegeDetails(
                                     downloadedImageUrl!!,
                                     selectedGraduationYear,

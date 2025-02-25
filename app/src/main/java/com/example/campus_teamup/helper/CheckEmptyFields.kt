@@ -1,7 +1,6 @@
 package com.example.campus_teamup.helper
 
-import android.util.Log
-import android.util.Patterns
+import androidx.compose.runtime.snapshots.SnapshotStateList
 
 object CheckEmptyFields {
 
@@ -37,7 +36,7 @@ object CheckEmptyFields {
         return true
     }
 
-    fun checkVacancyDetails(
+    fun checkVacancyFields(
         teamName: String,
         hackathonName: String,
         roleLookingFor: String,
@@ -50,4 +49,31 @@ object CheckEmptyFields {
     }
 
 
+    fun checkProjectFields(
+        teamName: String,
+        hackathonName: String,
+        problemStatement : String
+    ) : Boolean{
+
+        if(teamName.trim().isEmpty() || hackathonName.trim().isEmpty() || problemStatement.trim().isEmpty())
+            return false;
+        return true
+    }
+
+    fun checkTeamMemberUserNameIsEmpty(teamMembersUserName: SnapshotStateList<String>): Boolean{
+        teamMembersUserName.forEach{
+            if(it.isEmpty())
+                return true
+        }
+        return false
+    }
+
+    fun isUserNameInPresent(teamMembersUserName: SnapshotStateList<String> , userName : String): Boolean{
+
+        teamMembersUserName.forEach{
+            if(it == userName)
+                return true
+        }
+        return false
+    }
 }

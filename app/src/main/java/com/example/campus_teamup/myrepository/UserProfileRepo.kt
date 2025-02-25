@@ -16,7 +16,7 @@ class UserProfileRepo @Inject constructor(
     // college Details
 
     suspend fun saveCollegeDetails(userId : String , collegeDetails: CollegeDetails){
-        Log.d("CollegDetails" , "Saving CollegeDetails data")
+        Log.d("CollegeDetails" , "Saving CollegeDetails data")
         firebaseFirestore.collection("all_user_id").document(userId).
         collection("all_user_details").document("college_details").set(collegeDetails).await()
     }
@@ -36,7 +36,7 @@ class UserProfileRepo @Inject constructor(
     suspend fun uploadUserImageToStorage(userId: String , imageUri : Uri) : String?{
         return try {
 
-            val imageRef = storageReference.child("user_images/$userId/${System.currentTimeMillis()}.jpg")
+            val imageRef = storageReference.child("user_images/$userId/profile.jpg")
 
             imageRef.putFile(imageUri).await()
             Log.d("CollegeDetails","Image uploaded")

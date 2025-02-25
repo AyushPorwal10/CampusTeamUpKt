@@ -2,10 +2,12 @@ package com.example.campus_teamup.screens
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,19 +15,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,14 +45,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -65,7 +61,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.campus_teamup.R
-import com.example.campus_teamup.myactivities.CreatePost
 import com.example.campus_teamup.myactivities.DrawerItemActivity
 import com.example.campus_teamup.myactivities.UserProfile
 import com.example.campus_teamup.mysealedClass.BottomNavScreens
@@ -73,20 +68,28 @@ import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.LightTextColor
 import com.example.campus_teamup.ui.theme.White
+import com.example.campus_teamup.viewmodels.HomeScreenViewModel
+import com.example.campus_teamup.viewmodels.SearchRoleVacancy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 
-fun HomeScreen(context: Context = LocalContext.current) {
+fun HomeScreen(
+    context: Context = LocalContext.current,
+    homeScreenViewModel: HomeScreenViewModel,
+    searchRoleVacancy: SearchRoleVacancy
+) {
 
     val bgColor = BackGroundColor
     val textColor = White
 
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val bottomAppBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
+
+
     var multifloatingState by remember {
         mutableStateOf(MultifloatingState.Collapse)
     }
@@ -224,10 +227,9 @@ fun HomeScreen(context: Context = LocalContext.current) {
         }
     ) {
         Scaffold(
-            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            modifier = Modifier.nestedScroll(bottomAppBarScrollBehavior.nestedScrollConnection),
             topBar = {
                 TopAppBar(
-                    scrollBehavior = scrollBehavior,
                     title = { Text(text = "Campus TeamUp", color = textColor) },
                     colors = topAppBarColors(
                         containerColor = bgColor,
@@ -260,6 +262,7 @@ fun HomeScreen(context: Context = LocalContext.current) {
             bottomBar = {
                 HorizontalDivider(modifier = Modifier.width(2.dp))
                 BottomAppBar(
+                    scrollBehavior = bottomAppBarScrollBehavior,
                     containerColor = bgColor,
                 ) {
                     HandlingBottomAppBar(selected, navController, Modifier.weight(1f))
@@ -273,9 +276,37 @@ fun HomeScreen(context: Context = LocalContext.current) {
                 ) {
 
                     // bottom nav items
-                    composable(BottomNavScreens.Roles.screen) { RolesScreen() }
-                    composable(BottomNavScreens.Projects.screen) { ProjectsScreen() }
-                    composable(BottomNavScreens.Vacancies.screen) { VacanciesScreen() }
+                    composable(BottomNavScreens.Roles.screen , enterTransition = {
+                        slideInHorizontally(
+                            initialOffsetX = {-it},
+                            animationSpec = tween(
+                                300,
+                                easing = LinearEasing
+                            )
+                        )
+                    },
+                        exitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = {-it},
+                                animationSpec = tween(
+                                    300,
+                                    easing = FastOutLinearInEasing
+                                )
+                            )
+                        }) { RolesScreen(homeScreenViewModel , searchRoleVacancy) }
+
+
+
+                    composable(BottomNavScreens.Projects.screen ) {
+                        ProjectsScreen(
+                            homeScreenViewModel
+                        )
+                    }
+                    composable(BottomNavScreens.Vacancies.screen) {
+                        VacanciesScreen(
+                            homeScreenViewModel,searchRoleVacancy
+                        )
+                    }
                 }
 
             }

@@ -53,6 +53,7 @@ import java.time.LocalDate
 fun PostVacancy(createPostViewModel : CreatePostViewModel) {
 
     val isLoading = createPostViewModel.isLoading.collectAsState()
+    val isPosted = createPostViewModel.isPosted.collectAsState()
 
     val scrollState = rememberScrollState()
     val teamName = remember { mutableStateOf("") }
@@ -60,9 +61,7 @@ fun PostVacancy(createPostViewModel : CreatePostViewModel) {
     val hackathonName = remember { mutableStateOf("") }
     val skills = remember { mutableStateOf("") }
     val roleDescription = remember { mutableStateOf("") }
-    var downLoadImageUrl : String?
 
-    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
     var selectedTeamLogo by remember { mutableStateOf<Uri?>(null) }
@@ -79,6 +78,14 @@ fun PostVacancy(createPostViewModel : CreatePostViewModel) {
         }
     }
 
+    if(isPosted.value){
+        teamName.value = ""
+        hackathonName.value = ""
+        roleLookingFor.value = ""
+        skills.value = ""
+        roleDescription.value = ""
+        ToastHelper.showToast(context,"Vacancy Posted Successfully")
+    }
 
 
     Column(
@@ -99,7 +106,7 @@ fun PostVacancy(createPostViewModel : CreatePostViewModel) {
                 contentDescription = "User Profile",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(80.dp)
+                    .fillMaxSize()
                     .clip(CircleShape)
                     .border(1.dp, White, CircleShape))
         }
@@ -191,16 +198,9 @@ fun PostVacancy(createPostViewModel : CreatePostViewModel) {
             modifier = Modifier.fillMaxWidth(0.9f),
             colors = TextFieldStyle.myTextFieldColor(),
             shape = TextFieldStyle.defaultShape,
-            maxLines = 2,
             label = {
                 Text(text = stringResource(id = R.string.describe_role))
             },
-            leadingIcon = {
-                Icon(
-                    painterResource(id = R.drawable.email), contentDescription = null,
-                    modifier = Modifier.size(22.dp), tint = White
-                )
-            }
         )
 
 
@@ -213,7 +213,7 @@ fun PostVacancy(createPostViewModel : CreatePostViewModel) {
         else{
             OutlinedButton(
                 onClick = {
-                    val isAllRequiredFieldsCorrect = CheckEmptyFields.checkVacancyDetails(
+                    val isAllRequiredFieldsCorrect = CheckEmptyFields.checkVacancyFields(
                         teamName.value,
                         hackathonName.value,
                         roleLookingFor.value,
@@ -223,9 +223,7 @@ fun PostVacancy(createPostViewModel : CreatePostViewModel) {
                     if(isAllRequiredFieldsCorrect){
 
                         createPostViewModel.uploadTeamLogo(selectedTeamLogo!!) { url ->
-                            // This callback runs after the upload completes
                             val downloadImageUrl = url ?: ""
-
                                 createPostViewModel.postVacancy(
                                     LocalDate.now().toString(),
                                     downloadImageUrl,

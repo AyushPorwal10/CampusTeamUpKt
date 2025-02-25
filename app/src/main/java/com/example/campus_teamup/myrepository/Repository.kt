@@ -1,6 +1,7 @@
 package com.example.campus_teamup.myrepository
 
 import android.util.Log
+import androidx.compose.ui.text.toLowerCase
 import com.example.campus_teamup.mydataclass.SignupDetails
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -23,6 +24,10 @@ class Repository @Inject constructor(
         Log.d("Signup" , "Saving Signup data")
         firebaseFirestore.collection("all_user_id").document(userId).
         collection("all_user_details").document("signup_details").set(signupDetails).await()
+
+
+        // below is separate because to achieve simplicity in team details section
+        firebaseFirestore.collection("search_user_id").document(userId).set("userId" to userId)
     }
     // saving this separate because it becomes easy to check if email is present in db or not
     suspend fun saveEmail(email : String){

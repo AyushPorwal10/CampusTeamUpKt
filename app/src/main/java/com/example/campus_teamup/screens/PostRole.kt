@@ -57,7 +57,6 @@ fun PostRole(createPostViewModel: CreatePostViewModel) {
 
     val isLoading = createPostViewModel.isLoading.collectAsState()
 
-
     ConstraintLayout {
         val (noteForRole, divider, progressBar, enterRole, postRoleBtn) = createRefs()
 
@@ -70,8 +69,6 @@ fun PostRole(createPostViewModel: CreatePostViewModel) {
             "Web Full Stack Developer", ""
         )
 
-        if (isLoading.value)
-            role = ""
 
         var currentPlaceholderIndex by remember { mutableIntStateOf(0) }
 

@@ -2,6 +2,8 @@ package com.example.campus_teamup.screens
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.ColorFilter
+import android.graphics.Paint
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -208,7 +210,8 @@ fun MinFab(
                     center.x - (item.icon.width / 2),
                     center.y - (item.icon.width / 2),
                 ),
-                alpha = alpha
+                alpha = alpha,
+                colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.White)
             )
         }
     }

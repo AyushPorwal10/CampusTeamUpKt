@@ -1,37 +1,27 @@
 package com.example.campus_teamup
 
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.annotation.ColorRes
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.example.campus_teamup.helper.StatusBarColor
-import com.example.campus_teamup.helper.ToastHelper
 import com.example.campus_teamup.screens.HomeScreen
 import com.example.campus_teamup.ui.theme.BackGroundColor
 
-import com.example.campus_teamup.ui.theme.Black
-import com.example.campus_teamup.ui.theme.MyCustomTheme
-import com.example.campus_teamup.ui.theme.White
-import com.google.firebase.Firebase
-import com.google.firebase.auth.actionCodeSettings
-import com.google.firebase.auth.auth
+import com.example.campus_teamup.viewmodels.HomeScreenViewModel
+import com.example.campus_teamup.viewmodels.SearchRoleVacancy
+import dagger.hilt.android.AndroidEntryPoint
 
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    private val homeScreenViewModel : HomeScreenViewModel by viewModels()
+    private val searchRoleVacancy : SearchRoleVacancy by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,18 +31,21 @@ class MainActivity : ComponentActivity() {
         setContent {
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()  // this should be commented since we are using top app bar
+                        .fillMaxSize()
                         .background(BackGroundColor)
                 ){
-                    HomeScreen(this@MainActivity)
+                    HomeScreen(this@MainActivity , homeScreenViewModel , searchRoleVacancy)
                 }
             }
+        Log.d("Roles","MainActivity is going to fetch new roles")
+
+        homeScreenViewModel.fetchInitialOrPaginatedRoles()
+        homeScreenViewModel.fetchInitialOrPaginatedVacancy()
+        homeScreenViewModel.fetchProjects()
+
         }
 
-    override fun onResume() {
-        super.onResume()
-        Log.d("Post","MainActivity Resumed")
-    }
+
     }
 
 

@@ -1,5 +1,6 @@
 package com.example.campus_teamup.screens
 
+import android.support.v4.os.IResultReceiver2.Default
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +27,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,8 +49,8 @@ import kotlinx.coroutines.withContext
 
 @Composable
 fun CodingProfiles(
-    modifier: Modifier = Modifier,
-    userProfileViewModel: UserProfileViewModel
+    userProfileViewModel: UserProfileViewModel,
+    modifier: Modifier
 ) {
     val codingProfiles = remember { mutableStateListOf<String>() }
     val isLoading = userProfileViewModel.isLoading.collectAsState()
@@ -156,7 +158,7 @@ fun ProfileFields(
         profileLink.contains("gfg", ignoreCase = true) || profileLink.contains(
             "geeksforgeeks",
             ignoreCase = true
-        ) -> R.drawable.leetcode
+        ) -> R.drawable.gfg
 
         else -> R.drawable.coding  // Fallback icon if none of the above match
     }
@@ -185,7 +187,8 @@ fun ProfileFields(
                 Icon(
                     painter = painterResource(id = iconResource),
                     contentDescription = "",
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
+                    tint = Color.Unspecified
                 )
             },
             colors = TextFieldStyle.myTextFieldColor(),

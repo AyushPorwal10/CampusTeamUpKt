@@ -162,7 +162,7 @@ fun LoginScreen(
             // new account sign up button
             NewAccountSignUpButton(modifier = Modifier.constrainAs(signUp) {
                 end.linkTo(parent.end)
-                top.linkTo(loginButton.bottom, margin = 30.dp)
+                top.linkTo(if(showProgressBar.value) progressBar.bottom else loginButton.bottom, margin = 30.dp)
             }, onClick = navigateToSignUpScreen)
         }
     }

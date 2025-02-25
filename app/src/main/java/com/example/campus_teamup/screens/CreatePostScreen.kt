@@ -66,7 +66,7 @@ fun CreatePostScreen(screenToOpen : String , createPostViewModel: CreatePostView
             when(screenToOpen){
                 "Role" -> PostRole(createPostViewModel)
                 "Vacancy" -> PostVacancy(createPostViewModel)
-                "Project" -> PostProject()
+                "Project" -> PostProject(createPostViewModel)
             }
         }
     }

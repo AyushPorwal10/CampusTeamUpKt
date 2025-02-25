@@ -77,7 +77,7 @@ class SplashViewModel @Inject constructor(
 
     suspend fun saveUserIdToCollege(){
         Log.d("Signup","Going to save collegeName $collegeName")
-        repository.saveUserToCollege(userId , collegeName)
+        repository.saveUserToCollege(userId , collegeName.lowercase())
         _isAllDataSaved.value = true
         Log.d("Signup","Done with saving email and collegeName")
     }

@@ -1,5 +1,14 @@
 package com.example.campus_teamup.screens
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection.Companion.Down
+import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection.Companion.Up
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.with
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.campus_teamup.R
+import com.example.campus_teamup.mydataclass.CollegeDetails
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.Black
 import com.example.campus_teamup.ui.theme.BorderColor
@@ -34,7 +44,7 @@ import com.example.campus_teamup.ui.theme.White
 import com.example.campus_teamup.viewmodels.UserProfileViewModel
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 
 @Composable
 
@@ -69,15 +79,16 @@ fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
                 }
             }
         )
-    }) {paddingValues ->
+    }) { paddingValues ->
 
-        ConstraintLayout(modifier = Modifier
-            .background(BackGroundColor)
-            .fillMaxSize()
-            .padding(paddingValues)
-            ) {
+        ConstraintLayout(
+            modifier = Modifier
+                .background(BackGroundColor)
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
 
-            val (topAppBar ,divider, codingProfileBtn , collegeDetailsBtn , skillSection ,codingProfilesArea , collegeDetailsArea , skillSectionArea ) = createRefs()
+            val (topAppBar, divider, codingProfileBtn, collegeDetailsBtn, skillSection, codingProfilesArea, collegeDetailsArea, skillSectionArea) = createRefs()
 
 
 
@@ -96,7 +107,7 @@ fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
                         top.linkTo(topAppBar.bottom, margin = 20.dp)
                     }
                     .padding(all = 0.dp)
-                    .height(34.dp), selectedLayout , onClick = {
+                    .height(34.dp), selectedLayout, onClick = {
                     isClicked = !isClicked
                     selectedLayout = "collegeDetails"
                 }
@@ -108,7 +119,7 @@ fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
                         top.linkTo(topAppBar.bottom, margin = 20.dp)
                     }
                     .padding(all = 0.dp)
-                    .height(34.dp), selectedLayout , onClick = {
+                    .height(34.dp), selectedLayout, onClick = {
                     isClicked = !isClicked
                     selectedLayout = "codingProfiles"
                 }
@@ -119,52 +130,63 @@ fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
                         top.linkTo(topAppBar.bottom, margin = 20.dp)
                     }
                     .padding(all = 0.dp)
-                    .height(34.dp), selectedLayout , onClick = {
+                    .height(34.dp), selectedLayout, onClick = {
                     isClicked = !isClicked
                     selectedLayout = "skillSection"
                 }
             )
 
 
-            createHorizontalChain(collegeDetailsBtn , codingProfileBtn ,skillSection, chainStyle = ChainStyle.Spread)
+            createHorizontalChain(
+                collegeDetailsBtn,
+                codingProfileBtn,
+                skillSection,
+                chainStyle = ChainStyle.Spread
+            )
 
 
 
 
 
 
-                if(selectedLayout == "collegeDetails"){
-                    CollegeDetails(modifier = Modifier
-                        .padding(20.dp)
-                        .fillMaxSize()
-                        .constrainAs(collegeDetailsArea) {
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                            top.linkTo(collegeDetailsBtn.bottom, margin = 20.dp)
-                        },
-                        userProfileViewModel)
-                }
 
-                else if(selectedLayout == "codingProfiles"){
-                    CodingProfiles(modifier = Modifier
-                        .padding(20.dp)
-                        .fillMaxSize()
-                        .constrainAs(codingProfilesArea) {
-
-                            top.linkTo(collegeDetailsBtn.bottom, margin = 20.dp)
-                        },
-                        userProfileViewModel)
-                }
-               else {
-                    SkillSection(
+                when (selectedLayout) {
+                    "collegeDetails" -> CollegeDetails(
+                        userProfileViewModel,
                         modifier = Modifier
-                        .padding(20.dp)
-                        .fillMaxSize()
-                        .constrainAs(skillSectionArea) {
-
-                            top.linkTo(collegeDetailsBtn.bottom, margin = 20.dp) },
-                        userProfileViewModel
+                            .padding(20.dp)
+                            .fillMaxSize()
+                            .constrainAs(collegeDetailsArea) {
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                                top.linkTo(collegeDetailsBtn.bottom, margin = 20.dp)
+                            }
                     )
+
+                    "codingProfiles" -> CodingProfiles(
+                        userProfileViewModel,
+                        modifier = Modifier
+                            .padding(20.dp)
+                            .fillMaxSize()
+                            .constrainAs(collegeDetailsArea) {
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                                top.linkTo(collegeDetailsBtn.bottom, margin = 20.dp)
+                            }
+                    )
+
+                    else ->
+                        SkillSection(
+                            userProfileViewModel,
+                            modifier = Modifier
+                                .padding(20.dp)
+                                .fillMaxSize()
+                                .constrainAs(collegeDetailsArea) {
+                                    start.linkTo(parent.start)
+                                    end.linkTo(parent.end)
+                                    top.linkTo(collegeDetailsBtn.bottom, margin = 20.dp)
+                                }
+                        )
                 }
 
 
@@ -178,7 +200,8 @@ fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
 @Composable
 fun CodingProfilesBtn(modifier: Modifier, selectedLayout: String, onClick: () -> Unit) {
 
-    OutlinedButton(onClick =onClick ,
+    OutlinedButton(
+        onClick = onClick,
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(
             containerColor = if (selectedLayout == "codingProfiles") White else BackGroundColor
@@ -186,14 +209,15 @@ fun CodingProfilesBtn(modifier: Modifier, selectedLayout: String, onClick: () ->
     ) {
         Text(
             text = stringResource(id = R.string.coding),
-            color = if(selectedLayout == "codingProfiles" ) Black else White
+            color = if (selectedLayout == "codingProfiles") Black else White
         )
     }
 }
 
 @Composable
-fun CollegeDetailsBtn(modifier: Modifier, selectedLayout : String, onClick : () -> Unit) {
-    OutlinedButton(onClick = onClick,
+fun CollegeDetailsBtn(modifier: Modifier, selectedLayout: String, onClick: () -> Unit) {
+    OutlinedButton(
+        onClick = onClick,
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(
             containerColor = if (selectedLayout == "collegeDetails") White else BackGroundColor
@@ -202,14 +226,15 @@ fun CollegeDetailsBtn(modifier: Modifier, selectedLayout : String, onClick : () 
     ) {
         Text(
             text = stringResource(id = R.string.college),
-            color = if(selectedLayout == "collegeDetails" ) Black else White
+            color = if (selectedLayout == "collegeDetails") Black else White
         )
     }
 }
 
 @Composable
-fun SkillSectionBtn(modifier: Modifier, selectedLayout : String, onClick : () -> Unit) {
-    OutlinedButton(onClick = onClick,
+fun SkillSectionBtn(modifier: Modifier, selectedLayout: String, onClick: () -> Unit) {
+    OutlinedButton(
+        onClick = onClick,
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(
             containerColor = if (selectedLayout == "skillSection") White else BackGroundColor
@@ -218,7 +243,7 @@ fun SkillSectionBtn(modifier: Modifier, selectedLayout : String, onClick : () ->
     ) {
         Text(
             text = stringResource(id = R.string.skills),
-            color = if(selectedLayout == "skillSection" ) Black else White
+            color = if (selectedLayout == "skillSection") Black else White
         )
     }
 }

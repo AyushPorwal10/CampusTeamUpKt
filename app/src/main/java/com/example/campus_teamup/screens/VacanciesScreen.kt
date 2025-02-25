@@ -1,61 +1,73 @@
 package com.example.campus_teamup.screens
 
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.campus_teamup.R
-import com.example.campus_teamup.myThemes.PrimaryBlack
-import com.example.campus_teamup.myThemes.PrimaryWhiteGradient
 import com.example.campus_teamup.myThemes.TextFieldStyle
+import com.example.campus_teamup.mydataclass.VacancyDetails
+import com.example.campus_teamup.mytesting.SingleVacancy
 import com.example.campus_teamup.ui.theme.BackGroundColor
-import com.example.campus_teamup.ui.theme.Black
 import com.example.campus_teamup.ui.theme.BorderColor
-import com.example.campus_teamup.ui.theme.LightWhite
 import com.example.campus_teamup.ui.theme.White
+import com.example.campus_teamup.viewmodels.HomeScreenViewModel
+import com.example.campus_teamup.viewmodels.SearchRoleVacancy
+import kotlinx.coroutines.delay
 
 @Composable
-fun VacanciesScreen() {
+fun VacanciesScreen(homeScreenViewModel: HomeScreenViewModel,
+                    searchRoleVacancy: SearchRoleVacancy) {
     val textColor = White
     val bgColor = BackGroundColor
 
-    var queryText by remember { mutableStateOf("") }
+
+    val searchText by searchRoleVacancy.searchVacancyText.collectAsState()
+
     val searchOption = listOf("Search by Team Name" , "Search by Role" , "Search by Hackathon")
     var placeHolderIndex by remember {
         mutableIntStateOf(0)
     }
 
+    val vacancies by if (searchText.isNotEmpty()){
+        searchRoleVacancy.searchedVacancies.collectAsState()
+    }
+    else{
+        homeScreenViewModel.vacancyStateFlow.collectAsState()
+    }
+
     LaunchedEffect(Unit){
         while (true){
-            kotlinx.coroutines.delay(2000)
+            delay(2000)
             placeHolderIndex = (placeHolderIndex + 1) % searchOption.size
         }
     }
@@ -70,8 +82,10 @@ fun VacanciesScreen() {
 
             val (searchBar , filterIcon , divider, vacancyList) = createRefs()
 
-            OutlinedTextField(value = queryText,
-                onValueChange = { searchQuery -> queryText = searchQuery },
+            OutlinedTextField(value = searchText,
+                onValueChange = { searchQuery ->
+                                searchRoleVacancy.onSearchedVacancyTextChange(searchQuery)
+                },
                 colors = TextFieldStyle.myTextFieldColor(),
                 shape = TextFieldStyle.defaultShape,
                 maxLines = 1,
@@ -122,7 +136,8 @@ fun VacanciesScreen() {
             // horizontal arrangement of search items
             createHorizontalChain(searchBar , filterIcon , chainStyle = ChainStyle.Spread)
 
-            HorizontalDivider(thickness = 1.dp , color = BorderColor ,
+            HorizontalDivider(thickness = 1.dp,
+                color = BorderColor,
                 modifier = Modifier.constrainAs(divider){
                     start.linkTo(parent.start)
                     top.linkTo(searchBar.bottom , margin = 16.dp)
@@ -139,7 +154,9 @@ fun VacanciesScreen() {
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                         top.linkTo(divider.bottom, margin = 5.dp)
-                    }
+                    },
+                vacancies,
+                homeScreenViewModel
             )
 
 
@@ -151,18 +168,38 @@ fun VacanciesScreen() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShowListOfVacancies(modifier: Modifier) {
+fun ShowListOfVacancies(
+    modifier: Modifier,
+    vacancies: List<VacancyDetails>,
+    homeScreenViewModel: HomeScreenViewModel
+) {
 
-    LazyColumn(modifier = modifier , verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(10) {
-            SingleVacancy(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            )
+    val isRefreshing = homeScreenViewModel.isVacancyRefreshing.collectAsState()
+
+    LaunchedEffect(Unit){
+        Log.d("Vacancy","Composable Fetching When composable loads")
+        homeScreenViewModel.observeVacancyInRealTime()
+    }
+    PullToRefreshBox(isRefreshing = isRefreshing.value, onRefresh = {
+        Log.d("Vacancy","Composable Observing new roles user refresh")
+        homeScreenViewModel.observeVacancyInRealTime()
+    }, modifier = modifier , contentAlignment = Alignment.Center) {
+
+        LazyColumn(modifier = modifier , verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(vacancies){vacancy->
+                SingleVacancy(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    vacancy
+
+                )
+            }
         }
     }
+
 
 }

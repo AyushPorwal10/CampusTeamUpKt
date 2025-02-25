@@ -209,7 +209,7 @@ fun SignUpScreen(
             LoginButtonIfAlreadyAccount(modifier = Modifier.constrainAs(login) {
                 start.linkTo(signUp.end)
                 end.linkTo(parent.end)
-                top.linkTo(signUp.bottom, margin = 30.dp)
+                top.linkTo(if(showProgressBar.value) progressBar.bottom else signUp.bottom, margin = 30.dp)
             }, navigateToLoginScreen)
 
 
@@ -305,7 +305,7 @@ fun CollegeNameField(modifier: Modifier, collegeName: MutableState<String>) {
         value = collegeName.value, onValueChange = { collegeName.value = it },
         colors = TextFieldStyle.myTextFieldColor(),
         shape = TextFieldStyle.defaultShape,
-        maxLines = 1,
+        maxLines = 3,
         label = {
             Text(text = stringResource(id = R.string.enter_college_name))
         },
