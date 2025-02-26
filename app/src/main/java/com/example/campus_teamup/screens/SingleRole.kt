@@ -1,9 +1,8 @@
 package com.example.campus_teamup.screens
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,40 +10,29 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
 import com.example.campus_teamup.R
-import com.example.campus_teamup.helper.ProgressIndicator
 import com.example.campus_teamup.mydataclass.RoleDetails
+import com.example.campus_teamup.roleprofile.ViewUserProfile
 import com.example.campus_teamup.ui.theme.BackGroundColor
 
-import com.example.campus_teamup.ui.theme.Black
 import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.LightTextColor
 import com.example.campus_teamup.ui.theme.White
@@ -69,13 +57,11 @@ fun SingleRole(roleDetails: RoleDetails) {
             val (userImage, userName, roleLookingFor, viewProfile, downIcon, knowMoreBtn) = createRefs()
 
 
-            // Photo of user who posted role
-
+            Log.d("Image", "fetchedUrl" + roleDetails.userImageUrl)
             AsyncImage(
                 model = roleDetails.userImageUrl,
                 contentDescription = "User Profile",
                 contentScale = ContentScale.Crop,
-                //placeholder = painterResource(R.drawable.profile),
                 error = painterResource(R.drawable.profile),
                 modifier = Modifier
                     .constrainAs(userImage) {
@@ -84,8 +70,8 @@ fun SingleRole(roleDetails: RoleDetails) {
                     }
                     .size(40.dp)
                     .clip(CircleShape)
+                    .border(1.dp, White, CircleShape)
             )
-
 
 
             // Name of user who posted role
@@ -125,7 +111,7 @@ fun SingleRole(roleDetails: RoleDetails) {
                 top.linkTo(roleLookingFor.bottom, margin = 10.dp)
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
-            })
+            },roleDetails.postedBy)
 
         }
     }
@@ -134,9 +120,14 @@ fun SingleRole(roleDetails: RoleDetails) {
 }
 
 @Composable
-fun ViewProfileBtn(modifier: Modifier) {
+fun ViewProfileBtn(modifier: Modifier, postedBy: String) {
+    val context = LocalContext.current
     TextButton(
-        onClick = { /*TODO*/ },
+        onClick = {
+            val intent = Intent(context, ViewUserProfile::class.java)
+            intent.putExtra("userId",postedBy)
+            context.startActivity(intent)
+        },
         modifier = modifier,
 
         colors = ButtonDefaults.buttonColors(
@@ -148,7 +139,7 @@ fun ViewProfileBtn(modifier: Modifier) {
         Text(
             text = "View Profile",
             fontSize = 12.sp,
-            color = White
+            color = White,
         )
     }
 }

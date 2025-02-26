@@ -168,7 +168,7 @@ fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
                         modifier = Modifier
                             .padding(20.dp)
                             .fillMaxSize()
-                            .constrainAs(collegeDetailsArea) {
+                            .constrainAs(codingProfilesArea) {
                                 start.linkTo(parent.start)
                                 end.linkTo(parent.end)
                                 top.linkTo(collegeDetailsBtn.bottom, margin = 20.dp)

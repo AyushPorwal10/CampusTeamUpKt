@@ -1,5 +1,10 @@
 package com.example.campus_teamup.mydataclass
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+
+@Parcelize
 data class VacancyDetails(
     val postedBy: String = "",
     val postedOn: String = "",
@@ -9,7 +14,7 @@ data class VacancyDetails(
     val roleLookingFor: String = "",
     val skills: String = "",
     val roleDescription: String = ""
-){
+) : Parcelable {
     fun doesMatchSearchQuery(query: String): Boolean {
         return listOf(roleLookingFor, teamName,hackathonName).any {
             it.contains(query, ignoreCase = true)

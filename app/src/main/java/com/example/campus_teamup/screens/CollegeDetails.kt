@@ -69,6 +69,10 @@ fun CollegeDetails(
         listOf("Before 2022", "2022", "2023", "2024", "2025", "2026", "2027", "2028")
 
 
+
+
+
+
     val isLoading = userProfileViewModel.isLoading.collectAsState()
     val collegeDetails = userProfileViewModel.collegeDetails.collectAsState().value
 
@@ -96,6 +100,7 @@ fun CollegeDetails(
     val context = LocalContext.current
 
 
+
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -110,40 +115,26 @@ fun CollegeDetails(
 
     var downloadedImageUrl: String? = null
 
-    // this is fetching of college details when user enter college details section
-
-
     LaunchedEffect(collegeDetails) {
-        collegeDetails.let {
-            if (it != null) {
-                selectedBranch = it.branch ?: "Select Branch"
-            }
-            if (it != null) {
-                selectedCourse = it.course ?: "Select Course"
-            }
-            if (it != null) {
-                selectedGraduationYear = it.year ?: "Select Year"
-            }
-            if (it != null) {
-                collegeName = it.collegeName ?: "College"
-            }
-            if (it != null) {
-                userName = it.userName ?: "Your Name"
-            }
-            if(it != null){
-                downloadedImageUrl = it.userImageUrl
-            }
+        collegeDetails?.let {
+            selectedBranch = it.branch
+            selectedCourse = it.course
+            selectedGraduationYear = it.year
+            collegeName = it.collegeName
+            userName = it.userName
+            downloadedImageUrl = it.userImageUrl
+            selectedImageFromDevice = it.userImageUrl.toUri()
+            Log.d("Image", "Updated UI with image: $downloadedImageUrl")
         }
     }
-    Log.d(tag, "$selectedBranch , $selectedCourse , $selectedGraduationYear , $downloadedImageUrl")
-
+    Log.d("Image", "$selectedBranch , $selectedCourse , $selectedGraduationYear , $downloadedImageUrl")
 
 
     ConstraintLayout(modifier = modifier.fillMaxSize()) {
 
         val (userImage, editPhotoButton, progressBar, courseBranchYear, editOrUpdateBtn) = createRefs()
 
-        SubcomposeAsyncImage(
+        AsyncImage(
             model = selectedImageFromDevice ?: R.drawable.profile,
             contentDescription = "User Profile",
             contentScale = ContentScale.Crop,
@@ -155,9 +146,7 @@ fun CollegeDetails(
                     top.linkTo(parent.top)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                }, loading = {
-                    CircularProgressIndicator(modifier = Modifier.size(30.dp))
-            })
+                })
 
         if (isEditing) {
             IconButton(onClick = {
@@ -254,24 +243,49 @@ fun CollegeDetails(
                         Log.d("CollegeDetails", "Coroutine Scope Launched")
 
 
-                        userProfileViewModel.uploadUserImageToStorage(
-                            selectedImageFromDevice!!,
-                            onResult = { url ->
+//                        userProfileViewModel.uploadUserImageToStorage(
+//                            selectedImageFromDevice!!,
+//                            onResult = { url ->
+//
+//                                downloadedImageUrl = url ?: ""
+//
+//                                Log.d("CollegeDetails", " Download url is  $downloadedImageUrl")
+//                                userProfileViewModel.saveCollegeDetails(
+//                                    downloadedImageUrl!!,
+//                                    selectedGraduationYear,
+//                                    selectedBranch,
+//                                    selectedCourse
+//                                )
+//
+//                                Log.d("CollegeDetails", "Done with saving college details")
+//
+//                            })
+                        if (selectedImageFromDevice != null) {
+                            userProfileViewModel.uploadUserImageToStorage(
+                                selectedImageFromDevice!!,
+                                onResult = { url ->
+                                    downloadedImageUrl = url ?: downloadedImageUrl
 
-                                downloadedImageUrl = url ?: ""
+                                    Log.d("CollegeDetails", "Download URL is $downloadedImageUrl")
+                                    userProfileViewModel.saveCollegeDetails(
+                                        downloadedImageUrl ?: "",
+                                        selectedGraduationYear,
+                                        selectedBranch,
+                                        selectedCourse
+                                    )
+                                    Log.d("CollegeDetails", "Done with saving college details")
+                                })
+                        } else {
 
-                                Log.d("CollegeDetails", " Download url is  $downloadedImageUrl")
-                                userProfileViewModel.saveCollegeDetails(
-                                    downloadedImageUrl!!,
-                                    selectedGraduationYear,
-                                    selectedBranch,
-                                    selectedCourse
-                                )
+                            Log.d("CollegeDetails", "No new image selected, using existing URL: $downloadedImageUrl")
 
-                                Log.d("CollegeDetails", "Done with saving college details")
-
-                            })
-
+                            userProfileViewModel.saveCollegeDetails(
+                                downloadedImageUrl ?: "",
+                                selectedGraduationYear,
+                                selectedBranch,
+                                selectedCourse
+                            )
+                        }
 
                     }
 

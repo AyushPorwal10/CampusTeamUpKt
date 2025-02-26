@@ -94,6 +94,7 @@ class UserProfileViewModel @Inject constructor(
                 userProfileRepo.fetchCollegeDetails(userId).toObject(CollegeDetails::class.java)
             }
             _isLoading.value = false
+            Log.d("Image","Fetched Image in viewmodel url is ${result?.userImageUrl}")
             _collegeDetails.value = result
         }
     }

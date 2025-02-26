@@ -3,6 +3,10 @@ package com.example.campus_teamup.screens
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
@@ -41,6 +45,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -48,6 +53,7 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -86,6 +92,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -95,6 +102,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.toSize
+import androidx.constraintlayout.compose.ConstraintLayout
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.annotation.ExperimentalCoilApi
@@ -104,6 +112,8 @@ import coil.imageLoader
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import coil.util.DebugLogger
+import com.example.campus_teamup.helper.CustomDropdown
+import com.example.campus_teamup.helper.ProgressIndicator
 import com.example.campus_teamup.helper.ToastHelper
 import com.example.campus_teamup.myThemes.TextFieldStyle
 import com.example.campus_teamup.myactivities.CreatePost
@@ -112,7 +122,7 @@ import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.White
 import com.example.campus_teamup.viewmodels.HomeScreenViewModel
 import com.example.campus_teamup.viewmodels.TeamDetailsViewModel
-
+import com.example.campus_teamup.viewmodels.UserProfileViewModel
 
 
 @Composable
@@ -159,44 +169,242 @@ fun InputField(
 
 }
 
-@Composable
-fun UserNameField(
-    userName: String,
-    onDelete: () -> Unit
-) {
 
-    Row(
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        OutlinedTextField(
-            value = userName,
-            onValueChange = {
-            },
-            modifier = Modifier
-                .background(BackGroundColor)
-                .fillMaxWidth(0.8f),
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.profile),
-                    contentDescription = "",
-                    tint = BorderColor
-                )
-            },
-            shape = TextFieldStyle.defaultShape,
-            colors = TextFieldStyle.myTextFieldColor(),
-        )
-
-        IconButton(onClick = {
-            onDelete()
-        }) {
-            Icon(
-                painter = painterResource(id = R.drawable.delete),
-                contentDescription = null, tint = White, modifier = Modifier.size(20.dp)
-            )
-
-        }
-    }
-
-}
+//@Composable
+//fun Wait(
+//    userProfileViewModel: UserProfileViewModel,
+//    modifier: Modifier
+//) {
+//
+//    val tag: String = "CollegeDetails"
+//    val listOfCourse = listOf("B-Tech", "M-Tech", "BBA", "MBA", "BSc", "MSc")
+//    val listOfBranch = listOf("CSE", "IT", "ECE", "Civil", "Mechanical", "AIML", "IOT", "Other")
+//    val listOfGraduationYear =
+//        listOf("Before 2022", "2022", "2023", "2024", "2025", "2026", "2027", "2028")
+//
+//
+//
+//
+//    val isLoading = userProfileViewModel.isLoading.collectAsState()
+//    val collegeDetails = userProfileViewModel.collegeDetails.collectAsState().value
+//
+//    // if canEdit is false means user can only view , when click on save he will allowed to edit
+//    var isEditing by remember {
+//        mutableStateOf(false)
+//    }
+//
+//    var selectedCourse by remember {
+//        mutableStateOf("Select Course")
+//    }
+//    var selectedBranch by remember {
+//        mutableStateOf("Select Branch")
+//    }
+//    var selectedGraduationYear by remember {
+//        mutableStateOf("Select Year")
+//    }
+//    var collegeName by remember {
+//        mutableStateOf("College")
+//    }
+//    var userName by remember {
+//        mutableStateOf("Your Name")
+//    }
+//    var selectedImageFromDevice by remember { mutableStateOf<Uri?>(null) }
+//    val context = LocalContext.current
+//
+//
+//
+//    val imagePickerLauncher = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.GetContent()
+//    ) { uri: Uri? ->
+//        if (uri != null) {
+//            Log.d(tag, "Image selected $uri")
+//            selectedImageFromDevice = uri
+//        } else {
+//            ToastHelper.showToast(context, "No Image Selected")
+//        }
+//    }
+//
+//
+//    var downloadedImageUrl: String? = null
+//
+//    LaunchedEffect(collegeDetails) {
+//        collegeDetails.let {
+//            if (it != null) {
+//                selectedBranch = it.branch
+//            }
+//            if (it != null) {
+//                selectedCourse = it.course
+//            }
+//            if (it != null) {
+//                selectedGraduationYear = it.year
+//            }
+//            if (it != null) {
+//                collegeName = it.collegeName
+//            }
+//            if (it != null) {
+//                userName = it.userName
+//            }
+//            if(it != null){
+//                downloadedImageUrl = it.userImageUrl
+//            }
+//            else{
+//                Log.d("Image","downLoadImageUrl is null")
+//            }
+//        }
+//    }
+//    Log.d("Image", "$selectedBranch , $selectedCourse , $selectedGraduationYear , $downloadedImageUrl")
+//
+//
+//
+//    ConstraintLayout(modifier = modifier.fillMaxSize()) {
+//
+//        val (userImage, editPhotoButton, progressBar, courseBranchYear, editOrUpdateBtn) = createRefs()
+//
+//        AsyncImage(
+//            model = selectedImageFromDevice ?: R.drawable.profile,
+//            contentDescription = "User Profile",
+//            contentScale = ContentScale.Crop,
+//            modifier = Modifier
+//                .size(80.dp)
+//                .clip(CircleShape)
+//                .border(1.dp, White, CircleShape)
+//                .constrainAs(userImage) {
+//                    top.linkTo(parent.top)
+//                    start.linkTo(parent.start)
+//                    end.linkTo(parent.end)
+//                })
+//
+//        if (isEditing) {
+//            IconButton(onClick = {
+//                imagePickerLauncher.launch("image/*")
+//            }, modifier = Modifier
+//                .constrainAs(editPhotoButton) {
+//                    top.linkTo(parent.top)
+//                    start.linkTo(parent.start)
+//                    end.linkTo(parent.end)
+//                }
+//                .size(80.dp)) {
+//                Icon(
+//                    painter = painterResource(id = R.drawable.change_photo),
+//                    contentDescription = null,
+//                    Modifier.size(20.dp)
+//                )
+//            }
+//        }
+//
+//        Column(
+//            modifier = Modifier.constrainAs(courseBranchYear) {
+//                start.linkTo(parent.start)
+//                end.linkTo(parent.end)
+//                top.linkTo(userImage.bottom, margin = 40.dp)
+//            },
+//            horizontalAlignment = Alignment.CenterHorizontally,
+//            verticalArrangement = Arrangement.spacedBy(20.dp)
+//        ) {
+//
+//
+//            OutlinedTextField(
+//                value = collegeName,
+//                onValueChange = { collegeName = it },
+//                colors = TextFieldStyle.myTextFieldColor(),
+//                shape = TextFieldStyle.defaultShape,
+//                maxLines = 2,
+//                readOnly = true, // this can't be edited
+//                leadingIcon = {
+//                    Icon(
+//                        painterResource(id = R.drawable.college), contentDescription = "",
+//                        modifier = Modifier.size(22.dp), tint = White
+//                    )
+//                }, modifier = Modifier.fillMaxWidth(0.85f)
+//            )
+//
+//
+//            CustomDropdown(
+//                isEditing,
+//                options = listOfCourse,
+//                selectedOption = selectedCourse,
+//                onOptionSelected = { selectedCourse = it },
+//                backgroundColor = BackGroundColor,
+//                textColor = White,
+//                leadingIcon = R.drawable.college
+//            )
+//            CustomDropdown(
+//                isEditing,
+//                options = listOfBranch,
+//                selectedOption = selectedBranch,
+//                onOptionSelected = { selectedBranch = it },
+//                backgroundColor = BackGroundColor,
+//                textColor = White,
+//                leadingIcon = R.drawable.college
+//            )
+//
+//            CustomDropdown(
+//                isEditing,
+//                options = listOfGraduationYear,
+//                selectedOption = selectedGraduationYear,
+//                onOptionSelected = { selectedGraduationYear = it },
+//                backgroundColor = BackGroundColor,
+//                textColor = White,
+//                leadingIcon = R.drawable.college
+//            )
+//
+//        }
+//
+//        if (isLoading.value) {
+//            ProgressIndicator.showProgressBar(
+//                Modifier.constrainAs(progressBar) {
+//                    top.linkTo(courseBranchYear.bottom, margin = 20.dp)
+//                    start.linkTo(parent.start)
+//                    end.linkTo(parent.end)
+//                },
+//                true
+//            )
+//        } else {
+//            OutlinedButton(
+//                onClick = {
+//                    isEditing = !isEditing
+//                    if (!isEditing) {
+//
+//
+//                        Log.d("CollegeDetails", "Coroutine Scope Launched")
+//
+//
+//                        userProfileViewModel.uploadUserImageToStorage(
+//                            selectedImageFromDevice!!,
+//                            onResult = { url ->
+//
+//                                downloadedImageUrl = url ?: ""
+//
+//                                Log.d("CollegeDetails", " Download url is  $downloadedImageUrl")
+//                                userProfileViewModel.saveCollegeDetails(
+//                                    downloadedImageUrl!!,
+//                                    selectedGraduationYear,
+//                                    selectedBranch,
+//                                    selectedCourse
+//                                )
+//
+//                                Log.d("CollegeDetails", "Done with saving college details")
+//
+//                            })
+//
+//
+//                    }
+//
+//
+//                },
+//                modifier = Modifier.constrainAs(editOrUpdateBtn) {
+//                    top.linkTo(courseBranchYear.bottom, margin = 20.dp)
+//                    start.linkTo(parent.start)
+//                    end.linkTo(parent.end)
+//                },
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = BackGroundColor
+//                )
+//            ) {
+//                Text(text = if (isEditing) "Save" else "Edit", color = White)
+//            }
+//        }
+//
+//
+//    }
+//}

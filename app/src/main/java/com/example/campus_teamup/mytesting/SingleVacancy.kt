@@ -1,5 +1,6 @@
 package com.example.campus_teamup.mytesting
 
+import android.content.Intent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -26,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -42,11 +44,13 @@ import com.example.campus_teamup.ui.theme.BluePrimary
 import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.LightTextColor
 import com.example.campus_teamup.ui.theme.White
+import com.example.campus_teamup.vacancy.ViewVacancy
 
 
 @Composable
 fun SingleVacancy(modifier: Modifier = Modifier, vacancy: VacancyDetails) {
 
+    val context = LocalContext.current
     val textColor = White
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -66,7 +70,7 @@ fun SingleVacancy(modifier: Modifier = Modifier, vacancy: VacancyDetails) {
                 .padding(8.dp)
                 .fillMaxWidth()
         ) {
-            val (teamLogo, teamName, roleLookingFor, hackathonName , knowMoreBtn, downIcon, applyBtn, skillRequired) = createRefs()
+            val (teamLogo, teamName, roleLookingFor, hackathonName, knowMoreBtn, downIcon, applyBtn, skillRequired) = createRefs()
 
 
 
@@ -131,12 +135,15 @@ fun SingleVacancy(modifier: Modifier = Modifier, vacancy: VacancyDetails) {
 
 
                 TextButton(onClick = {
-
+                    val intent = Intent(context, ViewVacancy::class.java)
+                   intent.putExtra("vacancy_details",vacancy)
+                    context.startActivity(intent)
                 },
                     modifier = Modifier.constrainAs(applyBtn) {
                         top.linkTo(skillRequired.bottom, margin = 4.dp)
                         start.linkTo(parent.start)
-                    }, contentPadding = PaddingValues(vertical = 2.dp, horizontal = 10.dp)) {
+                    }, contentPadding = PaddingValues(vertical = 2.dp, horizontal = 10.dp)
+                ) {
                     Text(
                         text = "View Details",
                         color = White,
