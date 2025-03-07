@@ -2,21 +2,14 @@ package com.example.campus_teamup.viewmodels
 
 import android.net.Uri
 import android.util.Log
-import androidx.compose.ui.semantics.Role
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.campus_teamup.helper.show
 import com.example.campus_teamup.myactivities.UserManager
 import com.example.campus_teamup.mydataclass.CollegeDetails
 import com.example.campus_teamup.mydataclass.ProjectDetails
 import com.example.campus_teamup.mydataclass.RoleDetails
 import com.example.campus_teamup.mydataclass.VacancyDetails
 import com.example.campus_teamup.myrepository.CreatePostRepository
-import com.example.campus_teamup.screens.LoginScreen
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.toObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

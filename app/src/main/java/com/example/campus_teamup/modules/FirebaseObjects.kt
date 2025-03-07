@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.campus_teamup.myactivities.UserManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import dagger.Module
@@ -27,6 +28,12 @@ object FirebaseObjects {
 
     @Singleton
     @Provides
+    fun getFirebaseMessaging() : FirebaseMessaging{
+        return FirebaseMessaging.getInstance()
+    }
+
+    @Singleton
+    @Provides
     fun getFirebaseFireStore(): FirebaseFirestore {
         return FirebaseFirestore.getInstance()
     }
@@ -37,11 +44,13 @@ object FirebaseObjects {
         return FirebaseStorage.getInstance().reference
     }
 
+
     @Provides
     @Singleton
     fun provideApplicationContext(@ApplicationContext context: Context): Context {
         return context
     }
+
 
 
 

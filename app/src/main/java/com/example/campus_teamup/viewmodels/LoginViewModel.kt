@@ -3,11 +3,10 @@ package com.example.campus_teamup.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.campus_teamup.ActionCodeSettingsProvider
+import com.example.campus_teamup.helper.ActionCodeSettingsProvider
 import com.example.campus_teamup.myactivities.UserManager
 import com.example.campus_teamup.myrepository.Repository
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,6 +43,9 @@ class LoginViewModel  @Inject constructor(
     }
 
     suspend fun saveUserData(email : String){
+
+        // this is temporary saving because it requires when user comes with email link
+
         userManager.saveUserData(getUserId(email),"",email,"" , "Login")
     }
 

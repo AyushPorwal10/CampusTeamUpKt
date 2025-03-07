@@ -2,12 +2,14 @@ package com.example.campus_teamup.screens
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.BottomAppBar
@@ -37,6 +40,7 @@ import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -45,10 +49,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
@@ -60,14 +64,20 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import com.example.campus_teamup.R
+import com.example.campus_teamup.helper.HandleLogoutDialog
 import com.example.campus_teamup.myactivities.DrawerItemActivity
+import com.example.campus_teamup.myactivities.LoginAndSignUp
 import com.example.campus_teamup.myactivities.UserProfile
 import com.example.campus_teamup.mysealedClass.BottomNavScreens
+import com.example.campus_teamup.project.screens.ProjectsScreen
+import com.example.campus_teamup.roleprofile.screens.RolesScreen
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.LightTextColor
 import com.example.campus_teamup.ui.theme.White
+import com.example.campus_teamup.vacancy.screens.VacanciesScreen
 import com.example.campus_teamup.viewmodels.HomeScreenViewModel
 import com.example.campus_teamup.viewmodels.SearchRoleVacancy
 import kotlinx.coroutines.CoroutineScope
@@ -85,8 +95,12 @@ fun HomeScreen(
 
     val bgColor = BackGroundColor
     val textColor = White
+    val userEmailId = remember {
+        mutableStateOf("")
+    }
+    val userData = homeScreenViewModel.userData.collectAsState()
+    val userProfileImage = homeScreenViewModel.userImage.collectAsState()
 
-    val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val bottomAppBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
 
 
@@ -129,8 +143,6 @@ fun HomeScreen(
                     .fillMaxWidth(0.8f),
                 drawerContainerColor = BackGroundColor
             ) {
-
-
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -144,22 +156,24 @@ fun HomeScreen(
                 ) {
 
                     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
-                        val (userImage, userName, userEmail) = createRefs()
+                        val (userImage, userNameArea, userEmailArea) = createRefs()
 
-                        Image(
-                            painterResource(id = R.drawable.profile),
-                            contentDescription = stringResource(id = R.string.user_profile_icon),
+
+                        AsyncImage(
+                            model = userProfileImage.value.ifEmpty { R.drawable.profile },
+                            contentDescription = "User Profile",
+                            contentScale = ContentScale.Crop,
                             modifier = Modifier
+                                .size(60.dp)
+                                .clip(CircleShape)
+                                .border(1.dp, White, CircleShape)
                                 .constrainAs(userImage) {
                                     start.linkTo(parent.start)
                                     top.linkTo(parent.top)
-                                }
-                                .size(50.dp)
-                        )
-
+                                })
                         Text(
-                            text = "Ayush Porwal",
-                            modifier = Modifier.constrainAs(userName) {
+                            text = userData.value?.userName ?: "",
+                            modifier = Modifier.constrainAs(userNameArea) {
                                 start.linkTo(userImage.start)
                                 top.linkTo(userImage.bottom, margin = 10.dp)
 
@@ -168,10 +182,10 @@ fun HomeScreen(
                         )
 
                         Text(
-                            text = "ayushporwal1010@gmail.com",
-                            modifier = Modifier.constrainAs(userEmail) {
-                                start.linkTo(userName.start) // Align start with userName
-                                top.linkTo(userName.bottom, margin = 2.dp)
+                            text = userData.value?.email ?: "",
+                            modifier = Modifier.constrainAs(userEmailArea) {
+                                start.linkTo(userNameArea.start) // Align start with userName
+                                top.linkTo(userNameArea.bottom, margin = 2.dp)
                             },
                             color = LightTextColor
                         )
@@ -222,7 +236,7 @@ fun HomeScreen(
 
                 // logout button
 
-                LogOutButton(coroutineScope, drawerState)
+                LogOutButton(homeScreenViewModel)
             }
         }
     ) {
@@ -438,8 +452,9 @@ fun HandlingBottomAppBar(
 }
 
 @Composable
-fun LogOutButton(coroutineScope: CoroutineScope, drawerState: DrawerState) {
+fun LogOutButton(homeScreenViewModel: HomeScreenViewModel) {
 
+    val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
 
     NavigationDrawerItem(
@@ -465,6 +480,11 @@ fun LogOutButton(coroutineScope: CoroutineScope, drawerState: DrawerState) {
             },
             onConfirm = {
                 showDialog = false
+                homeScreenViewModel.logoutUser(onLogoutSuccess = {
+                    val navigateToLogin = Intent(context , LoginAndSignUp::class.java)
+                    navigateToLogin.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    context.startActivity(navigateToLogin)
+                })
             })
     }
 

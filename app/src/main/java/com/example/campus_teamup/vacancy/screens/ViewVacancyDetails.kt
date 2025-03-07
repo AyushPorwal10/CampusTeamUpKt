@@ -56,7 +56,6 @@ fun ViewVacancyDetails(modifier: Modifier = Modifier, vacancy: VacancyDetails) {
 
         ConstraintLayout(
             modifier = Modifier
-                .padding(8.dp)
                 .fillMaxWidth()
         ) {
             val (teamLogo, teamName, roleLookingFor, hackathonName, roleDescription, datePosted, skillRequired) = createRefs()
@@ -65,7 +64,7 @@ fun ViewVacancyDetails(modifier: Modifier = Modifier, vacancy: VacancyDetails) {
 
             AsyncImage(
                 model = vacancy.teamLogo,
-                contentDescription = "User Profile",
+                contentDescription = "Team Logo",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .constrainAs(teamLogo) {
@@ -138,7 +137,7 @@ fun ViewVacancyDetails(modifier: Modifier = Modifier, vacancy: VacancyDetails) {
                     .fillMaxWidth()
                     .constrainAs(datePosted) {
                         top.linkTo(roleDescription.bottom, margin = 8.dp)
-                        start.linkTo(roleDescription.end)
+                        start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     })
         }

@@ -20,6 +20,7 @@ class UserManager @Inject constructor(private val context: Context) {
         private val USER_EMAIL_KEY = stringPreferencesKey("user_email")
         private val USER_COLLEGE_KEY = stringPreferencesKey("user_college")
         private val LOGIN_OR_SIGNUP_KEY = stringPreferencesKey("login_or_signup")
+        private val FCM_TOKEN_KEY = stringPreferencesKey("fcm_token")
     }
 
     suspend fun saveUserData(userId: String, userName : String , email: String, college: String , loginOrSignUp : String) {
@@ -34,6 +35,13 @@ class UserManager @Inject constructor(private val context: Context) {
 
     }
 
+    suspend fun saveUserFCM(fcmToken : String){
+        context.dataStore.edit {preferences->
+            preferences[FCM_TOKEN_KEY] = fcmToken
+        }
+    }
+
+
     val userData: Flow<UserData> = context.dataStore.data.map { preferences ->
         UserData(
             userId = preferences[USER_ID_KEY] ?: "",
@@ -45,7 +53,12 @@ class UserManager @Inject constructor(private val context: Context) {
         )
     }
 
+    val fcmToken : Flow<String> = context.dataStore.data.map {
+        it[FCM_TOKEN_KEY] ?: ""
+    }
+
     suspend fun clearUserData(){
+        Log.d("Userdata" , "Clearing User Data")
         context.dataStore.edit { it.clear() }
     }
 }

@@ -47,4 +47,8 @@
     <string name="project_github_url">Project Github URL</string>
     <string name="hackathon_personal_project">Hackathon or Personal Project</string>
     <string name="interested_in_project">Interested in Project ? Let\'s Collaborate</string>
+    <string name="view_less">View less</string>
+    <string name="view_more">View more</string>
+    <string name="send_request">Send Request</string>
+    <string name="send_request_message">Once your request get approved you can message</string>
 </resources>

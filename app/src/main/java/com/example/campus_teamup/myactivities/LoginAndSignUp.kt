@@ -8,13 +8,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.campus_teamup.MainActivity
 import com.example.campus_teamup.mysealedClass.LoginSignupScreens
-import com.example.campus_teamup.screens.LoginScreen
-import com.example.campus_teamup.screens.SignUpScreen
+import com.example.campus_teamup.loginsignup.screens.LoginScreen
+import com.example.campus_teamup.loginsignup.screens.SignUpScreen
 import com.example.campus_teamup.viewmodels.SignUpViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class LoginAndSignUp : ComponentActivity() {

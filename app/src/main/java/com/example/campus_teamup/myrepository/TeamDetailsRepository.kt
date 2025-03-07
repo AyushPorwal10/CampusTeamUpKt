@@ -48,7 +48,7 @@ class TeamDetailsRepository @Inject constructor(
             }
     }
 
-    fun checkIfUserInOtherTeam(listOfTeamMembers: SnapshotStateList<String> , isPresent : (Boolean)-> Unit , onError: (Exception) -> Unit) {
+    fun checkIfUserInOtherTeam(collegeName:String , listOfTeamMembers: SnapshotStateList<String> , isPresent : (Boolean)-> Unit , onError: (Exception) -> Unit) {
 
         val membersToCheck = listOfTeamMembers.drop(1).take(6)
 
@@ -57,7 +57,7 @@ class TeamDetailsRepository @Inject constructor(
             return
         }
 
-        firebaseFirestore.collection("all_teams")
+        firebaseFirestore.collection("all_teams").document(collegeName).collection("teams")
             .whereIn(FieldPath.documentId(), membersToCheck)
             .get()
             .addOnSuccessListener { querySnapshot ->
@@ -69,11 +69,11 @@ class TeamDetailsRepository @Inject constructor(
             }
     }
 
-    suspend fun saveTeamDetails(listOfTeamMembers: SnapshotStateList<String> , userId : String) = coroutineScope{
+    suspend fun saveTeamDetails(collegeName: String,listOfTeamMembers: SnapshotStateList<String> , userId : String) = coroutineScope{
         val teamMembers = hashMapOf(
             "members" to listOfTeamMembers.toList()
         )
-        val firstDocumentRef = firebaseFirestore.collection("all_teams")
+        val firstDocumentRef = firebaseFirestore.collection("all_teams").document(collegeName).collection("teams")
             .document(listOfTeamMembers[0])
 
         firstDocumentRef.set(teamMembers).await()

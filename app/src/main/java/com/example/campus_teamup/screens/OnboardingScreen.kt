@@ -6,7 +6,6 @@ import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.example.campus_teamup.MainActivity
+import com.example.campus_teamup.myactivities.MainActivity
 import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.ProgressIndicator
 import com.example.campus_teamup.helper.ToastHelper
@@ -62,7 +61,7 @@ fun OnboardingScreen(
             .background(BackGroundColor)
     ) {
 
-        val (progressBar, appNameBox, imageOfThinkingBox, discoverTalentBtn) = createRefs()
+        val (progressBar, imageOfThinkingBox, discoverTalentBtn) = createRefs()
 
         Image(painter = painterResource(id = R.drawable.onboarding),
             contentDescription = "onboardingscreen",
@@ -107,11 +106,9 @@ fun PerformSavingOperation(
     emailLink: String,
     context: Context,
     showProgressBar: MutableState<Boolean>,
-
     ) {
     Log.d("Signup", "Performing Saving Operation")
     val coroutineScope = rememberCoroutineScope()
-
 
     LaunchedEffect(Unit) {
         Log.d("Signup", "Launch effect launched")
@@ -126,7 +123,7 @@ fun PerformSavingOperation(
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         coroutineScope.launch {
-                            splashViewModel.checkUserDataInDataStore()
+                            splashViewModel.checkUserDataInDataStore() // this is to check whether user is doing signup or login to take further actions
                             splashViewModel.saveEmail()
                             Log.d("Signup", "Email saving Done going to save college")
                             splashViewModel.saveUserIdToCollege()
@@ -147,7 +144,7 @@ fun PerformSavingOperation(
                     } else {
                         showProgressBar.value = false
                         Log.d("Signup", task.exception.toString())
-                        ToastHelper.showToast(context, "Something went wrong")
+                        ToastHelper.showToast(context, "Something went wrong \n Please check your network connection")
                     }
                 }
         }

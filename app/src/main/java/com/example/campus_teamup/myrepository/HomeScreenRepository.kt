@@ -9,14 +9,25 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.toObject
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class HomeScreenRepository @Inject constructor(
-    private val firebaseFirestore: FirebaseFirestore
+    private val firebaseFirestore: FirebaseFirestore,
+    private val firebaseMessaging: FirebaseMessaging
 ) {
 
+
+
+
+    suspend fun getUserImageUrl(userId : String?) : String {
+       val document =   firebaseFirestore.collection("user_images").document(userId+"").get().await()
+
+        return document.getString("user_image") ?: ""
+    }
     suspend fun fetchInitialOrPaginatedRoles(lastVisible: DocumentSnapshot?): QuerySnapshot {
 
         return if (lastVisible == null) {
@@ -155,4 +166,16 @@ class HomeScreenRepository @Inject constructor(
             .get()
             .await()
     }
+
+
+
+
+    suspend fun saveFcmToken(fcmToken : String , userId: String){
+        Log.d("FCM","FCM is saved in firestore $fcmToken")
+        firebaseFirestore.collection("all_user_id").document(userId).set(mapOf("fcm_token" to fcmToken ),SetOptions.merge()).await()
+    }
+
+
+
+
 }

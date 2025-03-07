@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "learnsign-in"
-  }
+    "default": "learnsign-in",
+    "development": "learnsign-in"
+  },
+  "targets": {},
+  "etags": {}
 }

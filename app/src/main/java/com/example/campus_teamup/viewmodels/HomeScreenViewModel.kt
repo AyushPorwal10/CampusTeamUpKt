@@ -5,30 +5,47 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.campus_teamup.myactivities.UserData
 import com.example.campus_teamup.myactivities.UserManager
 import com.example.campus_teamup.mydataclass.ProjectDetails
 import com.example.campus_teamup.mydataclass.RoleDetails
 import com.example.campus_teamup.mydataclass.VacancyDetails
 import com.example.campus_teamup.myrepository.HomeScreenRepository
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.internal.wait
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
     private val homeScreenRepository: HomeScreenRepository,
-    private val userManager: UserManager
+    private val userManager: UserManager,
+    private val firebaseAuth: FirebaseAuth,
 ) : ViewModel() {
 
 
+
+
+    private val _userData = MutableStateFlow<UserData?>(null)
+    val userData : StateFlow<UserData?> get() = _userData.asStateFlow()
+
+    private val _userImage = MutableStateFlow<String>("")
+    val userImage : StateFlow<String> = _userImage.asStateFlow()
+
+    private val _FCMToken = MutableStateFlow<String>("")
+    val FCMToken : StateFlow<String> get() = _FCMToken.asStateFlow()
 
 
     // role
@@ -238,6 +255,38 @@ class HomeScreenViewModel @Inject constructor(
             } finally{
                 _isProjectRefreshing.value = false
             }
+        }
+    }
+
+    fun logoutUser(onLogoutSuccess : ()->Unit){
+        viewModelScope.launch {
+            userManager.clearUserData()
+            firebaseAuth.signOut()
+            onLogoutSuccess()
+        }
+    }
+
+
+    fun fetchUserData(){
+        viewModelScope.launch {
+           _userData.value = userManager.userData.first()
+            _FCMToken.value = userManager.fcmToken.first()
+            Log.d("FCM","FCM fetched in viewmodel ${_FCMToken.value}")
+            getUserImageUrl()
+        }
+    }
+
+    private fun getUserImageUrl(){
+        viewModelScope.launch {
+
+            _userImage.value = homeScreenRepository.getUserImageUrl(userData.value?.userId)
+            Log.d("Profile","${_userImage.value} is the userimage")
+        }
+    }
+
+    fun saveFCMToken(){
+        viewModelScope.launch {
+            homeScreenRepository.saveFcmToken( FCMToken.value,userData.value!!.userId)
         }
     }
 

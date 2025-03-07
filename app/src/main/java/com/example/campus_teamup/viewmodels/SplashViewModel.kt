@@ -38,7 +38,8 @@ class SplashViewModel @Inject constructor(
              userEmail = userData.email
              userName = userData.userName
              collegeName = userData.collegeName
-             loginOrsignUp = userData.loginOrSignUp
+            Log.d("Signup","CollegeName is $collegeName ")
+            loginOrsignUp = userData.loginOrSignUp
 
             // if it is signup than save it to db
             if (loginOrsignUp == "Signup") {
@@ -59,6 +60,12 @@ class SplashViewModel @Inject constructor(
 
                 if(userSignUpData != null){
                     _isAllDataSaved.value = true
+
+
+                    // this two assignment is because while login this are not present so when we fetch from datastore
+                    userName = userSignUpData.userName
+                    collegeName = userSignUpData.collegeName
+
                     userManager.saveUserData(userSignUpData.userId ,userSignUpData.userName , userSignUpData.userEmail , userSignUpData.collegeName,"Login" )
                     Log.d("Signup","Saving to datastore")
                 }
