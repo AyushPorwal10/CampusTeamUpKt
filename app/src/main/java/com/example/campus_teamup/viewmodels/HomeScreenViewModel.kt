@@ -286,7 +286,7 @@ class HomeScreenViewModel @Inject constructor(
 
     fun saveFCMToken(){
         viewModelScope.launch {
-            homeScreenRepository.saveFcmToken( FCMToken.value,userData.value!!.userId)
+            userData.value?.userId?.let { homeScreenRepository.saveFcmToken( FCMToken.value, it) }
         }
     }
 

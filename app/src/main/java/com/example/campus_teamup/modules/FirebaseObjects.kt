@@ -2,6 +2,7 @@ package com.example.campus_teamup.modules
 
 import android.content.Context
 import com.example.campus_teamup.myactivities.UserManager
+import com.example.campus_teamup.notification.FCMApiService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
@@ -12,6 +13,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 
@@ -30,6 +33,21 @@ object FirebaseObjects {
     @Provides
     fun getFirebaseMessaging() : FirebaseMessaging{
         return FirebaseMessaging.getInstance()
+    }
+
+    @Singleton
+    @Provides
+    fun getRetrofit() : Retrofit{
+        return Retrofit.Builder()
+            .baseUrl("https://us-central1-learnsign-in.cloudfunctions.net/") // Replace with your actual base URL
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    @Singleton
+    @Provides
+    fun getFCMApiService(retrofit: Retrofit) : FCMApiService{
+        return retrofit.create(FCMApiService::class.java)
     }
 
     @Singleton

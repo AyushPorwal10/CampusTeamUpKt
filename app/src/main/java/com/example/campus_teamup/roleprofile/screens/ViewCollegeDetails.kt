@@ -23,8 +23,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.ShowRequestDialog
@@ -32,10 +34,16 @@ import com.example.campus_teamup.myThemes.TextFieldStyle
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.viewmodels.ViewProfileViewModel
 import com.example.campus_teamup.ui.theme.White
+import com.example.campus_teamup.viewmodels.NotificationViewModel
 
 @Composable
-fun ViewCollegeDetails(modifier: Modifier, viewProfileViewModel: ViewProfileViewModel) {
+fun ViewCollegeDetails(
+    modifier: Modifier,
+    viewProfileViewModel: ViewProfileViewModel,
+    receiverId: String?
+) {
 
+    val notification : NotificationViewModel = hiltViewModel()
 
     val collegeDetails = viewProfileViewModel.collegeDetails.collectAsState()
 
@@ -50,7 +58,7 @@ fun ViewCollegeDetails(modifier: Modifier, viewProfileViewModel: ViewProfileView
                 showRequestDialog = false
             },
             onConfirm = {
-                // here you can perform notification sending to user
+
             },
             collegeDetails.value?.userName
         )
@@ -103,6 +111,10 @@ fun ViewCollegeDetails(modifier: Modifier, viewProfileViewModel: ViewProfileView
             // ON click of this notification will be sent to user who posted role
             OutlinedButton(onClick = {
                 showRequestDialog = true
+                notification.fetchReceiverFCMToken(receiverId!!)
+                notification.fetchSenderId()
+                notification.sendNotification("New Request" , "Team is interested in your profile")
+
             }, colors = ButtonDefaults.buttonColors(containerColor = BackGroundColor)) {
                 Text(text = "Send Request")
             }

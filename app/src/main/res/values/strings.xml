@@ -51,4 +51,6 @@
     <string name="view_more">View more</string>
     <string name="send_request">Send Request</string>
     <string name="send_request_message">Once your request get approved you can message</string>
+    <string name="request_from">New Request</string>
+    <string name="team_is_interested">Team is interested in your profile</string>
 </resources>
