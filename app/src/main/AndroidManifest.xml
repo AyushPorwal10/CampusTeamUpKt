@@ -40,25 +40,27 @@
         <activity
             android:name=".myactivities.DrawerItemActivity"
             android:exported="false" />
+
         <activity
             android:name=".myactivities.MySplash"
             android:exported="true"
             android:launchMode="singleTask"
             android:theme="@style/Theme.CAMPUS_TEAMUP">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="learnsign-in.firebaseapp.com"
+                    android:pathPrefix="/__/auth/action"
+                    />
+            </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="campusteamup.page.link"
-                    android:scheme="https" />
             </intent-filter>
         </activity>
         <activity

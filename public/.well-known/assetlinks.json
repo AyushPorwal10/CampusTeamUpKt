@@ -1,0 +1,13 @@
+[
+    {
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.example.campus_teamup",
+        "sha256_cert_fingerprints": [
+          "17:3C:8C:BE:5B:74:1D:DB:D2:40:79:1C:58:89:EB:AD:D0:B9:68:07:34:E0:81:E9:FA:9D:01:82:EE:C4:0A:AA"
+        ]
+      }
+    }
+  ]
+   

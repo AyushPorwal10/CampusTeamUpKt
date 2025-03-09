@@ -18,7 +18,7 @@ import com.example.campus_teamup.ui.theme.White
 
 
 @Composable
-fun ShowRequestDialog(onCancel : () -> Unit = {} , onConfirm : () -> Unit = {} , userName : String?) {
+fun ShowRequestDialog(onCancel : () -> Unit , onConfirm : () -> Unit  , userName : String?) {
 
     AlertDialog(
         onDismissRequest = {

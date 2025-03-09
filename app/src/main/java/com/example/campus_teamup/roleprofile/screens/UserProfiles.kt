@@ -1,5 +1,6 @@
 package com.example.campus_teamup.roleprofile.screens
 
+import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,6 +40,7 @@ import com.example.campus_teamup.ui.theme.White
 @Composable
 fun ViewUserProfiles(viewProfileViewModel: ViewProfileViewModel, receiverId: String?) {
 
+    Log.d("FCM","All three composable screen is $receiverId <-")
     val context = LocalContext.current
     var isClicked by remember { mutableStateOf(false) }
 

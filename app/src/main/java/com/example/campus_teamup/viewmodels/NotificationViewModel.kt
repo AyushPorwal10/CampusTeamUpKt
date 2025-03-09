@@ -18,43 +18,58 @@ import javax.inject.Inject
 class NotificationViewModel @Inject constructor(
     private val notificationRepository: NotificationRepository,
     private val userManager: UserManager
-) : ViewModel(){
+) : ViewModel() {
 
 
     private val _receiverFCMToken = MutableStateFlow<String>("")
-    private val receiverFCMToken : StateFlow<String> get() = _receiverFCMToken.asStateFlow()
+    private val receiverFCMToken: StateFlow<String> get() = _receiverFCMToken.asStateFlow()
 
     private val _senderid = MutableStateFlow<String>("")
-    private val senderId : StateFlow<String> get() = _senderid.asStateFlow()
+    private val senderId: StateFlow<String> get() = _senderid.asStateFlow()
 
     private val _senderName = MutableStateFlow<String>("")
-    private val senderName : StateFlow<String>get () = _senderName.asStateFlow()
+    private val senderName: StateFlow<String> get() = _senderName.asStateFlow()
 
-    fun fetchSenderId(){
+    fun fetchSenderId(onComplete : ()-> Unit) {
         viewModelScope.launch {
             val userData = userManager.userData.first()
-            Log.d("Notification","Sender id fetched")
             _senderid.value = userData.userId
             _senderName.value = userData.userName
+            Log.d("FCM", "Sender id fetched ${senderId.value} <-")
+            onComplete()
         }
     }
-    fun fetchReceiverFCMToken(userId: String){
+
+    fun fetchReceiverFCMToken(userId: String , onFcmFetched : () -> Unit) {
         viewModelScope.launch {
 
-          val receiverFCM =   notificationRepository.fetchReceiverFCMToken(userId)
-            Log.d("Notification","Receiver FCM Fetched $receiverFCM")
-            _receiverFCMToken.value = receiverFCM
+            val receiverFCM = notificationRepository.fetchReceiverFCMToken(userId)
+            Log.d("FCM", "Receiver FCM Fetched $receiverFCM ttttt")
+            if (receiverFCM != null) {
+                _receiverFCMToken.value = receiverFCM
+            }
+            onFcmFetched()
         }
     }
-    fun sendNotification(title : String , body : String ){
+
+    fun sendNotification(title: String, body: String) {
         viewModelScope.launch {
-            try{
-                Log.d("Notification","FCM Token ${receiverFCMToken.value} title $title body $body useId ${senderId.value} userName ${senderName.value}")
-                val notificationData = NotificationData(receiverFCMToken.value ,title,body,senderId.value,senderName.value)
+            try {
+                Log.d(
+                    "FCM",
+                    "FCM Token ${receiverFCMToken.value} title $title body $body useId ${senderId.value} userName ${senderName.value}"
+                )
+                val notificationData = NotificationData(
+                    receiverFCMToken.value,
+                    title,
+                    body,
+                    senderId.value,
+                    senderName.value
+                )
+                Log.d("FCM","Sending notification")
                 notificationRepository.sendNotification(notificationData)
-            }
-            catch (e : Exception){
-                Log.d("Notification", e.toString())
+            } catch (e: Exception) {
+                Log.d("FCM", "$e   in notification viewmodel")
             }
 
         }

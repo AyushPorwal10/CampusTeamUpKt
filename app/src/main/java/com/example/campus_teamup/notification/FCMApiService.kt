@@ -11,7 +11,6 @@ interface FCMApiService  {
     @POST("sendNotification")
     suspend fun sendNotification(@Body notificationData: NotificationData)
 
-    object RetrofitClient
 }
 
 data class NotificationData(

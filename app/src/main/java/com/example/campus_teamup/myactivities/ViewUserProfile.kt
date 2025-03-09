@@ -16,7 +16,7 @@ class ViewUserProfile : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val userId = intent.getStringExtra("userId")
 
-        Log.d("ViewUserProfile","Received UserId $userId")
+        Log.d("FCM","Received UserId $userId <-")
         setContent{
             ViewUserProfiles(viewProfileViewModel , userId)
         }

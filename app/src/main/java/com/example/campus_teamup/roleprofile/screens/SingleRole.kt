@@ -125,6 +125,7 @@ fun ViewProfileBtn(modifier: Modifier, postedBy: String) {
     TextButton(
         onClick = {
             val intent = Intent(context, ViewUserProfile::class.java)
+            Log.d("FCM","User id taken from vacancy activity $postedBy <- here it is ")
             intent.putExtra("userId",postedBy)
             context.startActivity(intent)
         },

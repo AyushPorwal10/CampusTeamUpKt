@@ -9,9 +9,9 @@ class ActionCodeSettingsProvider @Inject constructor() {
 
     fun getActionCodeSettings(): ActionCodeSettings {
         return ActionCodeSettings.newBuilder()
-            .setUrl("https://learnsign-in.web.app")
+            .setUrl("https://learnsign-in.firebaseapp.com")
             .setHandleCodeInApp(true)
-            .setAndroidPackageName("com.example.campus_teamup", true, "11")
+            .setAndroidPackageName("com.example.campus_teamup", false, "11")
             .build()
     }
 }

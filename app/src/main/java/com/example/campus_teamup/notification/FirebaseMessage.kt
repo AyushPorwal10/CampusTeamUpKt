@@ -38,7 +38,7 @@ class FirebaseMessage : FirebaseMessagingService() {
         val message = remoteMessage.notification?.body ?: "You have a new message"
         val userId = remoteMessage.data["userId"] ?: ""
         val userName = remoteMessage.data["userName"] ?: ""
-        Log.d("Notification"," OnMessageReceived title $title useId $userId userName $userName")
+        Log.d("FCM"," OnMessageReceived title $title useId $userId userName $userName")
         sendNotification(title, message, userId, userName)
     }
 
@@ -76,7 +76,7 @@ class FirebaseMessage : FirebaseMessagingService() {
 
         // storing it locally and later saving in firestore
 
-        Log.d("FCM", "FCM is being $token")
+        Log.d("FCM", "FCM is going to save locally $token <-")
         saveTokenInDataStore(token)
 
         sendRegistrationToServer(token)
@@ -87,7 +87,7 @@ class FirebaseMessage : FirebaseMessagingService() {
         CoroutineScope(Dispatchers.IO).launch {
 
             userManager.saveUserFCM(token)
-            Log.d("FCM", "FCM saved locally $token")
+            Log.d("FCM", "FCM saved locally $token <-")
 
         }
     }

@@ -1,5 +1,6 @@
 package com.example.campus_teamup.roleprofile.screens
 
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,8 +44,8 @@ fun ViewCollegeDetails(
     receiverId: String?
 ) {
 
-    val notification : NotificationViewModel = hiltViewModel()
-
+    val notification: NotificationViewModel = hiltViewModel()
+    Log.d("FCM", "Receiver id in viewcollegeDetails is $receiverId <-")
     val collegeDetails = viewProfileViewModel.collegeDetails.collectAsState()
 
     var showRequestDialog by remember {
@@ -59,6 +60,14 @@ fun ViewCollegeDetails(
             },
             onConfirm = {
 
+                notification.fetchReceiverFCMToken(receiverId!! , onFcmFetched = { // first fetch fcm
+                    Log.d("FCM","Going to fetch sender id ")
+                    notification.fetchSenderId{                                   // than fetch sender id
+                        Log.d("FCM","Going to send notificatoin after fetching sender id")
+                        notification.sendNotification("New Request","Team is interested in your profile")  // send notification
+                        showRequestDialog = false
+                    }
+                })
             },
             collegeDetails.value?.userName
         )
@@ -111,9 +120,6 @@ fun ViewCollegeDetails(
             // ON click of this notification will be sent to user who posted role
             OutlinedButton(onClick = {
                 showRequestDialog = true
-                notification.fetchReceiverFCMToken(receiverId!!)
-                notification.fetchSenderId()
-                notification.sendNotification("New Request" , "Team is interested in your profile")
 
             }, colors = ButtonDefaults.buttonColors(containerColor = BackGroundColor)) {
                 Text(text = "Send Request")
