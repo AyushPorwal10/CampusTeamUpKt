@@ -7,16 +7,15 @@ import javax.inject.Inject
 
 
 interface FCMApiService  {
-
     @POST("sendNotification")
     suspend fun sendNotification(@Body notificationData: NotificationData)
-
 }
 
 data class NotificationData(
+    val time: String,
     val fcmToken: String,
     val title: String,
     val body: String,
-    val userId: String,
-    val userName: String,
+    val senderId: String,
+    val senderName: String,
 )

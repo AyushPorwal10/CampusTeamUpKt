@@ -64,6 +64,7 @@ class SplashViewModel @Inject constructor(
 
                     // this two assignment is because while login this are not present so when we fetch from datastore
                     userName = userSignUpData.userName
+
                     collegeName = userSignUpData.collegeName
 
                     userManager.saveUserData(userSignUpData.userId ,userSignUpData.userName , userSignUpData.userEmail , userSignUpData.collegeName,"Login" )

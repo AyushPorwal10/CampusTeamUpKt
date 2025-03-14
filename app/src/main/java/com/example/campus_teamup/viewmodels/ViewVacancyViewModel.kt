@@ -3,12 +3,14 @@ package com.example.campus_teamup.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.campus_teamup.helper.ToastHelper
 import com.example.campus_teamup.myrepository.ViewVacancyRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,7 +31,10 @@ class ViewVacancyViewModel @Inject constructor(
 
     fun fetchTeamDetails(postedBy : String){
         viewModelScope.launch {
-            viewVacancyRepository.fetchTeamDetails(postedBy).collect{
+            viewVacancyRepository.fetchTeamDetails(postedBy)
+                .catch {
+                    Log.e("Team","No team details found")
+                }.collect{
                 Log.d("Testing","Size of teamUserId in viewmodel is ${it.size}")
                 _teamDetails.value = it
                 fetchMemberImage()

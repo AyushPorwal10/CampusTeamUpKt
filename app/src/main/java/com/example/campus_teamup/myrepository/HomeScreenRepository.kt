@@ -171,6 +171,10 @@ class HomeScreenRepository @Inject constructor(
 
 
     suspend fun saveFcmToken(fcmToken : String , userId: String){
+        // this can be when user log out and login again , it will cause fcm to empty since fcm always generate when
+        // user open app for first time
+        if(fcmToken.isEmpty())
+            return
         Log.d("FCM","FCM is saved in firestore $fcmToken")
         firebaseFirestore.collection("all_user_id").document(userId).set(mapOf("fcm_token" to fcmToken ),SetOptions.merge()).await()
     }

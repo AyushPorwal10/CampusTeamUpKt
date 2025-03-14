@@ -1,12 +1,9 @@
 package com.example.campus_teamup.vacancy.screens
 
-import android.graphics.drawable.Icon
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -33,12 +30,13 @@ import com.example.campus_teamup.R
 import com.example.campus_teamup.myThemes.TextFieldStyle
 import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.White
+import com.example.campus_teamup.viewmodels.NotificationViewModel
 import com.example.campus_teamup.viewmodels.ViewVacancyViewModel
 
 @Composable
 fun ViewTeamDetails(
     modifier: Modifier = Modifier,
-    viewVacancyViewModel: ViewVacancyViewModel
+    viewVacancyViewModel: ViewVacancyViewModel,
 ) {
 
 

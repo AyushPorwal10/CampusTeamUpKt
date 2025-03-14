@@ -1,6 +1,8 @@
 package com.example.campus_teamup.roleprofile.screens
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,10 +37,16 @@ import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.Black
 import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.White
+import com.example.campus_teamup.viewmodels.NotificationViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun ViewUserProfiles(viewProfileViewModel: ViewProfileViewModel, receiverId: String?) {
+fun ViewUserProfiles(
+    viewProfileViewModel: ViewProfileViewModel,
+    notificationViewModel: NotificationViewModel,
+    receiverId: String?
+) {
 
     Log.d("FCM","All three composable screen is $receiverId <-")
     val context = LocalContext.current
@@ -132,6 +140,7 @@ fun ViewUserProfiles(viewProfileViewModel: ViewProfileViewModel, receiverId: Str
                             top.linkTo(collegeDetailsBtn.bottom, margin = 20.dp)
                         },
                     viewProfileViewModel,
+                    notificationViewModel,
                     receiverId
                 )
 

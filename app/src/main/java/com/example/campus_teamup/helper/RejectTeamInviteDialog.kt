@@ -18,11 +18,9 @@ import com.example.campus_teamup.ui.theme.White
 
 
 @Composable
-fun ShowRequestDialog(onCancel : () -> Unit , onConfirm : () -> Unit ) {
-
+fun RejectTeamInviteDialog(onCancel : () -> Unit , onConfirm : () -> Unit ) {
     AlertDialog(
         onDismissRequest = {
-
         },
         confirmButton = {
             Button(onClick = {
@@ -43,10 +41,10 @@ fun ShowRequestDialog(onCancel : () -> Unit , onConfirm : () -> Unit ) {
             }
         },
         title = {
-            Text(text = stringResource(id = R.string.send_request) ,  color = White , style = MaterialTheme.typography.titleLarge)
+            Text(text = stringResource(id = R.string.are_you_sure) ,  color = White , style = MaterialTheme.typography.titleLarge)
         },
         text = {
-            Text(text = stringResource(id = R.string.send_request_message) ,  color = White , style = MaterialTheme.typography.titleMedium)
+            Text(text = stringResource(id = R.string.reject_team_request_message) ,  color = White , style = MaterialTheme.typography.titleMedium)
         } , containerColor = BackGroundColor , modifier = Modifier
             .border(1.dp, BorderColor, RoundedCornerShape(30.dp))
     )

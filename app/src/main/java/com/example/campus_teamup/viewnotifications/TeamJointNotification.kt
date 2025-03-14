@@ -1,4 +1,4 @@
-package com.example.campus_teamup.screens
+package com.example.campus_teamup.viewnotifications
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -33,7 +33,6 @@ import com.example.campus_teamup.ui.theme.LightTextColor
 
 import com.example.campus_teamup.ui.theme.White
 
-@Preview
 @Composable
 fun TeamJointNotification(){
 
@@ -65,7 +64,7 @@ fun TeamJointNotification(){
             Text(
                 text = "Ayush Porwal Request to Join" ,
                 fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
+                maxLines = 2,
                 style = MaterialTheme.typography.titleMedium,
                 color = textColor,
                 overflow = TextOverflow.Ellipsis,
@@ -86,7 +85,7 @@ fun TeamJointNotification(){
                     .clip(RoundedCornerShape(30.dp))
                     .size(24.dp)
                     .constrainAs(acceptBtn) {
-                        top.linkTo(userImage.bottom, margin = 4.dp)
+                        top.linkTo(userImage.bottom, margin = 8.dp)
                         start.linkTo(parent.start)
                         bottom.linkTo(parent.bottom)
                     } , tint = textColor)
@@ -98,8 +97,8 @@ fun TeamJointNotification(){
                     .clip(RoundedCornerShape(30.dp))
                     .size(24.dp)
                     .constrainAs(rejectBtn) {
-                        top.linkTo(userImage.bottom, margin = 4.dp)
-                        start.linkTo(parent.start, margin = 4.dp)
+                        top.linkTo(userImage.bottom, margin = 8.dp)
+                        start.linkTo(parent.start)
                         bottom.linkTo(parent.bottom)
 
 

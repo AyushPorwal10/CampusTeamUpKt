@@ -13,6 +13,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class UserProfile : ComponentActivity() {
+
     private val userProfileViewModel : UserProfileViewModel by viewModels()
      private var collegeDetails: CollegeDetails? = null
     override fun onCreate(savedInstanceState: Bundle?) {

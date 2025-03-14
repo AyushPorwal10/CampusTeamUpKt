@@ -18,20 +18,29 @@ class ViewVacancyRepository @Inject constructor(
         val teamDetailsSnapshot = firebaseFirestore.collection("all_user_id").document(userId)
             .collection("all_user_details").document("teamDetails").get().await()
 
-        val teamReferencePath =
-            teamDetailsSnapshot.getString("teamReference") ?: return@callbackFlow
+        val teamReferencePath = teamDetailsSnapshot.getString("teamReference")
+
+        //  only reason it can null if person who posted
+        if(teamReferencePath == null){
+            Log.d("Team","Team referece path is null")
+            close(IllegalStateException("teamReference is null"))
+            return@callbackFlow
+        }
         Log.d("Team", teamReferencePath)
+
         val realTimeTeamDetailsUpdate =
             firebaseFirestore.document(teamReferencePath).addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     close(error)
                     return@addSnapshotListener
                 }
+                if(snapshot != null){
+                    val listOfTeamMembers = snapshot?.get("members") as? List<String> ?: emptyList()
+                    Log.d("Team","Size of team in repository is ${listOfTeamMembers.size}")
 
-                val listOfTeamMembers = snapshot?.get("members") as? List<String> ?: emptyList()
-                Log.d("Team","Size of team in repository is ${listOfTeamMembers.size}")
+                    trySend(listOfTeamMembers)
+                }
 
-                trySend(listOfTeamMembers)
             }
         awaitClose { realTimeTeamDetailsUpdate.remove() }
     }

@@ -35,17 +35,14 @@ class HomeScreenViewModel @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
 ) : ViewModel() {
 
-
-
-
     private val _userData = MutableStateFlow<UserData?>(null)
-    val userData : StateFlow<UserData?> get() = _userData.asStateFlow()
+    val userData: StateFlow<UserData?> get() = _userData.asStateFlow()
 
     private val _userImage = MutableStateFlow<String>("")
-    val userImage : StateFlow<String> = _userImage.asStateFlow()
+    val userImage: StateFlow<String> = _userImage.asStateFlow()
 
     private val _FCMToken = MutableStateFlow<String>("")
-    val FCMToken : StateFlow<String> get() = _FCMToken.asStateFlow()
+    val FCMToken: StateFlow<String> get() = _FCMToken.asStateFlow()
 
 
     // role
@@ -144,8 +141,7 @@ class HomeScreenViewModel @Inject constructor(
                             lastVisibleRole = newLastVisible
                             lastRolePostedOn = roles.first().postedOn
                             _rolesStateFlow.value = roles
-                        }
-                        else{
+                        } else {
                             _rolesStateFlow.value = emptyList()
                         }
                     },
@@ -252,13 +248,13 @@ class HomeScreenViewModel @Inject constructor(
                         Log.d("Project", " ONUPDATE Is refreshing become false")
                     }
                 )
-            } finally{
+            } finally {
                 _isProjectRefreshing.value = false
             }
         }
     }
 
-    fun logoutUser(onLogoutSuccess : ()->Unit){
+    fun logoutUser(onLogoutSuccess: () -> Unit) {
         viewModelScope.launch {
             userManager.clearUserData()
             firebaseAuth.signOut()
@@ -267,26 +263,26 @@ class HomeScreenViewModel @Inject constructor(
     }
 
 
-    fun fetchUserData(){
+    fun fetchUserData() {
         viewModelScope.launch {
-           _userData.value = userManager.userData.first()
+            _userData.value = userManager.userData.first()
             _FCMToken.value = userManager.fcmToken.first()
-            Log.d("FCM","FCM fetched in viewmodel ${_FCMToken.value}")
+            Log.d("FCM", "FCM fetched in viewmodel ${_FCMToken.value}")
             getUserImageUrl()
         }
     }
 
-    private fun getUserImageUrl(){
+    private fun getUserImageUrl() {
         viewModelScope.launch {
 
             _userImage.value = homeScreenRepository.getUserImageUrl(userData.value?.userId)
-            Log.d("Profile","${_userImage.value} is the userimage")
+            Log.d("Profile", "${_userImage.value} is the userimage")
         }
     }
 
-    fun saveFCMToken(){
+    fun saveFCMToken() {
         viewModelScope.launch {
-            userData.value?.userId?.let { homeScreenRepository.saveFcmToken( FCMToken.value, it) }
+            userData.value?.userId?.let { homeScreenRepository.saveFcmToken(FCMToken.value, it) }
         }
     }
 

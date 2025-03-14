@@ -47,6 +47,7 @@ import com.example.campus_teamup.ui.theme.White
 @Composable
 fun RecentChatScreen(
 ){
+
     Scaffold(topBar = {
         TopAppBar(
             title = {

@@ -18,11 +18,9 @@ import com.example.campus_teamup.ui.theme.White
 
 
 @Composable
-fun ShowRequestDialog(onCancel : () -> Unit , onConfirm : () -> Unit ) {
-
+fun StartChatDialog(onConfirm : () -> Unit ) {
     AlertDialog(
         onDismissRequest = {
-
         },
         confirmButton = {
             Button(onClick = {
@@ -30,23 +28,11 @@ fun ShowRequestDialog(onCancel : () -> Unit , onConfirm : () -> Unit ) {
             } , colors = ButtonDefaults.buttonColors(
                 containerColor = BackGroundColor
             )) {
-                Text(text = "Confirm" , color = White , style = MaterialTheme.typography.titleSmall)
+                Text(text = "Start Chat" , color = White , style = MaterialTheme.typography.titleSmall)
             }
-        },
-        dismissButton = {
-            Button(onClick = {
-                onCancel()
-            }, colors = ButtonDefaults.buttonColors(
-                containerColor = BackGroundColor
-            ) ) {
-                Text(text = "Cancel", color = White , style = MaterialTheme.typography.titleSmall)
-            }
-        },
-        title = {
-            Text(text = stringResource(id = R.string.send_request) ,  color = White , style = MaterialTheme.typography.titleLarge)
         },
         text = {
-            Text(text = stringResource(id = R.string.send_request_message) ,  color = White , style = MaterialTheme.typography.titleMedium)
+            Text(text = stringResource(id = R.string.start_chat_message) ,  color = White , style = MaterialTheme.typography.titleMedium)
         } , containerColor = BackGroundColor , modifier = Modifier
             .border(1.dp, BorderColor, RoundedCornerShape(30.dp))
     )

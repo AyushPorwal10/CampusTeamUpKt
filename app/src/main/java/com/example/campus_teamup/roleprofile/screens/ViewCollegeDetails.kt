@@ -1,6 +1,8 @@
 package com.example.campus_teamup.roleprofile.screens
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -24,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -37,21 +39,24 @@ import com.example.campus_teamup.viewmodels.ViewProfileViewModel
 import com.example.campus_teamup.ui.theme.White
 import com.example.campus_teamup.viewmodels.NotificationViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ViewCollegeDetails(
     modifier: Modifier,
     viewProfileViewModel: ViewProfileViewModel,
+    notification: NotificationViewModel,
     receiverId: String?
 ) {
 
-    val notification: NotificationViewModel = hiltViewModel()
     Log.d("FCM", "Receiver id in viewcollegeDetails is $receiverId <-")
     val collegeDetails = viewProfileViewModel.collegeDetails.collectAsState()
+    val senderId = notification.senderId.collectAsState()
+
+    val isRequestAlreadySent by notification.isRequestAlreadySend.collectAsState()
 
     var showRequestDialog by remember {
         mutableStateOf(false)
     }
-
 
     if (showRequestDialog) {
         ShowRequestDialog(
@@ -59,17 +64,12 @@ fun ViewCollegeDetails(
                 showRequestDialog = false
             },
             onConfirm = {
-
                 notification.fetchReceiverFCMToken(receiverId!! , onFcmFetched = { // first fetch fcm
-                    Log.d("FCM","Going to fetch sender id ")
-                    notification.fetchSenderId{                                   // than fetch sender id
-                        Log.d("FCM","Going to send notificatoin after fetching sender id")
-                        notification.sendNotification("New Request","Team is interested in your profile")  // send notification
+
+                        notification.sendNotification("New Request","Team is interested in your profile", receiverId)  // send notification
                         showRequestDialog = false
-                    }
                 })
             },
-            collegeDetails.value?.userName
         )
     }
     ConstraintLayout(modifier = modifier.fillMaxSize()) {
@@ -103,27 +103,37 @@ fun ViewCollegeDetails(
         ) {
 
 
-            ShowDetails(details = collegeDetails.value?.collegeName, icon = R.drawable.college)
+            ShowDetails(details = if(collegeDetails.value?.collegeName == null) "No details" else collegeDetails.value?.collegeName, icon = R.drawable.college)
             ShowDetails(
-                details = "Course : " + collegeDetails.value?.course,
+                details = "Course : " + if(collegeDetails.value?.course == null) "No details" else collegeDetails.value?.course,
                 icon = R.drawable.college
             )
             ShowDetails(
-                details = "Branch : " + collegeDetails.value?.branch,
+                details = "Branch : " + if(collegeDetails.value?.branch == null) "No details" else collegeDetails.value?.branch,
                 icon = R.drawable.college
             )
             ShowDetails(
-                details = "Graduation year : " + collegeDetails.value?.year,
+                details = "Graduation year : " + if(collegeDetails.value?.year == null) "No details" else collegeDetails.value?.year,
                 icon = R.drawable.college
             )
 
             // ON click of this notification will be sent to user who posted role
-            OutlinedButton(onClick = {
-                showRequestDialog = true
 
-            }, colors = ButtonDefaults.buttonColors(containerColor = BackGroundColor)) {
-                Text(text = "Send Request")
+
+            if(senderId.value == receiverId)
+                Text(text = "" , color = White , style = MaterialTheme.typography.titleMedium)
+            else if(isRequestAlreadySent){
+                Text(text = "Request sent" , color = White , style = MaterialTheme.typography.titleMedium)
             }
+            else{
+                OutlinedButton(onClick = {
+                    showRequestDialog = true
+
+                }, colors = ButtonDefaults.buttonColors(containerColor = BackGroundColor)) {
+                    Text(text = "Send Request")
+                }
+            }
+
 
         }
     }

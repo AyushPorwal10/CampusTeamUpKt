@@ -69,13 +69,13 @@ fun CollegeDetails(
     }
 
     var selectedCourse by remember {
-        mutableStateOf("Select Course")
+        mutableStateOf("other")
     }
     var selectedBranch by remember {
-        mutableStateOf("Select Branch")
+        mutableStateOf("other")
     }
     var selectedGraduationYear by remember {
-        mutableStateOf("Select Year")
+        mutableStateOf("other")
     }
     var collegeName by remember {
         mutableStateOf("College")

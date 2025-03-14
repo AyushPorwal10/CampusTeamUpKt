@@ -7,6 +7,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.campus_teamup.R
+import com.example.campus_teamup.myactivities.DrawerItemActivity
 import com.example.campus_teamup.myactivities.MainActivity
 import com.example.campus_teamup.myactivities.UserManager
 import com.example.campus_teamup.myrepository.HomeScreenRepository
@@ -17,6 +18,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -36,15 +38,22 @@ class FirebaseMessage : FirebaseMessagingService() {
 
         val title = remoteMessage.notification?.title ?: "New Notification"
         val message = remoteMessage.notification?.body ?: "You have a new message"
-        val userId = remoteMessage.data["userId"] ?: ""
-        val userName = remoteMessage.data["userName"] ?: ""
-        Log.d("FCM"," OnMessageReceived title $title useId $userId userName $userName")
-        sendNotification(title, message, userId, userName)
+        val senderId = remoteMessage.data["userId"] ?: ""
+        val senderName = remoteMessage.data["userName"] ?: ""
+        val notificationSentOn = remoteMessage.data["time"] ?: ""
+
+        Log.d("Testing","Time is $notificationSentOn")
+        Log.d("FCM"," OnMessageReceived title $title useId $senderId userName $senderName")
+        Log.d("Open","sender id is $senderId and name is $senderName")
+        sendNotification(title, message, senderId, senderName)
     }
 
     private fun sendNotification(title: String, message: String, userId: String, userName: String) {
-        val intent = Intent(this, MainActivity::class.java).apply {
+
+        // to open the notification section of
+        val intent = Intent(this, DrawerItemActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra("DrawerItem","notifications") // this will open the notification section
             putExtra("userId", userId)
             putExtra("userName", userName)
         }
@@ -65,8 +74,8 @@ class FirebaseMessage : FirebaseMessagingService() {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        Log.d("FCM","Notifying with notification manager")
         notificationManager.notify(0,notificationBuilder.build())
-
 
     }
 
@@ -98,8 +107,12 @@ class FirebaseMessage : FirebaseMessagingService() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                Log.d("FCM", "Saving FCM Token for user: $userId")
                 homeScreenRepository.saveFcmToken(token, userId)
                 Log.d("FCM", "New token saved successfully")
+            } catch (e: HttpException) {
+                Log.e("FCM", "HTTP error while saving token: ${e.code()} - ${e.message()}", e)
+                Log.e("FCM", "Response error body: ${e.response()?.errorBody()?.string()}")
             } catch (e: Exception) {
                 Log.e("FCM", "Failed to save new token", e)
             }

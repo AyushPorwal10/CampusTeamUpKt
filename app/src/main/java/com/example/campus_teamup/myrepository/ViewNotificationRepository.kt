@@ -1,0 +1,88 @@
+package com.example.campus_teamup.myrepository
+
+import android.util.Log
+import com.example.campus_teamup.mydataclass.LastMessage
+import com.example.campus_teamup.viewnotifications.NotificationItems
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
+
+class ViewNotificationRepository @Inject constructor(private val firebaseFirestore: FirebaseFirestore) {
+
+
+    suspend fun fetchTeamInviteNotifications(userId: String): Flow<List<NotificationItems.TeamInviteNotification>> =
+        callbackFlow {
+
+            val teamInviteCollection = firebaseFirestore.collection("all_user_id").document(userId)
+                .collection("all_user_details").document("team_invites").collection("all_invites")
+
+            val listener = teamInviteCollection.addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.e("UserNotification", error.toString())
+                    close(error)
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    val listOfNotifications =
+                        snapshot.documents.mapNotNull { document ->
+                            document.toObject(NotificationItems.TeamInviteNotification::class.java)
+                                ?.apply {
+                                    Log.d("UserNotification", "Document id is ${document.id} <-")
+                                    this.teamRequestId = document.id
+                                }
+                        }
+                    trySend(listOfNotifications)
+                }
+            }
+            awaitClose { listener.remove() }
+        }
+
+
+    // if user deny request than remove that request from notification section of receiver
+    // also update the list of users to which sender sent request means after rejection of request
+    // sender can again show interest to let him in team
+
+    suspend fun denyRequest(requestToRemove: String, receiverId: String , senderId : String) {
+        coroutineScope {
+            launch {
+                firebaseFirestore.collection("all_user_id").document(receiverId)
+                    .collection("all_user_details").document("team_invites")
+                    .collection("all_invites")
+                    .document(requestToRemove).delete().await()
+            }
+            launch {
+                Log.d(
+                    "Request",
+                    "$senderId <-  Going to update sender list of user to whom he send request"
+                )
+                firebaseFirestore.collection("request_send_by").document(senderId)
+                    .update("request_send_to", FieldValue.arrayRemove(receiverId))
+                    .await()
+            }
+        }
+    }
+
+
+      fun createChatRoom(chatRoomId : String , onSuccess : (Boolean) -> Unit , onFailure : (Boolean) -> Unit){
+         Log.d("ChatRoomId","Repo chat room id $chatRoomId")
+        firebaseFirestore.collection("chat_rooms").document(chatRoomId).set(LastMessage(
+           "",
+           "",
+           "",
+           chatRoomId
+       )).addOnSuccessListener {
+           onSuccess(true)
+        }
+            .addOnFailureListener{
+                onFailure(false)
+            }
+    }
+
+}
