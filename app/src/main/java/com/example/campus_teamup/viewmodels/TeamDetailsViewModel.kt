@@ -3,6 +3,7 @@ package com.example.campus_teamup.viewmodels
 import android.util.Log
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.text.toLowerCase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.campus_teamup.myactivities.UserManager
@@ -108,7 +109,7 @@ class TeamDetailsViewModel @Inject constructor(
     fun saveTeamDetails(listOfTeamMembers: SnapshotStateList<String>) {
 
         viewModelScope.launch {
-            teamDetailsRepository.saveTeamDetails(collegeName.value , listOfTeamMembers, _userId.value)
+            teamDetailsRepository.saveTeamDetails(collegeName.value.lowercase() , listOfTeamMembers, _userId.value)
         }
     }
 

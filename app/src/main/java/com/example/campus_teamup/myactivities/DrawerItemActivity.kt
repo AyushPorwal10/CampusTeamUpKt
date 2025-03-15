@@ -44,7 +44,7 @@ class DrawerItemActivity : ComponentActivity() {
             val startDestination = when (intent.getStringExtra("DrawerItem")) {
                 "notifications" -> "notifications"
                 "teamDetails" -> "teamDetails"
-                "recentchats" -> "recentschats"
+                "recentchats" -> "recentchats"
                 else -> "notifications"
             }
 

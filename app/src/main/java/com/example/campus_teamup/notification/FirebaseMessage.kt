@@ -18,6 +18,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONException
+import org.json.JSONObject
 import retrofit2.HttpException
 import javax.inject.Inject
 
@@ -36,15 +38,39 @@ class FirebaseMessage : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        val title = remoteMessage.notification?.title ?: "New Notification"
-        val message = remoteMessage.notification?.body ?: "You have a new message"
-        val senderId = remoteMessage.data["userId"] ?: ""
-        val senderName = remoteMessage.data["userName"] ?: ""
-        val notificationSentOn = remoteMessage.data["time"] ?: ""
+//        val title = remoteMessage.notification?.title ?: "New Notification"
+//        val message = remoteMessage.notification?.body ?: "You have a new message"
+//        val senderId = remoteMessage.data["userId"] ?: ""
+//        val senderName = remoteMessage.data["userName"] ?: ""
+//        val notificationSentOn = remoteMessage.data["time"] ?: ""
+//
+//        Log.d("Testing","Time is $notificationSentOn")
+//        Log.d("FCM"," OnMessageReceived title $title useId $senderId userName $senderName")
+//        Log.d("Open","sender id is $senderId and name is $senderName")
+//        sendNotification(title, message, senderId, senderName)
 
-        Log.d("Testing","Time is $notificationSentOn")
-        Log.d("FCM"," OnMessageReceived title $title useId $senderId userName $senderName")
-        Log.d("Open","sender id is $senderId and name is $senderName")
+        val notification = remoteMessage.notification
+        val data = remoteMessage.data
+
+        val title = notification?.title ?: "New Notification"
+        val message = notification?.body ?: "You have a new message"
+
+        val payload = data["payload"]?.let { jsonString ->
+            try {
+                JSONObject(jsonString)
+            } catch (e: JSONException) {
+                Log.e("FCM", "Error parsing payload JSON: ${e.message}")
+                null
+            }
+        }
+
+        val senderId = payload?.optString("senderId") ?: data["senderId"] ?: ""
+        val senderName = payload?.optString("senderName") ?: data["senderName"] ?: ""
+        val notificationSentOn = payload?.optString("time") ?: data["time"] ?: ""
+
+        Log.d("FCM", "Received Notification - Title: $title, Message: $message")
+        Log.d("FCM", "Sender ID: $senderId, Sender Name: $senderName, Time: $notificationSentOn")
+
         sendNotification(title, message, senderId, senderName)
     }
 

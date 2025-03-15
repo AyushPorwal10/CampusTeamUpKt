@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -19,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,13 +35,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.Dimensions
+import com.example.campus_teamup.helper.ProgressIndicator
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.LightTextColor
 import com.example.campus_teamup.ui.theme.LightWhite
 import com.example.campus_teamup.ui.theme.White
+import com.example.campus_teamup.viewmodels.RecentChatsViewModel
 
 
 @Preview
@@ -47,6 +52,16 @@ import com.example.campus_teamup.ui.theme.White
 @Composable
 fun RecentChatScreen(
 ){
+
+
+
+    val recentChatViewModel : RecentChatsViewModel = hiltViewModel()
+
+    recentChatViewModel.fetchRecentChats("ayushporwal1010")
+    val userAllChats = recentChatViewModel.userAllChats.collectAsState()
+    val areChatsLoading = recentChatViewModel.areChatsLoading.collectAsState()
+
+
 
     Scaffold(topBar = {
         TopAppBar(
@@ -71,9 +86,13 @@ fun RecentChatScreen(
             }
         )
     }) {paddingValues ->
-        LazyColumn(modifier = Modifier.padding(paddingValues).fillMaxSize().background(
-            BackGroundColor)){
-            items(5) {
+        LazyColumn(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .background(BackGroundColor)
+        ) {
+            items(userAllChats.value) { singleRecentChat ->
                 SingleRecentChat()
             }
         }

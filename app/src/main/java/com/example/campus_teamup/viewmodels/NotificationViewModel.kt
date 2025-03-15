@@ -8,7 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.campus_teamup.helper.TimeAndDate
 import com.example.campus_teamup.myactivities.UserManager
 import com.example.campus_teamup.myrepository.NotificationRepository
-import com.example.campus_teamup.notification.NotificationData
+import com.example.campus_teamup.notification.FcmMessage
+import com.example.campus_teamup.notification.Message
+import com.example.campus_teamup.notification.Notification
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -68,39 +70,74 @@ class NotificationViewModel @Inject constructor(
             onFcmFetched()
         }
     }
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun sendNotification(title: String, body: String, receiverId: String) {
-        viewModelScope.launch {
-            try {
-                Log.d(
-                    "FCM",
-                    "FCM Token ${receiverFCMToken.value} title $title body $body useId ${senderId.value} userName ${senderName.value}"
-                )
-                Log.d("Request","New request added to list")
-                _listOfUserId.value = _listOfUserId.value + receiverId
-                _isRequestAlreadySent.value = true
-                val notificationData = NotificationData(
-                    TimeAndDate.getCurrentTime(),
-                    receiverFCMToken.value,
-                    title,
-                    body,
-                    senderId.value,
-                    senderName.value
-                )
-                Log.d("FCM","Sending notification")
-                notificationRepository.sendNotification(notificationData , _listOfUserId.value , receiverId)
+//    @RequiresApi(Build.VERSION_CODES.O)
+//    fun sendNotification(title: String, body: String, receiverId: String) {
+//        viewModelScope.launch {
+//            try {
+//                Log.d(
+//                    "FCM",
+//                    "FCM Token ${receiverFCMToken.value} title $title body $body useId ${senderId.value} userName ${senderName.value}"
+//                )
+//                Log.d("Request","New request added to list")
+//                _listOfUserId.value = _listOfUserId.value + receiverId
+//                _isRequestAlreadySent.value = true
+//                val notificationData = NotificationData(
+//                    TimeAndDate.getCurrentTime(),
+//                    receiverFCMToken.value,
+//                    title,
+//                    body,
+//                    senderId.value,
+//                    senderName.value
+//                )
+//                Log.d("FCM","Sending notification")
+//                notificationRepository.sendNotification(notificationData , _listOfUserId.value , receiverId)
+//
+//            } catch (e: Exception) {
+//                Log.d("FCM", "$e   in notification viewmodel")
+//            }
+//
+//        }
+//    }
+@RequiresApi(Build.VERSION_CODES.O)
+fun sendNotification(title: String, body: String, receiverId: String) {
+    viewModelScope.launch {
+        try {
+            Log.d(
+                "FCM",
+                "FCM Token ${receiverFCMToken.value} title $title body $body useId ${senderId.value} userName ${senderName.value}"
+            )
+            Log.d("Request", "New request added to list")
+            _listOfUserId.value = _listOfUserId.value + receiverId
+            _isRequestAlreadySent.value = true
 
-            } catch (e: Exception) {
-                Log.d("FCM", "$e   in notification viewmodel")
-            }
+            // Build the payload according to HTTP v1 API requirements:
+            val message = Message(
+                token = receiverFCMToken.value,
+                notification = Notification(
+                    title = title,
+                    body = body
+                ),
+                data = mapOf(
+                    "senderId" to senderId.value,
+                    "senderName" to senderName.value,
+                    "time" to TimeAndDate.getCurrentTime()
+                )
+            )
+            val fcmMessage = FcmMessage(message)
 
+            Log.d("FCM", "Sending notification")
+            notificationRepository.sendNotification(fcmMessage, _listOfUserId.value, receiverId)
+
+        } catch (e: Exception) {
+            Log.d("FCM", "$e in notification viewmodel")
         }
     }
+}
 
 
     fun checkIfAlreadyRequestSent(receiverId: String ){
         viewModelScope.launch {
-            val listOfUserId = notificationRepository.checkIfAlreadyRequestSent(senderId.value  , onComplete = {
+            notificationRepository.checkIfAlreadyRequestSent(senderId.value  , onComplete = {
                 _listOfUserId.value = it
                 Log.d("Request","list of request sent is ${it.size} <-")
                 // if request is already sent than no need to send request again

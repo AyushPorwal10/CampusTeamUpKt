@@ -2,7 +2,7 @@ package com.example.campus_teamup.myrepository
 
 import android.util.Log
 import com.example.campus_teamup.notification.FCMApiService
-import com.example.campus_teamup.notification.NotificationData
+import com.example.campus_teamup.notification.FcmMessage
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -45,31 +45,63 @@ class NotificationRepository @Inject constructor(
 
     // sending notification and updating list of users to which sender sent notification
 
+//    suspend fun sendNotification(
+//        notificationData: NotificationData,
+//        listOfPeopleUserSentRequest: List<String>,
+//        receiverId: String
+//    ) {
+//        coroutineScope {
+//            launch {
+//                fcmApiService.sendNotification(notificationData)
+//                Log.d("FCM", "sending notification in repo concurrent")
+//            }
+//            launch {
+//                updateRequestList(notificationData.senderId, listOfPeopleUserSentRequest)
+//                Log.d("FCM", "updating notification in repo concurrent")
+//            }
+//
+//            // this is to add notification data in receiver data so that receiver can see the notification at one place
+//
+//            launch {
+//                firebaseFirestore.collection("all_user_id").document(receiverId)
+//                    .collection("all_user_details").document("team_invites")
+//                    .collection("all_invites").add(notificationData)
+//            }
+//
+//        }
+//    }
+
     suspend fun sendNotification(
-        notificationData: NotificationData,
+        fcmMessage: FcmMessage,
         listOfPeopleUserSentRequest: List<String>,
         receiverId: String
     ) {
         coroutineScope {
             launch {
-                fcmApiService.sendNotification(notificationData)
-                Log.d("FCM", "sending notification in repo concurrent")
+                fcmApiService.sendNotification(fcmMessage)
+                Log.d("FCM", "Sent notification successfully")
             }
             launch {
-                updateRequestList(notificationData.senderId, listOfPeopleUserSentRequest)
-                Log.d("FCM", "updating notification in repo concurrent")
+                updateRequestList(fcmMessage.message.data["senderId"] ?: "", listOfPeopleUserSentRequest)
+                Log.d("FCM", "Updated request list concurrently")
             }
-
-            // this is to add notification data in receiver data so that receiver can see the notification at one place
-
             launch {
                 firebaseFirestore.collection("all_user_id").document(receiverId)
                     .collection("all_user_details").document("team_invites")
-                    .collection("all_invites").add(notificationData)
+                    .collection("all_invites").add(
+                        mapOf(
+                            "title" to fcmMessage.message.notification.title,
+                            "message" to fcmMessage.message.notification.body,
+                            "senderId" to fcmMessage.message.data["senderId"],
+                            "senderName" to fcmMessage.message.data["senderName"],
+                            "time" to fcmMessage.message.data["time"]
+                        )
+                    )
+                Log.d("FCM", "Saved notification data to Firestore")
             }
-
         }
     }
+
 
     suspend fun updateRequestList(senderId: String, listOfPeopleUserSentRequest: List<String>) {
 

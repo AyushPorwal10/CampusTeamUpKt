@@ -29,7 +29,7 @@ admin.initializeApp({
 
 exports.sendNotification = functions.https.onRequest(async (req, res) => {
   try {
-    const {fcmToken, title, body, userId, userName, time} = req.body;
+    const {fcmToken, title, body, senderId, senderName, time} = req.body;
 
     const message = {
       token: fcmToken,
@@ -38,8 +38,8 @@ exports.sendNotification = functions.https.onRequest(async (req, res) => {
         body: body,
       },
       data: {
-        userId: userId,
-        userName: userName,
+        senderId: senderId,
+        senderName: senderName,
         time: time,
       },
     };

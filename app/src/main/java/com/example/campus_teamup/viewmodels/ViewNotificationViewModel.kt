@@ -30,6 +30,12 @@ class ViewNotificationViewModel @Inject constructor(
     private val _isChatRoomCreated = MutableStateFlow<Boolean>(false)
     val isChatRoomCreated: StateFlow<Boolean>  = _isChatRoomCreated.asStateFlow()
 
+    private val _teamInviteList = MutableStateFlow<List<NotificationItems.TeamInviteNotification>>(
+        emptyList()
+    )
+    val teamInviteList: StateFlow<List<NotificationItems.TeamInviteNotification>> get() = _teamInviteList.asStateFlow()
+
+
     fun fetchUserDataFromDatastore() {
         viewModelScope.launch {
             val userData = userManager.userData.first()
@@ -41,10 +47,11 @@ class ViewNotificationViewModel @Inject constructor(
     fun createChatRoom(index : Int){
         viewModelScope.launch {
             // receiver means the person who accepts invites
+            val senderId = teamInviteList.value[index].senderId
+            val senderName = teamInviteList.value[index].senderName
+            val chatRoomId = ChatRoomId.getChatRoomId(senderId,userId)
 
-            val chatRoomId = ChatRoomId.getChatRoomId(teamInviteList.value[index].senderId,userId)
-
-            viewNotificationRepository.createChatRoom(chatRoomId , onSuccess = {
+            viewNotificationRepository.createChatRoom(senderName,senderId , userId , chatRoomId , onSuccess = {
                 Log.d("ChatRoomId","Chat room is created $chatRoomId <-")
                 _isChatRoomCreated.value = true
                 // if receiver accepts request than remove this from list of notifications
@@ -56,11 +63,6 @@ class ViewNotificationViewModel @Inject constructor(
         }
     }
 
-    private val _teamInviteList = MutableStateFlow<List<NotificationItems.TeamInviteNotification>>(
-        emptyList()
-    )
-    val teamInviteList: StateFlow<List<NotificationItems.TeamInviteNotification>> get() = _teamInviteList.asStateFlow()
-
 
     fun fetchTeamInviteNotifications() {
         viewModelScope.launch {
@@ -70,6 +72,7 @@ class ViewNotificationViewModel @Inject constructor(
                         "UserNotification",
                         "Fetched team invite notifications ${listOfInvites.size}"
                     )
+
                     _teamInviteList.value = listOfInvites
                 }
         }
@@ -79,6 +82,7 @@ class ViewNotificationViewModel @Inject constructor(
         val currentList = _teamInviteList.value
         _teamInviteList.value = _teamInviteList.value.toMutableList().apply {
             if (index in indices) {
+                Log.d("UserNotification","Sender id from index is ${currentList[index].senderId}")
                 viewModelScope.launch {
                     viewNotificationRepository.denyRequest(
                         currentList[index].teamRequestId,

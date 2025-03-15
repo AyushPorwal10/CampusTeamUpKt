@@ -1,8 +1,12 @@
 package com.example.campus_teamup.myrepository
 
 import android.util.Log
+import com.example.campus_teamup.helper.TimeAndDate
 import com.example.campus_teamup.mydataclass.LastMessage
+import com.example.campus_teamup.mydataclass.RecentChats
+import com.example.campus_teamup.mydataclass.SendMessage
 import com.example.campus_teamup.viewnotifications.NotificationItems
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
@@ -49,7 +53,7 @@ class ViewNotificationRepository @Inject constructor(private val firebaseFiresto
     // also update the list of users to which sender sent request means after rejection of request
     // sender can again show interest to let him in team
 
-    suspend fun denyRequest(requestToRemove: String, receiverId: String , senderId : String) {
+    suspend fun denyRequest(requestToRemove: String, receiverId: String, senderId: String) {
         coroutineScope {
             launch {
                 firebaseFirestore.collection("all_user_id").document(receiverId)
@@ -66,23 +70,64 @@ class ViewNotificationRepository @Inject constructor(private val firebaseFiresto
                     .update("request_send_to", FieldValue.arrayRemove(receiverId))
                     .await()
             }
+
         }
     }
 
 
-      fun createChatRoom(chatRoomId : String , onSuccess : (Boolean) -> Unit , onFailure : (Boolean) -> Unit){
-         Log.d("ChatRoomId","Repo chat room id $chatRoomId")
-        firebaseFirestore.collection("chat_rooms").document(chatRoomId).set(LastMessage(
-           "",
-           "",
-           "",
-           chatRoomId
-       )).addOnSuccessListener {
-           onSuccess(true)
-        }
-            .addOnFailureListener{
-                onFailure(false)
+    suspend fun createChatRoom(
+        senderName : String ,
+        senderId: String,
+        receiverId: String,
+        chatRoomId: String,
+        onSuccess: (Boolean) -> Unit,
+        onFailure: (Boolean) -> Unit
+    ) {
+        Log.d("ChatRoomId", "Repo chat room id $chatRoomId")
+
+
+        coroutineScope {
+            launch {
+                firebaseFirestore.collection("chat_rooms").document(chatRoomId).set(
+                    LastMessage(
+                        "",
+                        "",
+                        "",
+                        chatRoomId
+                    )
+                ).addOnSuccessListener {
+                    onSuccess(true)
+                }
+                    .addOnFailureListener {
+                        onFailure(false)
+                    }
             }
+            launch {
+                firebaseFirestore.collection("chat_rooms").document(chatRoomId).collection("chats")
+                    .document().set(
+                        SendMessage(
+                            "welcome_message",
+                            TimeAndDate.getCurrentTime(),
+                            "start_chat"
+                        )
+                    ).await()
+            }
+
+            launch {
+                firebaseFirestore.collection("all_user_id").document(senderId).collection("chats")
+                    .document(chatRoomId).set(RecentChats(
+                        TimeAndDate.getCurrentTime(),chatRoomId,
+                        senderName,TimeAndDate.getCurrentTime()
+                    ))
+
+                firebaseFirestore.collection("all_user_id").document(receiverId).collection("chats")
+                    .document(chatRoomId).set(RecentChats(
+                        TimeAndDate.getCurrentTime(),chatRoomId,senderName,TimeAndDate.getCurrentTime()
+                    ))
+            }
+        }
+
+
     }
 
 }
