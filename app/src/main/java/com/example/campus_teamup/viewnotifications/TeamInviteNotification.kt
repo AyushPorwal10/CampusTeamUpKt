@@ -11,7 +11,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,9 +24,7 @@ import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.RejectTeamInviteDialog
-import com.example.campus_teamup.helper.StartChatDialog
-import com.example.campus_teamup.screens.ChatNotification
-import com.example.campus_teamup.screens.RecentChatScreen
+import com.example.campus_teamup.myactivities.UserData
 import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.LightTextColor
 import com.example.campus_teamup.ui.theme.White
@@ -38,9 +35,12 @@ import com.example.campus_teamup.viewmodels.ViewNotificationViewModel
 fun TeamInviteNotification(
     teamInviteNotification: NotificationItems.TeamInviteNotification,
     index: Int,
-    viewNotificationViewModel: ViewNotificationViewModel
+    viewNotificationViewModel: ViewNotificationViewModel,
+    currentUserData: UserData?
 ) {
 
+
+    Log.d("UserData","In TeamInviteNotification UserId from datastore is ${currentUserData?.userId} ")
 
     Log.d("UserNotification", "Sender name is ${teamInviteNotification.senderName} <-")
     Log.d("UserNotification", "Sender id is ${teamInviteNotification.senderId} <-")
@@ -54,10 +54,9 @@ fun TeamInviteNotification(
         RejectTeamInviteDialog(onCancel = {
             rejectTeamInviteDialog = false
         }) {
-            viewNotificationViewModel.denyRequest(index)
+            viewNotificationViewModel.denyRequest(index , currentUserData?.userId)
         }
     }
-
 
 
     Card(colors = CardDefaults.cardColors(containerColor = BorderColor, contentColor = White)) {
@@ -109,7 +108,7 @@ fun TeamInviteNotification(
             // This is when user accept to do communication with sender chat option is open for them
 
             IconButton(onClick = {
-                viewNotificationViewModel.createChatRoom(index)
+                viewNotificationViewModel.createChatRoom(index,currentUserData?.userId)
             }, modifier = Modifier.constrainAs(acceptBtn) {
                 top.linkTo(viewTeamDetailsBtn.bottom, margin = 4.dp)
             }) {

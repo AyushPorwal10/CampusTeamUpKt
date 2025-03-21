@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -58,7 +59,6 @@ class NotificationViewModel @Inject constructor(
     }
 
     // this will be used to send notification
-
     fun fetchReceiverFCMToken(receiverId: String , onFcmFetched : () -> Unit) {
         viewModelScope.launch {
 
@@ -70,34 +70,6 @@ class NotificationViewModel @Inject constructor(
             onFcmFetched()
         }
     }
-//    @RequiresApi(Build.VERSION_CODES.O)
-//    fun sendNotification(title: String, body: String, receiverId: String) {
-//        viewModelScope.launch {
-//            try {
-//                Log.d(
-//                    "FCM",
-//                    "FCM Token ${receiverFCMToken.value} title $title body $body useId ${senderId.value} userName ${senderName.value}"
-//                )
-//                Log.d("Request","New request added to list")
-//                _listOfUserId.value = _listOfUserId.value + receiverId
-//                _isRequestAlreadySent.value = true
-//                val notificationData = NotificationData(
-//                    TimeAndDate.getCurrentTime(),
-//                    receiverFCMToken.value,
-//                    title,
-//                    body,
-//                    senderId.value,
-//                    senderName.value
-//                )
-//                Log.d("FCM","Sending notification")
-//                notificationRepository.sendNotification(notificationData , _listOfUserId.value , receiverId)
-//
-//            } catch (e: Exception) {
-//                Log.d("FCM", "$e   in notification viewmodel")
-//            }
-//
-//        }
-//    }
 @RequiresApi(Build.VERSION_CODES.O)
 fun sendNotification(title: String, body: String, receiverId: String) {
     viewModelScope.launch {
@@ -128,7 +100,11 @@ fun sendNotification(title: String, body: String, receiverId: String) {
             Log.d("FCM", "Sending notification")
             notificationRepository.sendNotification(fcmMessage, _listOfUserId.value, receiverId)
 
-        } catch (e: Exception) {
+        }
+        catch (e: HttpException) {
+            Log.e("FCM", "HTTP Exception: ${e.response()?.errorBody()?.string()}")
+        }
+        catch (e: Exception) {
             Log.d("FCM", "$e in notification viewmodel")
         }
     }
@@ -147,8 +123,8 @@ fun sendNotification(title: String, body: String, receiverId: String) {
                 }
             })
         }
-
-
     }
+
+
 
 }

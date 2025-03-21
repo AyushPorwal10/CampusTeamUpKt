@@ -39,7 +39,8 @@ object FirebaseObjects {
     @Provides
     fun getRetrofit() : Retrofit{
         return Retrofit.Builder()
-            .baseUrl("https://us-central1-learnsign-in.cloudfunctions.net/") // Replace with your actual base URL
+
+            .baseUrl("https://us-central1-learnsign-in.cloudfunctions.net/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }

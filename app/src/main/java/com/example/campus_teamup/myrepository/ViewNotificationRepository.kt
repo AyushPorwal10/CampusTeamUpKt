@@ -21,11 +21,14 @@ import javax.inject.Inject
 class ViewNotificationRepository @Inject constructor(private val firebaseFirestore: FirebaseFirestore) {
 
 
-    suspend fun fetchTeamInviteNotifications(userId: String): Flow<List<NotificationItems.TeamInviteNotification>> =
+    // this are invites from team leader or member because this member founds interest in user profile so they request
+    suspend fun fetchTeamInviteNotifications(currentUserId: String): Flow<List<NotificationItems.TeamInviteNotification>> =
         callbackFlow {
 
-            val teamInviteCollection = firebaseFirestore.collection("all_user_id").document(userId)
-                .collection("all_user_details").document("team_invites").collection("all_invites")
+            val teamInviteCollection =
+                firebaseFirestore.collection("all_user_id").document(currentUserId)
+                    .collection("all_user_details").document("team_invites")
+                    .collection("all_invites")
 
             val listener = teamInviteCollection.addSnapshotListener { snapshot, error ->
                 if (error != null) {
@@ -76,9 +79,9 @@ class ViewNotificationRepository @Inject constructor(private val firebaseFiresto
 
 
     suspend fun createChatRoom(
-        senderName : String ,
+        senderName: String,
         senderId: String,
-        receiverId: String,
+        receiverId: String?,
         chatRoomId: String,
         onSuccess: (Boolean) -> Unit,
         onFailure: (Boolean) -> Unit
@@ -115,19 +118,65 @@ class ViewNotificationRepository @Inject constructor(private val firebaseFiresto
 
             launch {
                 firebaseFirestore.collection("all_user_id").document(senderId).collection("chats")
-                    .document(chatRoomId).set(RecentChats(
-                        TimeAndDate.getCurrentTime(),chatRoomId,
-                        senderName,TimeAndDate.getCurrentTime()
-                    ))
+                    .document(chatRoomId).set(
+                        RecentChats(
+                            TimeAndDate.getCurrentTime(), chatRoomId,
+                            senderName, TimeAndDate.getCurrentTime()
+                        )
+                    )
 
-                firebaseFirestore.collection("all_user_id").document(receiverId).collection("chats")
-                    .document(chatRoomId).set(RecentChats(
-                        TimeAndDate.getCurrentTime(),chatRoomId,senderName,TimeAndDate.getCurrentTime()
-                    ))
+                if (receiverId != null) {
+                    firebaseFirestore.collection("all_user_id").document(receiverId)
+                        .collection("chats")
+                        .document(chatRoomId).set(
+                            RecentChats(
+                                TimeAndDate.getCurrentTime(),
+                                chatRoomId,
+                                senderName,
+                                TimeAndDate.getCurrentTime()
+                            )
+                        )
+                }
             }
         }
 
 
     }
+
+
+    // this is when a user wants to join other team
+    fun fetchMemberInviteNotifications(currentUserId: String): Flow<List<NotificationItems.MemberInviteNotification>> = callbackFlow{
+
+
+        val collectionReference =
+            firebaseFirestore.collection("all_user_id").document(currentUserId)
+                .collection("team_join_request")
+
+
+        val realTimeListener = collectionReference.addSnapshotListener{snapshot , error->
+            if(error != null){
+             close(error)
+                return@addSnapshotListener
+            }
+
+            if(snapshot != null && !snapshot.isEmpty){
+
+                snapshot.documents.mapNotNull {items->
+                   val listOfMemberInvites =  items.toObject(NotificationItems.MemberInviteNotification::class.java) as List<NotificationItems.MemberInviteNotification>
+
+
+                    Log.d("ShowNotification" , "Size of listOfMemberList is ${listOfMemberInvites.size}")
+                    trySend(listOfMemberInvites)
+                }
+            }
+            else{
+                Log.d("ShowNotification" , "Snapshot is null or empty")
+            }
+        }
+
+        awaitClose{realTimeListener.remove()}
+
+    }
+
 
 }

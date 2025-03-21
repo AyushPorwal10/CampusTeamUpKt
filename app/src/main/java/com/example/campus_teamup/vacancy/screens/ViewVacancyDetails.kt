@@ -1,64 +1,79 @@
 package com.example.campus_teamup.vacancy.screens
 
-import android.content.Intent
-import androidx.compose.animation.animateContentSize
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.Dimensions
+import com.example.campus_teamup.helper.ShowRequestDialog
+import com.example.campus_teamup.helper.ToastHelper
+import com.example.campus_teamup.myactivities.UserData
 import com.example.campus_teamup.mydataclass.VacancyDetails
 import com.example.campus_teamup.ui.theme.BluePrimary
 import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.LightTextColor
 import com.example.campus_teamup.ui.theme.White
+import com.example.campus_teamup.viewmodels.ViewVacancyViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ViewVacancyDetails(modifier: Modifier = Modifier, vacancy: VacancyDetails) {
+fun ViewVacancyDetails(
+    modifier: Modifier = Modifier,
+    vacancy: VacancyDetails,
+    currentUserData: State<UserData?>
+) {
     val textColor = White
+    val context = LocalContext.current
+
+    val showRequestDialog = remember{ mutableStateOf(false) }
+    Log.d("VacancyNotification","Current user id in viewvacancydetails is  is ${currentUserData.value?.userId} <- ")
+
+    val viewVacancyViewModel : ViewVacancyViewModel = hiltViewModel()
+
+    val isRequestAlreadySent = viewVacancyViewModel.isRequestSent.collectAsState()
+
     Box(
         modifier = modifier
             .border(
                 0.5.dp, BorderColor,
                 shape = RoundedCornerShape(Dimensions.largeRoundedShape)
             )
-            .fillMaxWidth(0.9f), contentAlignment = Alignment.Center
+            .fillMaxWidth(0.95f), contentAlignment = Alignment.Center
     ) {
 
         ConstraintLayout(
             modifier = Modifier
+                .padding(6.dp)
                 .fillMaxWidth()
         ) {
-            val (teamLogo, teamName, roleLookingFor, hackathonName, roleDescription, datePosted, skillRequired) = createRefs()
+            val (teamLogo, teamName, roleLookingFor, hackathonName, roleDescription, datePosted, skillRequired , sendRequestBtn) = createRefs()
 
 
 
@@ -140,7 +155,53 @@ fun ViewVacancyDetails(modifier: Modifier = Modifier, vacancy: VacancyDetails) {
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     })
+
+
+            if(!isRequestAlreadySent.value){
+                OutlinedButton(onClick = {
+                    showRequestDialog.value = true
+                } , modifier = Modifier.constrainAs(sendRequestBtn){
+                    top.linkTo(datePosted.bottom , margin = 10.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }) {
+                    Text(text = stringResource(id = R.string.send_request) , color = White , style = MaterialTheme.typography.titleMedium)
+                }
+
+                if(showRequestDialog.value){
+                    ShowRequestDialog(onCancel = {
+                        showRequestDialog.value  = false
+                    }) {
+                        Log.d("VacancyNotification","Confirm clicked")
+
+                        Log.d("VacancyNotification","Current user id is ${currentUserData.value?.userId} <-")
+
+                        currentUserData.value?.userId?.let {
+
+                            viewVacancyViewModel.sendNotification(
+                                it, currentUserData.value?.userName!!, onNotificationSent = {
+                                    showRequestDialog.value = false
+                                }, onNotificationError = {
+                                                         showRequestDialog.value = false
+                                    ToastHelper.showToast(context , "Sorry Something went wrong !")
+                                },vacancy.postedBy)
+                        }
+                    }
+                }
+            }
+            else if(currentUserData.value?.userId != vacancy.postedBy){
+                OutlinedButton(onClick = {
+                } , modifier = Modifier.constrainAs(sendRequestBtn){
+                    top.linkTo(datePosted.bottom , margin = 10.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }) {
+                    Text(text = stringResource(id = R.string.request_already_sent) , color = White , style = MaterialTheme.typography.titleMedium)
+                }
+            }
         }
+
+
     }
 }
 

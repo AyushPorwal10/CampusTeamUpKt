@@ -22,7 +22,6 @@ fun ShowRequestDialog(onCancel : () -> Unit , onConfirm : () -> Unit ) {
 
     AlertDialog(
         onDismissRequest = {
-
         },
         confirmButton = {
             Button(onClick = {

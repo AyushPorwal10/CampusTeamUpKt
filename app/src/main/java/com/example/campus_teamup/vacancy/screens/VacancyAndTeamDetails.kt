@@ -1,5 +1,7 @@
 package com.example.campus_teamup.vacancy.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +20,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,20 +33,22 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.campus_teamup.R
+import com.example.campus_teamup.myactivities.UserData
 import com.example.campus_teamup.mydataclass.VacancyDetails
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.Black
 import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.White
-import com.example.campus_teamup.viewmodels.NotificationViewModel
 import com.example.campus_teamup.viewmodels.ViewVacancyViewModel
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun VacancyAndTeamDetails(
     vacancyDetails: VacancyDetails,
     viewVacancyViewModel: ViewVacancyViewModel,
+    currentUserData: State<UserData?>,
 ) {
 
     // reusing viewmodel of role profile
@@ -137,6 +142,7 @@ fun VacancyAndTeamDetails(
                             top.linkTo(vacancyDetailsBtn.bottom, margin = 20.dp)
                         },
                     vacancyDetails
+                    ,currentUserData
                 )
 
                 "teamDetails" -> ViewTeamDetails(

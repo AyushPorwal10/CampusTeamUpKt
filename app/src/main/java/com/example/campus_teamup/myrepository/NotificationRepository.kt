@@ -43,33 +43,6 @@ class NotificationRepository @Inject constructor(
         }
     }
 
-    // sending notification and updating list of users to which sender sent notification
-
-//    suspend fun sendNotification(
-//        notificationData: NotificationData,
-//        listOfPeopleUserSentRequest: List<String>,
-//        receiverId: String
-//    ) {
-//        coroutineScope {
-//            launch {
-//                fcmApiService.sendNotification(notificationData)
-//                Log.d("FCM", "sending notification in repo concurrent")
-//            }
-//            launch {
-//                updateRequestList(notificationData.senderId, listOfPeopleUserSentRequest)
-//                Log.d("FCM", "updating notification in repo concurrent")
-//            }
-//
-//            // this is to add notification data in receiver data so that receiver can see the notification at one place
-//
-//            launch {
-//                firebaseFirestore.collection("all_user_id").document(receiverId)
-//                    .collection("all_user_details").document("team_invites")
-//                    .collection("all_invites").add(notificationData)
-//            }
-//
-//        }
-//    }
 
     suspend fun sendNotification(
         fcmMessage: FcmMessage,
@@ -77,6 +50,8 @@ class NotificationRepository @Inject constructor(
         receiverId: String
     ) {
         coroutineScope {
+
+            Log.d("FCM","Fcm in notification repo is ${fcmMessage.message.token}")
             launch {
                 fcmApiService.sendNotification(fcmMessage)
                 Log.d("FCM", "Sent notification successfully")
@@ -105,7 +80,7 @@ class NotificationRepository @Inject constructor(
 
     suspend fun updateRequestList(senderId: String, listOfPeopleUserSentRequest: List<String>) {
 
-        val data = mapOf("request_send_to" to listOfPeopleUserSentRequest)
+        val data = mapOf("role_request_send_to" to listOfPeopleUserSentRequest)
 
         firebaseFirestore.collection("request_send_by").document(senderId).set(data).await()
     }
@@ -113,7 +88,7 @@ class NotificationRepository @Inject constructor(
     suspend fun checkIfAlreadyRequestSent(senderId: String, onComplete: (List<String>) -> Unit) {
 
         val document =
-            firebaseFirestore.collection("request_send_by").document(senderId).get().await()
+            firebaseFirestore.collection("role_request_send_to").document(senderId).get().await()
 
         // listOfUser that person sent request
 

@@ -1,5 +1,6 @@
 package com.example.campus_teamup.viewnotifications
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,15 +22,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.campus_teamup.R
+import com.example.campus_teamup.myactivities.UserData
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.White
 import com.example.campus_teamup.viewmodels.ViewNotificationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationsScreen(viewNotificationViewModel: ViewNotificationViewModel) {
+fun NotificationsScreen(viewNotificationViewModel: ViewNotificationViewModel, currentUserData : UserData?) {
     val bgColor = BackGroundColor
     val textColor = White
+
+
+    Log.d("UserData","Notification Screen UserId from datastore is ${currentUserData?.userId} ")
 
     val listOfNotification = viewNotificationViewModel.teamInviteList.collectAsState()
 
@@ -62,7 +67,7 @@ fun NotificationsScreen(viewNotificationViewModel: ViewNotificationViewModel) {
              horizontalAlignment = Alignment.CenterHorizontally,
          ){
              itemsIndexed(listOfNotification.value) { index, item ->
-                 TeamInviteNotification(item, index , viewNotificationViewModel)
+                 TeamInviteNotification(item, index , viewNotificationViewModel , currentUserData)
              }
          }
         })

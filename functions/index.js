@@ -1,53 +1,95 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
-
-// const {onRequest} = require("firebase-functions/v2/https");
-// const logger = require("firebase-functions/logger");
-
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
-
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
-
-const admin = require("firebase-admin");
 const functions = require("firebase-functions");
+const admin = require("firebase-admin");
 
-const serviceAccount = require("./serviceAccountKey.json");
+admin.initializeApp();
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+
+// when teamMember is interested in users profile they can send request
 
 exports.sendNotification = functions.https.onRequest(async (req, res) => {
+  console.log("Raw Request Body:", JSON.stringify(req.body, null, 2));
+
+  const message = req.body.message;
+
+  if (!message || !message.token) {
+    console.error("Role FCM Token is missing!");
+    return res.status(400).send("FCM Token is required");
+  }
+
+  const {senderId, senderName, time} = message.data || {};
+  const {title, body} = message.notification || {};
+  const fcmToken = message.token;
+
+  const fcmMessage = {
+    token: fcmToken,
+    notification: {title, body},
+    data: {
+      senderId: senderId || "",
+      senderName: senderName || "",
+      time: time || "",
+    },
+  };
+
   try {
-    const {fcmToken, title, body, senderId, senderName, time} = req.body;
+    console.log("Sending FCM Message:", JSON.stringify(fcmMessage, null, 2));
 
-    const message = {
-      token: fcmToken,
-      notification: {
-        title: title,
-        body: body,
-      },
-      data: {
-        senderId: senderId,
-        senderName: senderName,
-        time: time,
-      },
-    };
+    const response = await admin.messaging().send(fcmMessage);
+    console.log("FCM Response:", response);
 
-    await admin.messaging().send(message);
-    return res.status(200).send("Notification sent successfully!");
+    return res.status(200).send("Notification sent successfully");
   } catch (error) {
     console.error("Error sending notification:", error);
-    return res.status(500).send("Failed to send notification.");
+    return res.status(500).send("Error sending notification");
   }
 });
+
+// This is when a user requests to join a team
+exports.sendTeamJointNotification = functions.https.onRequest(
+    async (req, res) => {
+      console.log(
+          "Raw Request Body:",
+          JSON.stringify(req.body, null, 2),
+      );
+
+      const message = req.body.message;
+
+      if (!message || !message.token) {
+        console.error("Vacancy FCM Token is missing!");
+        return res.status(400).send("FCM Token is required");
+      }
+
+      const {
+        senderId,
+        senderName,
+        time,
+      } = message.data || {};
+
+      const {title, body} = message.notification || {};
+      const fcmToken = message.token;
+
+      const fcmMessage = {
+        token: fcmToken,
+        notification: {title, body},
+        data: {
+          senderId: senderId || "",
+          senderName: senderName || "",
+          time: time || "",
+        },
+      };
+
+      try {
+        console.log(
+            "Sending FCM Message:",
+            JSON.stringify(fcmMessage, null, 2),
+        );
+
+        const response = await admin.messaging().send(fcmMessage);
+        console.log("FCM Response:", response);
+
+        return res.status(200).send("Notification sent successfully");
+      } catch (error) {
+        console.error("Error sending notification:", error);
+        return res.status(500).send("Error sending notification");
+      }
+    },
+);

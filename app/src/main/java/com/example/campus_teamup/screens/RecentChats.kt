@@ -39,6 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.Dimensions
 import com.example.campus_teamup.helper.ProgressIndicator
+import com.example.campus_teamup.mydataclass.RecentChats
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.LightTextColor
@@ -47,13 +48,9 @@ import com.example.campus_teamup.ui.theme.White
 import com.example.campus_teamup.viewmodels.RecentChatsViewModel
 
 
-@Preview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RecentChatScreen(
-){
-
-
+fun RecentChatScreen(startChat : (RecentChats) -> Unit){
 
     val recentChatViewModel : RecentChatsViewModel = hiltViewModel()
 
@@ -93,7 +90,9 @@ fun RecentChatScreen(
                 .background(BackGroundColor)
         ) {
             items(userAllChats.value) { singleRecentChat ->
-                SingleRecentChat()
+                SingleRecentChat(singleRecentChat , onClick = {
+                    startChat(singleRecentChat)
+                })
             }
         }
     }

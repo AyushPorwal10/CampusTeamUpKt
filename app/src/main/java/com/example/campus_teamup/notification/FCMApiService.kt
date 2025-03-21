@@ -9,6 +9,9 @@ import javax.inject.Inject
 interface FCMApiService  {
     @POST("sendNotification")
     suspend fun sendNotification(@Body fcmMessage: FcmMessage)
+
+    @POST("sendTeamJointNotification")
+    suspend fun sendTeamJointNotification(@Body fcmMessage: FcmMessage)
 }
 
 data class FcmMessage(

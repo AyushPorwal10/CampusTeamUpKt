@@ -2,6 +2,7 @@ package com.example.campus_teamup.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.campus_teamup.helper.Dimensions
+import com.example.campus_teamup.mydataclass.RecentChats
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.LightTextColor
@@ -28,11 +30,14 @@ import com.example.campus_teamup.ui.theme.White
 
 
 @Composable
-fun SingleRecentChat(){
+fun SingleRecentChat(chatData : RecentChats , onClick : () -> Unit){
     val textColor = LightTextColor
     val bgColor = BackGroundColor
 
     Box(modifier = Modifier
+        .clickable {
+         onClick()
+        }
         .background(bgColor)
         .padding(8.dp)
         .border(0.5.dp, BorderColor, shape = RoundedCornerShape(Dimensions.smallRoundedShape))
@@ -45,12 +50,12 @@ fun SingleRecentChat(){
             val ( userName , notificationCount , lastMessageDate) = createRefs()
 
             Text(
-                text = "New Message from Ayush Porwal" ,
+                text = chatData.senderName,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
-                color = textColor,
+                color = White,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .constrainAs(userName) {
                         start.linkTo(parent.start, margin = 2.dp)
@@ -70,7 +75,7 @@ fun SingleRecentChat(){
                 Text(text = "28" , color = White , style = MaterialTheme.typography.bodySmall)
             }
 
-            Text(text = "Last message on 26-01-2025" ,
+            Text(text = "Created on ${chatData.createdOn}" ,
                 style = MaterialTheme.typography.bodySmall ,
                 color = LightWhite,
                 modifier = Modifier.constrainAs(lastMessageDate){

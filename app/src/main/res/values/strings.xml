@@ -50,7 +50,7 @@
     <string name="view_less">View less</string>
     <string name="view_more">View more</string>
     <string name="send_request">Send Request</string>
-    <string name="send_request_message">Once your request get approved you can message.</string>
+    <string name="send_request_message">Once your request get approved you can start messaging.</string>
     <string name="request_from">New Request</string>
     <string name="team_is_interested">Team is interested in your profile</string>
     <string name="team_invite">Team Invite</string>
@@ -59,4 +59,5 @@
     <string name="are_you_sure">Are you sure ?</string>
     <string name="reject_team_request_message">You are going to reject Team invite.</string>
     <string name="start_chat_message">Now you can start sending messages.</string>
+    <string name="request_already_sent">Request Sent</string>
 </resources>
