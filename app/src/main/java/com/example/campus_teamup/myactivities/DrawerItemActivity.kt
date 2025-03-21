@@ -105,10 +105,6 @@ class DrawerItemActivity : ComponentActivity() {
                     navigateToChatScreen = true
                 }
             }
-
-
-
-
         }
     }
 }
