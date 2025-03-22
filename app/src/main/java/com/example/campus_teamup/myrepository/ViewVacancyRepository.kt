@@ -200,7 +200,7 @@ class ViewVacancyRepository @Inject constructor(
             tag, "Updating notification list with data ${fcmMessage.message.notification.title} " +
                     fcmMessage.message.notification.body + fcmMessage.message.data["time"]
         )
-
+        Log.d("ShowNotification","Receiver id is $requestReceiverId <-")
         val documentReference =
             firebaseFirestore.collection("all_user_id").document(requestReceiverId)
                 .collection("team_join_request")

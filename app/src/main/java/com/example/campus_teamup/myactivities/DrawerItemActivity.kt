@@ -62,7 +62,8 @@ class DrawerItemActivity : ComponentActivity() {
 
             NavHost(navController, startDestination = startDestination) {
                 composable("notifications") {
-                    viewNotificationViewModel.fetchTeamInviteNotifications(currentUserData.value?.userId)
+                    //viewNotificationViewModel.fetchTeamInviteNotifications(currentUserData.value?.userId)
+                    viewNotificationViewModel.fetchCombinedNotifications(currentUserData.value?.userId)
 
                     NotificationsScreen(viewNotificationViewModel ,currentUserData.value)
                 }

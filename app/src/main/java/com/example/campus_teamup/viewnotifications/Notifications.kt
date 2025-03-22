@@ -36,7 +36,8 @@ fun NotificationsScreen(viewNotificationViewModel: ViewNotificationViewModel, cu
 
     Log.d("UserData","Notification Screen UserId from datastore is ${currentUserData?.userId} ")
 
-    val listOfNotification = viewNotificationViewModel.teamInviteList.collectAsState()
+    val combinedNotificationList = viewNotificationViewModel.combineNotificationList.collectAsState()
+
 
     Scaffold(
         topBar = {
@@ -66,8 +67,17 @@ fun NotificationsScreen(viewNotificationViewModel: ViewNotificationViewModel, cu
              verticalArrangement = Arrangement.spacedBy(8.dp),
              horizontalAlignment = Alignment.CenterHorizontally,
          ){
-             itemsIndexed(listOfNotification.value) { index, item ->
-                 TeamInviteNotification(item, index , viewNotificationViewModel , currentUserData)
+             itemsIndexed(combinedNotificationList.value) { index, item ->
+                 when(item){
+                     is NotificationItems.TeamInviteNotification -> {
+                         Log.d("ShowNotification","Showing TeamInviteNotification")
+                         TeamInviteNotification(item, index , viewNotificationViewModel , currentUserData)
+                     }
+                     is NotificationItems.MemberInviteNotification -> {
+                         Log.d("ShowNotification","Showing MemberInviteNotification")
+                         TeamJointNotification(item )
+                     }
+                 }
              }
          }
         })

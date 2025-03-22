@@ -63,7 +63,7 @@ fun TeamInviteNotification(
         ConstraintLayout(
             modifier = Modifier
                 .padding(6.dp)
-                .fillMaxWidth(0.8f)
+                .fillMaxWidth(0.9f)
         ) {
             val (heading, invitationMessage, viewTeamDetailsBtn, acceptBtn, denyBtn) = createRefs()
 

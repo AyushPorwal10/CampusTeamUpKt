@@ -24,9 +24,8 @@ class ViewNotificationViewModel @Inject constructor(
 ) : ViewModel() {
 
 
-
     private val _isChatRoomCreated = MutableStateFlow<Boolean>(false)
-    val isChatRoomCreated: StateFlow<Boolean>  = _isChatRoomCreated.asStateFlow()
+    val isChatRoomCreated: StateFlow<Boolean> = _isChatRoomCreated.asStateFlow()
 
     private val _teamInviteList = MutableStateFlow<List<NotificationItems.TeamInviteNotification>>(
         emptyList()
@@ -34,53 +33,43 @@ class ViewNotificationViewModel @Inject constructor(
     val teamInviteList: StateFlow<List<NotificationItems.TeamInviteNotification>> get() = _teamInviteList.asStateFlow()
 
 
-    private val _memberInviteList = MutableStateFlow<List<NotificationItems.MemberInviteNotification>>(
+    private val _combineNotificationList = MutableStateFlow<List<NotificationItems>>(
         emptyList()
     )
-    val memberInviteList: StateFlow<List<NotificationItems.MemberInviteNotification>> get() = _memberInviteList.asStateFlow()
+    val combineNotificationList: StateFlow<List<NotificationItems>> get() = _combineNotificationList.asStateFlow()
 
 
-    fun createChatRoom(index : Int,currentUserId: String?){
+    fun createChatRoom(index: Int, currentUserId: String?) {
         viewModelScope.launch {
             // receiver means the person who accepts invites
             val senderId = teamInviteList.value[index].senderId
             val senderName = teamInviteList.value[index].senderName
-            val chatRoomId = ChatRoomId.getChatRoomId(senderId,currentUserId)
+            val chatRoomId = ChatRoomId.getChatRoomId(senderId, currentUserId)
 
-            viewNotificationRepository.createChatRoom(senderName,senderId , currentUserId , chatRoomId , onSuccess = {
-                Log.d("ChatRoomId","Chat room is created $chatRoomId <-")
-                _isChatRoomCreated.value = true
-                // if receiver accepts request than remove this from list of notifications
-                denyRequest(index,currentUserId)
-            } , onFailure = {
-                _isChatRoomCreated.value = false
-            })
-
+            viewNotificationRepository.createChatRoom(
+                senderName,
+                senderId,
+                currentUserId,
+                chatRoomId,
+                onSuccess = {
+                    Log.d("ChatRoomId", "Chat room is created $chatRoomId <-")
+                    _isChatRoomCreated.value = true
+                    // if receiver accepts request than remove this from list of notifications
+                    denyRequest(index, currentUserId)
+                },
+                onFailure = {
+                    _isChatRoomCreated.value = false
+                })
         }
     }
 
 
-    fun fetchTeamInviteNotifications(currentUserId: String?) {
-        viewModelScope.launch {
-            if (currentUserId != null) {
-                viewNotificationRepository.fetchTeamInviteNotifications(currentUserId)
-                    .collect { listOfInvites ->
-                        Log.d(
-                            "UserNotification",
-                            "Fetched team invite notifications ${listOfInvites.size}"
-                        )
 
-                        _teamInviteList.value = listOfInvites
-                    }
-            }
-        }
-    }
-
-    fun denyRequest(index: Int,currentUserId : String?) {
+    fun denyRequest(index: Int, currentUserId: String?) {
         val currentList = _teamInviteList.value
         _teamInviteList.value = _teamInviteList.value.toMutableList().apply {
             if (index in indices) {
-                Log.d("UserNotification","Sender id from index is ${currentList[index].senderId}")
+                Log.d("UserNotification", "Sender id from index is ${currentList[index].senderId}")
                 viewModelScope.launch {
                     if (currentUserId != null) {
                         viewNotificationRepository.denyRequest(
@@ -97,14 +86,34 @@ class ViewNotificationViewModel @Inject constructor(
     }
 
 
-    fun fetchMemberInviteNotifications(currentUserId: String?){
-        if(currentUserId == null)
-            return
+//    fun fetchMemberInviteNotifications(currentUserId: String?){
+//        if(currentUserId == null)
+//            return
+//        viewModelScope.launch {
+//            viewNotificationRepository.fetchMemberInviteNotifications(currentUserId).collect{list->
+//                _memberInviteList.value = list
+//            }
+//        }
+//    }
+//
 
-        viewModelScope.launch {
-            viewNotificationRepository.fetchMemberInviteNotifications(currentUserId).collect{list->
-                _memberInviteList.value = list
+
+    fun fetchCombinedNotifications(currentUserId: String?) {
+
+        if (currentUserId != null) {
+            Log.d("ShowNotification","viewmodel current user id is NOT null")
+
+            viewModelScope.launch {
+                viewNotificationRepository.fetchCombinedNotifications(currentUserId)
+                    .collect { allNotification ->
+                        Log.d("ShowNotification","All notification in viewmodel is ${allNotification.size}")
+                        _combineNotificationList.value = allNotification
+                    }
             }
         }
+        else{
+            Log.d("ShowNotification","viewmodel current user id is null")
+        }
     }
+
 }

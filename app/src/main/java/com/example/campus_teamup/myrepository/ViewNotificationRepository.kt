@@ -14,6 +14,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -27,7 +28,6 @@ class ViewNotificationRepository @Inject constructor(private val firebaseFiresto
 
             val teamInviteCollection =
                 firebaseFirestore.collection("all_user_id").document(currentUserId)
-                    .collection("all_user_details").document("team_invites")
                     .collection("all_invites")
 
             val listener = teamInviteCollection.addSnapshotListener { snapshot, error ->
@@ -36,17 +36,18 @@ class ViewNotificationRepository @Inject constructor(private val firebaseFiresto
                     close(error)
                     return@addSnapshotListener
                 }
-                if (snapshot != null) {
-                    val listOfNotifications =
-                        snapshot.documents.mapNotNull { document ->
-                            document.toObject(NotificationItems.TeamInviteNotification::class.java)
-                                ?.apply {
-                                    Log.d("UserNotification", "Document id is ${document.id} <-")
-                                    this.teamRequestId = document.id
-                                }
-                        }
-                    trySend(listOfNotifications)
-                }
+                val listOfNotifications =
+                    snapshot?.documents?.mapNotNull { document ->
+                        document.toObject(NotificationItems.TeamInviteNotification::class.java)
+                            ?.apply {
+                                Log.d("UserNotification", "Document id is ${document.id} <-")
+                                this.teamRequestId = document.id
+                            }
+                    } ?: emptyList()
+
+                Log.d("ShowNotification", "Size of listOfTeamInvite is ${listOfNotifications.size}")
+                trySend(listOfNotifications)
+
             }
             awaitClose { listener.remove() }
         }
@@ -56,25 +57,29 @@ class ViewNotificationRepository @Inject constructor(private val firebaseFiresto
     // also update the list of users to which sender sent request means after rejection of request
     // sender can again show interest to let him in team
 
-    suspend fun denyRequest(requestToRemove: String, receiverId: String, senderId: String) {
-        coroutineScope {
-            launch {
-                firebaseFirestore.collection("all_user_id").document(receiverId)
-                    .collection("all_user_details").document("team_invites")
-                    .collection("all_invites")
-                    .document(requestToRemove).delete().await()
-            }
-            launch {
-                Log.d(
-                    "Request",
-                    "$senderId <-  Going to update sender list of user to whom he send request"
-                )
-                firebaseFirestore.collection("request_send_by").document(senderId)
-                    .update("request_send_to", FieldValue.arrayRemove(receiverId))
-                    .await()
-            }
+     fun denyRequest(requestToRemove: String, receiverId: String, senderId: String) {
 
-        }
+            // this is take care of atomicity
+            val runBatch = firebaseFirestore.batch()
+
+            val deleteOperation =
+                firebaseFirestore.collection("all_user_id").document(receiverId)
+                    .collection("all_invites")
+                    .document(requestToRemove)
+
+            Log.d(
+                "Request",
+                "$senderId <-  Going to update sender list of user to whom he send request"
+            )
+            val updateOperation = firebaseFirestore.collection("request_send_by").document(senderId)
+
+
+            runBatch.delete(deleteOperation)
+            runBatch.update(updateOperation, "request_send_to" , FieldValue.arrayRemove(receiverId))
+
+            runBatch.commit()
+
+        Log.d("DenyRequest","DenyRequest is completed")
     }
 
 
@@ -145,37 +150,54 @@ class ViewNotificationRepository @Inject constructor(private val firebaseFiresto
 
 
     // this is when a user wants to join other team
-    fun fetchMemberInviteNotifications(currentUserId: String): Flow<List<NotificationItems.MemberInviteNotification>> = callbackFlow{
+    fun fetchMemberInviteNotifications(currentUserId: String): Flow<List<NotificationItems.MemberInviteNotification>> =
+        callbackFlow {
 
 
-        val collectionReference =
-            firebaseFirestore.collection("all_user_id").document(currentUserId)
-                .collection("team_join_request")
+            val collectionReference =
+                firebaseFirestore.collection("all_user_id").document(currentUserId)
+                    .collection("team_join_request")
 
 
-        val realTimeListener = collectionReference.addSnapshotListener{snapshot , error->
-            if(error != null){
-             close(error)
-                return@addSnapshotListener
-            }
-
-            if(snapshot != null && !snapshot.isEmpty){
-
-                snapshot.documents.mapNotNull {items->
-                   val listOfMemberInvites =  items.toObject(NotificationItems.MemberInviteNotification::class.java) as List<NotificationItems.MemberInviteNotification>
-
-
-                    Log.d("ShowNotification" , "Size of listOfMemberList is ${listOfMemberInvites.size}")
-                    trySend(listOfMemberInvites)
+            val realTimeListener = collectionReference.addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
                 }
+
+
+                val listOfMemberInvites = snapshot?.documents?.mapNotNull { items ->
+                    items.toObject(NotificationItems.MemberInviteNotification::class.java)
+                } ?: emptyList()
+
+                Log.d(
+                    "ShowNotification",
+                    "Size of listOfMemberList is ${listOfMemberInvites.size}"
+                )
+                trySend(listOfMemberInvites)
+
             }
-            else{
-                Log.d("ShowNotification" , "Snapshot is null or empty")
-            }
+
+            awaitClose { realTimeListener.remove() }
+
         }
 
-        awaitClose{realTimeListener.remove()}
 
+    suspend fun fetchCombinedNotifications(currentUserId: String): Flow<List<NotificationItems>> {
+
+        val teamInviteNotificationList = fetchTeamInviteNotifications(currentUserId)
+        val memberInvitedNotificationList = fetchMemberInviteNotifications(currentUserId)
+
+        return combine(
+            teamInviteNotificationList,
+            memberInvitedNotificationList
+        ) { teamInvite, memberInvite ->
+            val combinedList = mutableListOf<NotificationItems>()
+            combinedList.addAll(teamInvite)
+            combinedList.addAll(memberInvite)
+            Log.d("ShowNotification", "Repo all notification size is ${combinedList.size}")
+            combinedList
+        }
     }
 
 
