@@ -57,11 +57,12 @@ class ViewNotificationRepository @Inject constructor(private val firebaseFiresto
     // also update the list of users to which sender sent request means after rejection of request
     // sender can again show interest to let him in team
 
-     fun denyRequest(requestToRemove: String, receiverId: String, senderId: String) {
+     fun denyTeamRequest(requestToRemove: String, receiverId: String, senderId: String) {
 
             // this is take care of atomicity
             val runBatch = firebaseFirestore.batch()
 
+         // this will remove the notification from current user
             val deleteOperation =
                 firebaseFirestore.collection("all_user_id").document(receiverId)
                     .collection("all_invites")
@@ -71,6 +72,9 @@ class ViewNotificationRepository @Inject constructor(private val firebaseFiresto
                 "Request",
                 "$senderId <-  Going to update sender list of user to whom he send request"
             )
+
+
+         // purpose is to update the list of users to whom user send request
             val updateOperation = firebaseFirestore.collection("request_send_by").document(senderId)
 
 
@@ -79,9 +83,32 @@ class ViewNotificationRepository @Inject constructor(private val firebaseFiresto
 
             runBatch.commit()
 
-        Log.d("DenyRequest","DenyRequest is completed")
+        Log.d("DenyRequest","Team Invite is completed")
     }
 
+
+    // this is when a user denies the request who want to join current user team
+    fun denyUserRequest(requestToRemove: String , receiverId: String , senderId: String){
+
+
+        val runBath = firebaseFirestore.batch()
+        // this operation will remove the notification that receiver receives because receiver decides to deny it
+        val removeNotification = firebaseFirestore.collection("all_user_id").document(receiverId).collection("team_join_request")
+            .document(requestToRemove)
+
+
+        // this will remove the userId from sender List to whom sender sends request
+
+        val updateSenderList = firebaseFirestore.collection("team_joint_request").document(senderId)
+
+        runBath.delete(removeNotification)
+
+        runBath.update(updateSenderList , "request_sent_to" , FieldValue.arrayRemove(receiverId))
+
+        runBath.commit()
+
+        Log.d("DenyRequest","Member Invite deny request is complete")
+    }
 
     suspend fun createChatRoom(
         senderName: String,
@@ -199,6 +226,5 @@ class ViewNotificationRepository @Inject constructor(private val firebaseFiresto
             combinedList
         }
     }
-
 
 }

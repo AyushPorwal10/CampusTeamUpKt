@@ -54,7 +54,7 @@ fun TeamInviteNotification(
         RejectTeamInviteDialog(onCancel = {
             rejectTeamInviteDialog = false
         }) {
-            viewNotificationViewModel.denyRequest(index , currentUserData?.userId)
+            viewNotificationViewModel.denyTeamRequest(index , currentUserData?.userId)
         }
     }
 

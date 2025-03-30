@@ -24,7 +24,7 @@ object TimeAndDate {
     fun formatDate(timestamp: Long): String {
 
         val dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault())
-        val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm", Locale.ENGLISH)
+        val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm:ss", Locale.ENGLISH)
         return dateTime.format(formatter)
     }
 }

@@ -25,7 +25,6 @@ import javax.inject.Inject
 class UserProfileViewModel @Inject constructor(
     private val userProfileRepo: UserProfileRepo,
     private val userManager: UserManager,
-    private val storageReference: StorageReference
 ) : ViewModel() {
 
     private lateinit var userId: String

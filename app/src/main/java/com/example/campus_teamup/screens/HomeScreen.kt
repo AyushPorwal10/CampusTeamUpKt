@@ -8,7 +8,6 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -22,7 +21,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -33,9 +31,11 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -67,6 +67,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.HandleLogoutDialog
+import com.example.campus_teamup.helper.ToastHelper
 import com.example.campus_teamup.myactivities.DrawerItemActivity
 import com.example.campus_teamup.myactivities.LoginAndSignUp
 import com.example.campus_teamup.myactivities.UserProfile
@@ -80,7 +81,6 @@ import com.example.campus_teamup.ui.theme.White
 import com.example.campus_teamup.vacancy.screens.VacanciesScreen
 import com.example.campus_teamup.viewmodels.HomeScreenViewModel
 import com.example.campus_teamup.viewmodels.SearchRoleVacancy
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 
@@ -90,8 +90,11 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     context: Context = LocalContext.current,
     homeScreenViewModel: HomeScreenViewModel,
-    searchRoleVacancy: SearchRoleVacancy
+    searchRoleVacancy: SearchRoleVacancy,
+    userId: String?
 ) {
+
+    Log.d("Saving", "currentUserId in homescreen is $userId <-")
 
     val bgColor = BackGroundColor
     val textColor = White
@@ -102,6 +105,8 @@ fun HomeScreen(
     val userProfileImage = homeScreenViewModel.userImage.collectAsState()
 
     val bottomAppBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
 
     var multifloatingState by remember {
@@ -234,6 +239,20 @@ fun HomeScreen(
                     context.startActivity(intent)
                 }
 
+
+                // saved items
+
+                NavItem(
+                    coroutineScope,
+                    drawerState,
+                    R.drawable.saveproject,
+                    stringResource(id = R.string.saved_items)
+                ) {
+                    val intent = Intent(context, DrawerItemActivity::class.java)
+                    intent.putExtra("DrawerItem", "savedItems")
+                    context.startActivity(intent)
+                }
+
                 // logout button
 
                 LogOutButton(homeScreenViewModel)
@@ -242,6 +261,9 @@ fun HomeScreen(
     ) {
         Scaffold(
             modifier = Modifier.nestedScroll(bottomAppBarScrollBehavior.nestedScrollConnection),
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState)
+            },
             topBar = {
                 TopAppBar(
                     title = { Text(text = "Campus TeamUp", color = textColor) },
@@ -281,50 +303,69 @@ fun HomeScreen(
                 ) {
                     HandlingBottomAppBar(selected, navController, Modifier.weight(1f))
                 }
-            },
-            content = { paddingValues ->
-                NavHost(
-                    navController = navController,
-                    startDestination = BottomNavScreens.Roles.screen,
-                    modifier = Modifier.padding(paddingValues)
-                ) {
-
-                    // bottom nav items
-                    composable(BottomNavScreens.Roles.screen , enterTransition = {
-                        slideInHorizontally(
-                            initialOffsetX = {-it},
-                            animationSpec = tween(
-                                300,
-                                easing = LinearEasing
-                            )
-                        )
-                    },
-                        exitTransition = {
-                            slideOutHorizontally(
-                                targetOffsetX = {-it},
-                                animationSpec = tween(
-                                    300,
-                                    easing = FastOutLinearInEasing
-                                )
-                            )
-                        }) { RolesScreen(homeScreenViewModel , searchRoleVacancy) }
-
-
-
-                    composable(BottomNavScreens.Projects.screen ) {
-                        ProjectsScreen(
-                            homeScreenViewModel
-                        )
-                    }
-                    composable(BottomNavScreens.Vacancies.screen) {
-                        VacanciesScreen(
-                            homeScreenViewModel,searchRoleVacancy
-                        )
-                    }
-                }
-
             }
-        )
+        ) { paddingValues ->
+            NavHost(
+                navController = navController,
+                startDestination = BottomNavScreens.Roles.screen,
+                modifier = Modifier.padding(paddingValues)
+            ) {
+
+                composable(BottomNavScreens.Roles.screen) {
+                    RolesScreen(homeScreenViewModel, searchRoleVacancy, saveRole = { roleDetails ->
+                        homeScreenViewModel.saveRole(roleDetails, onRoleSaved = {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "Role Saved Successfully.",
+                                    actionLabel = "Ok"
+                                )
+                            }
+                        }, onError = {
+                            Log.e("RoleSaved", "Error is $it")
+                            ToastHelper.showToast(context, "Something went wrong !")
+                        })
+                    })
+                }
+                composable(BottomNavScreens.Projects.screen) {
+                    ProjectsScreen(
+                        homeScreenViewModel,
+                        saveProject = {
+                            homeScreenViewModel.saveProject(it, onProjectSaved = {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Project Saved Successfully.",
+                                        actionLabel = "Ok"
+                                    )
+                                }
+                            },
+                                onError = {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(message = "Something went wrong.")
+                                    }
+                                })
+                        }
+                    )
+                }
+                composable(BottomNavScreens.Vacancies.screen) {
+                    VacanciesScreen(
+                        homeScreenViewModel, searchRoleVacancy,
+                        saveVacancy = {
+                            homeScreenViewModel.saveVacancy(it , onVacancySaved = {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Vacancy Saved Successfully.",
+                                        actionLabel = "Ok"
+                                    )
+                                }
+                            },
+                                onError = {
+                                })
+                        }
+                    )
+                }
+            }
+
+        }
     }
 }
 
@@ -481,8 +522,9 @@ fun LogOutButton(homeScreenViewModel: HomeScreenViewModel) {
             onConfirm = {
                 showDialog = false
                 homeScreenViewModel.logoutUser(onLogoutSuccess = {
-                    val navigateToLogin = Intent(context , LoginAndSignUp::class.java)
-                    navigateToLogin.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    val navigateToLogin = Intent(context, LoginAndSignUp::class.java)
+                    navigateToLogin.flags =
+                        Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     context.startActivity(navigateToLogin)
                 })
             })

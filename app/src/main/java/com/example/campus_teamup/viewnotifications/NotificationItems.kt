@@ -13,7 +13,6 @@ sealed class NotificationItems {
     // this is when a user wants to join team
 
     data class MemberInviteNotification(
-        val memberRequestId : String = "",
         val time : String = "",
         val senderId : String = "",
         val senderName : String = ""

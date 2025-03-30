@@ -18,9 +18,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.campus_teamup.chatsection.screens.ChatScreen
 import com.example.campus_teamup.helper.StartChatDialog
+import com.example.campus_teamup.saveditems.ShowSavedItems
 import com.example.campus_teamup.viewnotifications.NotificationsScreen
 import com.example.campus_teamup.screens.RecentChatScreen
 import com.example.campus_teamup.screens.TeamDetailsScreen
+import com.example.campus_teamup.viewmodels.SavedItemsViewModel
 import com.example.campus_teamup.viewmodels.TeamDetailsViewModel
 import com.example.campus_teamup.viewmodels.UserDataSharedViewModel
 import com.example.campus_teamup.viewmodels.ViewNotificationViewModel
@@ -32,7 +34,7 @@ class DrawerItemActivity : ComponentActivity() {
 
     private val teamDetailsViewModel: TeamDetailsViewModel by viewModels()
     private val viewNotificationViewModel: ViewNotificationViewModel by viewModels()
-
+    private val savedItemsViewModel : SavedItemsViewModel by viewModels()
     private val userDataSharedViewModel : UserDataSharedViewModel by viewModels()
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -57,6 +59,7 @@ class DrawerItemActivity : ComponentActivity() {
                 "notifications" -> "notifications"
                 "teamDetails" -> "teamDetails"
                 "recentchats" -> "recentchats"
+                "savedItems" -> "savedItems"
                 else -> "notifications"
             }
 
@@ -84,6 +87,12 @@ class DrawerItemActivity : ComponentActivity() {
                     val chatRoomId = backStackEntry.arguments?.getString("chatRoomId")
                     val currentUserId = backStackEntry.arguments?.getString("currentUserId")
                     ChatScreen(senderName,chatRoomId , currentUserId)
+                }
+                composable("savedItems"){
+                    savedItemsViewModel.fetchSavedProjects(currentUserData.value?.userId)
+                    savedItemsViewModel.fetchSavedRoles(currentUserData.value?.userId)
+                    savedItemsViewModel.fetchSavedVacancy(currentUserData.value?.userId)
+                    ShowSavedItems(currentUserData.value , savedItemsViewModel)
                 }
 
             }

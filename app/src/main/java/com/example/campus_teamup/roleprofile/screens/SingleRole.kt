@@ -2,14 +2,18 @@ package com.example.campus_teamup.roleprofile.screens
 
 import android.content.Intent
 import android.util.Log
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -29,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.AsyncImage
 import com.example.campus_teamup.R
+import com.example.campus_teamup.helper.Dimensions
 import com.example.campus_teamup.mydataclass.RoleDetails
 import com.example.campus_teamup.myactivities.ViewUserProfile
 import com.example.campus_teamup.ui.theme.BackGroundColor
@@ -39,30 +44,34 @@ import com.example.campus_teamup.ui.theme.White
 
 
 @Composable
-fun SingleRole(roleDetails: RoleDetails) {
+fun SingleRole(roleDetails: RoleDetails , onSaveRoleClicked : (RoleDetails) -> Unit) {
+
+    val context = LocalContext.current
     val textColor = White
-    val bgColor = BackGroundColor
 
     Box(
         modifier = Modifier
-            .border(0.5.dp, BorderColor, shape = RoundedCornerShape(22.dp))
-            .fillMaxWidth(0.9f), contentAlignment = Alignment.Center
+            .border(
+                0.5.dp, BorderColor,
+                shape = RoundedCornerShape(Dimensions.largeRoundedShape)
+            )
+            .fillMaxWidth(0.9f)
+            .animateContentSize(), contentAlignment = Alignment.Center
     ) {
 
         ConstraintLayout(
             modifier = Modifier
-                .padding(horizontal = 20.dp, vertical = 10.dp)
+                .padding(8.dp)
                 .fillMaxWidth()
         ) {
-            val (userImage, userName, roleLookingFor, viewProfile, downIcon, knowMoreBtn) = createRefs()
+            val (userImage, userName, roleLookingFor, viewProfileBtn, saveProjectBtn) = createRefs()
 
 
-            Log.d("Image", "fetchedUrl" + roleDetails.userImageUrl)
+
             AsyncImage(
-                model = roleDetails.userImageUrl,
+                model = roleDetails.userImageUrl ?: R.drawable.profile,
                 contentDescription = "User Profile",
                 contentScale = ContentScale.Crop,
-                error = painterResource(R.drawable.profile),
                 modifier = Modifier
                     .constrainAs(userImage) {
                         top.linkTo(parent.top)
@@ -70,48 +79,75 @@ fun SingleRole(roleDetails: RoleDetails) {
                     }
                     .size(40.dp)
                     .clip(CircleShape)
-                    .border(1.dp, White, CircleShape)
-            )
+                    .border(1.dp, White, CircleShape))
 
-
-            // Name of user who posted role
             Text(text = roleDetails.userName,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 softWrap = false,
-                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = textColor,
+                style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.constrainAs(userName)
                 {
-                    start.linkTo(userImage.end, margin = 8.dp)
                     top.linkTo(userImage.top)
                     bottom.linkTo(userImage.bottom)
+                    start.linkTo(userImage.end, margin = 8.dp)
                 })
 
+            IconButton(onClick = {
+                onSaveRoleClicked(roleDetails)
+            }, modifier = Modifier.constrainAs(saveProjectBtn) {
+                top.linkTo(parent.top)
+                bottom.linkTo(userName.bottom)
+                end.linkTo(parent.end)
+            }.size(26.dp)) {
+                Icon(
+                    painter = painterResource(id = R.drawable.saveproject),
+                    contentDescription = null,
+                    tint = White
+                   )
 
-            // Role that user posted
+            }
+
+
             Text(
-                text = "Role : ${roleDetails.role}",
+                text = "Looking For : ${roleDetails.role}",
                 maxLines = 1,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Medium,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleMedium,
                 softWrap = false,
+                style = MaterialTheme.typography.titleMedium,
                 color = LightTextColor,
                 modifier = Modifier.constrainAs(roleLookingFor) {
                     top.linkTo(userImage.bottom, margin = 12.dp)
                     start.linkTo(parent.start)
-
                 })
 
 
-            // view Profile btn
-            ViewProfileBtn(Modifier.constrainAs(viewProfile) {
-                top.linkTo(roleLookingFor.bottom, margin = 10.dp)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-            },roleDetails.postedBy)
+            TextButton(
+                onClick = {
+                    val intent = Intent(context, ViewUserProfile::class.java)
+                    Log.d(
+                        "FCM",
+                        "User id taken from vacancy activity ${roleDetails.postedBy} <- here it is "
+                    )
+                    intent.putExtra("userId", roleDetails.postedBy)
+                    context.startActivity(intent)
+                },
+                modifier = Modifier.constrainAs(viewProfileBtn) {
+                    top.linkTo(roleLookingFor.bottom, margin = 4.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }, contentPadding = PaddingValues(vertical = 2.dp, horizontal = 10.dp)
+            ) {
+                Text(
+                    text = "View Profile",
+                    color = White,
+                    fontSize = 12.sp
+                )
+            }
+
 
         }
     }
@@ -119,28 +155,3 @@ fun SingleRole(roleDetails: RoleDetails) {
 
 }
 
-@Composable
-fun ViewProfileBtn(modifier: Modifier, postedBy: String) {
-    val context = LocalContext.current
-    TextButton(
-        onClick = {
-            val intent = Intent(context, ViewUserProfile::class.java)
-            Log.d("FCM","User id taken from vacancy activity $postedBy <- here it is ")
-            intent.putExtra("userId",postedBy)
-            context.startActivity(intent)
-        },
-        modifier = modifier,
-
-        colors = ButtonDefaults.buttonColors(
-            containerColor = BackGroundColor,
-            contentColor = White
-
-        )
-    ) {
-        Text(
-            text = "View Profile",
-            fontSize = 12.sp,
-            color = White,
-        )
-    }
-}

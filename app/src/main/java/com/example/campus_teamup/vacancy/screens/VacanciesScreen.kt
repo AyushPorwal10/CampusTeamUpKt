@@ -43,27 +43,27 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun VacanciesScreen(homeScreenViewModel: HomeScreenViewModel,
-                    searchRoleVacancy: SearchRoleVacancy) {
+                    searchRoleVacancy: SearchRoleVacancy , saveVacancy : (VacancyDetails) -> Unit ) {
     val textColor = White
     val bgColor = BackGroundColor
 
+    val idOfSavedVacancy by homeScreenViewModel.listOfSavedVacancy.collectAsState()
 
     val searchText by searchRoleVacancy.searchVacancyText.collectAsState()
 
-    val searchOption = listOf("Search by Team Name" , "Search by Role" , "Search by Hackathon")
+    val searchOption = listOf("Search by Team Name", "Search by Role", "Search by Hackathon")
     var placeHolderIndex by remember {
         mutableIntStateOf(0)
     }
 
-    val vacancies by if (searchText.isNotEmpty()){
+    val vacancies by if (searchText.isNotEmpty()) {
         searchRoleVacancy.searchedVacancies.collectAsState()
-    }
-    else{
+    } else {
         homeScreenViewModel.vacancyStateFlow.collectAsState()
     }
 
-    LaunchedEffect(Unit){
-        while (true){
+    LaunchedEffect(Unit) {
+        while (true) {
             delay(2000)
             placeHolderIndex = (placeHolderIndex + 1) % searchOption.size
         }
@@ -77,11 +77,11 @@ fun VacanciesScreen(homeScreenViewModel: HomeScreenViewModel,
 
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
 
-            val (searchBar , filterIcon , divider, vacancyList) = createRefs()
+            val (searchBar, filterIcon, divider, vacancyList) = createRefs()
 
             OutlinedTextField(value = searchText,
                 onValueChange = { searchQuery ->
-                                searchRoleVacancy.onSearchedVacancyTextChange(searchQuery)
+                    searchRoleVacancy.onSearchedVacancyTextChange(searchQuery)
                 },
                 colors = TextFieldStyle.myTextFieldColor(),
                 shape = TextFieldStyle.defaultShape,
@@ -131,13 +131,13 @@ fun VacanciesScreen(homeScreenViewModel: HomeScreenViewModel,
             )
 
             // horizontal arrangement of search items
-            createHorizontalChain(searchBar , filterIcon , chainStyle = ChainStyle.Spread)
+            createHorizontalChain(searchBar, filterIcon, chainStyle = ChainStyle.Spread)
 
             HorizontalDivider(thickness = 1.dp,
                 color = BorderColor,
-                modifier = Modifier.constrainAs(divider){
+                modifier = Modifier.constrainAs(divider) {
                     start.linkTo(parent.start)
-                    top.linkTo(searchBar.bottom , margin = 16.dp)
+                    top.linkTo(searchBar.bottom, margin = 16.dp)
                     end.linkTo(parent.end)
                 })
 
@@ -153,15 +153,13 @@ fun VacanciesScreen(homeScreenViewModel: HomeScreenViewModel,
                         top.linkTo(divider.bottom, margin = 5.dp)
                     },
                 vacancies,
-                homeScreenViewModel
+                homeScreenViewModel,
+                saveVacancy = {
+                    saveVacancy(it)
+                },
+                idOfSavedVacancy
             )
-
-
-
-
-
         }
-
     }
 }
 
@@ -170,33 +168,40 @@ fun VacanciesScreen(homeScreenViewModel: HomeScreenViewModel,
 fun ShowListOfVacancies(
     modifier: Modifier,
     vacancies: List<VacancyDetails>,
-    homeScreenViewModel: HomeScreenViewModel
+    homeScreenViewModel: HomeScreenViewModel,
+    saveVacancy: (VacancyDetails) -> Unit,
+    idOfSavedVacancy: List<String>,
 ) {
 
     val isRefreshing = homeScreenViewModel.isVacancyRefreshing.collectAsState()
 
-    LaunchedEffect(Unit){
-        Log.d("Vacancy","Composable Fetching When composable loads")
+    LaunchedEffect(Unit) {
+        Log.d("Vacancy", "Composable Fetching When composable loads")
         homeScreenViewModel.observeVacancyInRealTime()
     }
     PullToRefreshBox(isRefreshing = isRefreshing.value, onRefresh = {
-        Log.d("Vacancy","Composable Observing new roles user refresh")
+        Log.d("Vacancy", "Composable Observing new roles user refresh")
         homeScreenViewModel.observeVacancyInRealTime()
-    }, modifier = modifier , contentAlignment = Alignment.Center) {
+    }, modifier = modifier, contentAlignment = Alignment.Center) {
 
-        LazyColumn(modifier = modifier , verticalArrangement = Arrangement.spacedBy(16.dp)
+        LazyColumn(
+            modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(vacancies){vacancy->
-                SingleVacancy(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    vacancy
+            items(vacancies) { vacancy ->
 
-                )
+                if(!idOfSavedVacancy.contains(vacancy.vacancyId)){
+                    SingleVacancy(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        vacancy,
+                        onSaveVacancy = {
+                            saveVacancy(it)
+                        }
+                    )
+                }
+
             }
         }
     }
-
-
 }

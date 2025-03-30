@@ -48,7 +48,6 @@ fun CodingProfiles(
     val isLoading = userProfileViewModel.isLoading.collectAsState()
 
     val isEditing = remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {

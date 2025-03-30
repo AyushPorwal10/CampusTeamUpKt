@@ -60,4 +60,5 @@
     <string name="reject_team_request_message">You are going to reject Team invite.</string>
     <string name="start_chat_message">Now you can start sending messages.</string>
     <string name="request_already_sent">Request Sent</string>
+    <string name="saved_items">Saved Items</string>
 </resources>

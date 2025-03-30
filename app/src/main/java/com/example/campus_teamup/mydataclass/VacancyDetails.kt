@@ -6,6 +6,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class VacancyDetails(
+    var vacancyId : String = "",
     val postedBy: String = "",
     val postedOn: String = "",
     val teamLogo: String = "",

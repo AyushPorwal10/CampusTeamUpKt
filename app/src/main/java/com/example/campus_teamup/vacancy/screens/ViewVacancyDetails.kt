@@ -52,10 +52,13 @@ fun ViewVacancyDetails(
     val textColor = White
     val context = LocalContext.current
 
-    val showRequestDialog = remember{ mutableStateOf(false) }
-    Log.d("VacancyNotification","Current user id in viewvacancydetails is  is ${currentUserData.value?.userId} <- ")
+    val showRequestDialog = remember { mutableStateOf(false) }
+    Log.d(
+        "VacancyNotification",
+        "Current user id in viewvacancydetails is  is ${currentUserData.value?.userId} <- "
+    )
 
-    val viewVacancyViewModel : ViewVacancyViewModel = hiltViewModel()
+    val viewVacancyViewModel: ViewVacancyViewModel = hiltViewModel()
 
     val isRequestAlreadySent = viewVacancyViewModel.isRequestSent.collectAsState()
 
@@ -65,7 +68,7 @@ fun ViewVacancyDetails(
                 0.5.dp, BorderColor,
                 shape = RoundedCornerShape(Dimensions.largeRoundedShape)
             )
-            .fillMaxWidth(0.95f), contentAlignment = Alignment.Center
+            .fillMaxWidth(0.98f), contentAlignment = Alignment.Center
     ) {
 
         ConstraintLayout(
@@ -73,7 +76,7 @@ fun ViewVacancyDetails(
                 .padding(6.dp)
                 .fillMaxWidth()
         ) {
-            val (teamLogo, teamName, roleLookingFor, hackathonName, roleDescription, datePosted, skillRequired , sendRequestBtn) = createRefs()
+            val (teamLogo, teamName, roleLookingFor, hackathonName, roleDescription, datePosted, skillRequired, sendRequestBtn) = createRefs()
 
 
 
@@ -100,7 +103,7 @@ fun ViewVacancyDetails(
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.constrainAs(teamName)
                 {
-                    top.linkTo(teamLogo.bottom , margin = 8.dp)
+                    top.linkTo(teamLogo.bottom, margin = 8.dp)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 })
@@ -137,14 +140,14 @@ fun ViewVacancyDetails(
                     })
 
             Text(text = "Role Description : " + vacancy.roleDescription.ifEmpty { "No Description" },
-            color = LightTextColor,
-            style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier
-                .fillMaxWidth()
-                .constrainAs(roleDescription) {
-                    top.linkTo(skillRequired.bottom, margin = 8.dp)
-                    start.linkTo(parent.start)
-                })
+                color = LightTextColor,
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .constrainAs(roleDescription) {
+                        top.linkTo(skillRequired.bottom, margin = 8.dp)
+                        start.linkTo(parent.start)
+                    })
 
             Text(text = "Posted on : ${vacancy.postedOn}", color = White,
                 style = MaterialTheme.typography.titleSmall,
@@ -157,24 +160,34 @@ fun ViewVacancyDetails(
                     })
 
 
-            if(!isRequestAlreadySent.value){
+            // if id are not equal than show btn
+
+            if (currentUserData.value?.userId != vacancy.postedBy) {
+
                 OutlinedButton(onClick = {
                     showRequestDialog.value = true
-                } , modifier = Modifier.constrainAs(sendRequestBtn){
-                    top.linkTo(datePosted.bottom , margin = 10.dp)
+                }, modifier = Modifier.constrainAs(sendRequestBtn) {
+                    top.linkTo(datePosted.bottom, margin = 10.dp)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 }) {
-                    Text(text = stringResource(id = R.string.send_request) , color = White , style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = if (isRequestAlreadySent.value) stringResource(id = R.string.request_already_sent) else stringResource(
+                            id = R.string.send_request
+                        ), color = White, style = MaterialTheme.typography.titleMedium
+                    )
                 }
 
-                if(showRequestDialog.value){
+                if (showRequestDialog.value) {
                     ShowRequestDialog(onCancel = {
-                        showRequestDialog.value  = false
+                        showRequestDialog.value = false
                     }) {
-                        Log.d("VacancyNotification","Confirm clicked")
+                        Log.d("VacancyNotification", "Confirm clicked")
 
-                        Log.d("VacancyNotification","Current user id is ${currentUserData.value?.userId} <-")
+                        Log.d(
+                            "VacancyNotification",
+                            "Current user id is ${currentUserData.value?.userId} <-"
+                        )
 
                         currentUserData.value?.userId?.let {
 
@@ -182,21 +195,12 @@ fun ViewVacancyDetails(
                                 it, currentUserData.value?.userName!!, onNotificationSent = {
                                     showRequestDialog.value = false
                                 }, onNotificationError = {
-                                                         showRequestDialog.value = false
-                                    ToastHelper.showToast(context , "Sorry Something went wrong !")
-                                },vacancy.postedBy)
+                                    showRequestDialog.value = false
+                                    ToastHelper.showToast(context, "Sorry Something went wrong !")
+                                }, vacancy.postedBy
+                            )
                         }
                     }
-                }
-            }
-            else if(currentUserData.value?.userId != vacancy.postedBy){
-                OutlinedButton(onClick = {
-                } , modifier = Modifier.constrainAs(sendRequestBtn){
-                    top.linkTo(datePosted.bottom , margin = 10.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }) {
-                    Text(text = stringResource(id = R.string.request_already_sent) , color = White , style = MaterialTheme.typography.titleMedium)
                 }
             }
         }

@@ -54,13 +54,11 @@ class CreatePostViewModel @Inject constructor(
                 var userImageUrl = snapshot.toObject(CollegeDetails::class.java)
 
                 createPostRepository.postRole(
-                    userId, RoleDetails(
-                        userId,
-                        userName,
-                        userImageUrl?.userImageUrl ?: "",
-                        role,
-                        datePosted
-                    )
+                    userId,
+                    userName,
+                    userImageUrl?.userImageUrl ?: "",
+                    role,
+                    datePosted
                 )
             }
             _isPosted.value = true
@@ -100,8 +98,9 @@ class CreatePostViewModel @Inject constructor(
             _isLoading.value = true
             Log.d("Vacancy", "Going to post vacancy")
             withContext(Dispatchers.IO) {
-                createPostRepository.postVacancy(
+                createPostRepository.postTeamVacancy(
                     userId, VacancyDetails(
+                        "",   // this will be generated in repo class
                         userId,
                         postedOn,
                         teamLogo,
@@ -137,16 +136,13 @@ class CreatePostViewModel @Inject constructor(
             _isLoading.value = true
 
             withContext(Dispatchers.IO){
-                createPostRepository.postProject(userId ,
-                    ProjectDetails(
-                        userId,
-                        postedOn,
-                        teamName,
-                        hackathonOrPersonal,
-                        problemStatement,
-                        githubUrl,
-                        projectLikes
-                    )
+                createPostRepository.addProject(userId ,
+                    postedOn,
+                    teamName,
+                    hackathonOrPersonal,
+                    problemStatement,
+                    githubUrl,
+                    projectLikes
                 )
             }
 

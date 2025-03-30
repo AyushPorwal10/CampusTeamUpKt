@@ -8,15 +8,17 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import com.example.campus_teamup.screens.HomeScreen
 import com.example.campus_teamup.ui.theme.BackGroundColor
 
 import com.example.campus_teamup.viewmodels.HomeScreenViewModel
 import com.example.campus_teamup.viewmodels.SearchRoleVacancy
+import com.example.campus_teamup.viewmodels.UserDataSharedViewModel
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -25,23 +27,25 @@ class MainActivity : ComponentActivity() {
 
     private val homeScreenViewModel: HomeScreenViewModel by viewModels()
     private val searchRoleVacancy: SearchRoleVacancy by viewModels()
+    private val userDataSharedViewModel : UserDataSharedViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("Post", "MainActivity Created")
 
 
-        if (checkGooglePlayServices()) {
 
-        }
 
         setContent {
+            val userData = userDataSharedViewModel.userData.collectAsState()
 
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(BackGroundColor)
             ) {
-                HomeScreen(this@MainActivity, homeScreenViewModel, searchRoleVacancy)
+                    HomeScreen(this@MainActivity, homeScreenViewModel, searchRoleVacancy , userData.value?.userId)
+
+
             }
         }
 
@@ -50,7 +54,6 @@ class MainActivity : ComponentActivity() {
 
         homeScreenViewModel.fetchInitialOrPaginatedRoles()
         homeScreenViewModel.fetchInitialOrPaginatedVacancy()
-        homeScreenViewModel.fetchProjects()
     }
 
 

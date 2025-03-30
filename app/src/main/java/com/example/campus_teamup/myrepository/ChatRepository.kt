@@ -24,27 +24,26 @@ class ChatRepository @Inject constructor(
 ) {
 
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun sendMessage(sendMessage: SendMessage, chatRoomId: String): Result<Unit> {
+     fun sendMessage(sendMessage: SendMessage, chatRoomId: String): Result<Unit> {
 
         return try {
-            coroutineScope {
-                launch {
-                    firestore.collection("chat_rooms").document(chatRoomId).collection("chats")
-                        .document()
-                        .set(sendMessage).await()
-                }
+                firestore.runTransaction { transaction ->
+                    val sendMessageDocumentRef =
+                        firestore.collection("chat_rooms").document(chatRoomId).collection("chats")
+                            .document()
 
-                launch {
-                    firestore.collection("chat_rooms").document(chatRoomId).set(
-                        LastMessage(
+                    val lastMessageDocumentReference = firestore.collection("chat_rooms").document(chatRoomId)
+
+                    transaction.set(sendMessageDocumentRef, sendMessage)
+
+                    transaction.set(lastMessageDocumentReference, LastMessage(
                             sendMessage.message,
                             sendMessage.senderId,
                             sendMessage.timeStamp,
-                            chatRoomId
-                        )
-                    ).await()
+                            chatRoomId)
+                    )
                 }
-            }
+            Log.d("Transaction","Transaction Completed")
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -56,7 +55,7 @@ class ChatRepository @Inject constructor(
 
         val chatReference =
             firestore.collection("chat_rooms").document(chatRoomId).collection("chats")
-                .orderBy("timeStamp",Query.Direction.ASCENDING)
+                .orderBy("timeStamp", Query.Direction.ASCENDING)
 
         val realTimeChatListener = chatReference.addSnapshotListener { snapshot, error ->
 

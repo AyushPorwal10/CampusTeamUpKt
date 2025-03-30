@@ -55,7 +55,7 @@ class ViewNotificationViewModel @Inject constructor(
                     Log.d("ChatRoomId", "Chat room is created $chatRoomId <-")
                     _isChatRoomCreated.value = true
                     // if receiver accepts request than remove this from list of notifications
-                    denyRequest(index, currentUserId)
+                    denyTeamRequest(index, currentUserId)
                 },
                 onFailure = {
                     _isChatRoomCreated.value = false
@@ -64,24 +64,52 @@ class ViewNotificationViewModel @Inject constructor(
     }
 
 
-
-    fun denyRequest(index: Int, currentUserId: String?) {
-        val currentList = _teamInviteList.value
-        _teamInviteList.value = _teamInviteList.value.toMutableList().apply {
+    fun denyTeamRequest(index: Int, currentUserId: String?) {
+        val currentList = _combineNotificationList.value
+        _combineNotificationList.value = _combineNotificationList.value.toMutableList().apply {
             if (index in indices) {
-                Log.d("UserNotification", "Sender id from index is ${currentList[index].senderId}")
-                viewModelScope.launch {
-                    if (currentUserId != null) {
-                        viewNotificationRepository.denyRequest(
-                            currentList[index].teamRequestId,
-                            currentUserId,
-                            currentList[index].senderId
-                        )
+                val teamNotification = currentList[index]
+                if (teamNotification is NotificationItems.TeamInviteNotification) {
+                    viewModelScope.launch {
+                        if (currentUserId != null) {
+                            viewNotificationRepository.denyTeamRequest(
+                                teamNotification.teamRequestId,
+                                currentUserId,
+                                teamNotification.senderId
+                            )
+                        }
                     }
                 }
                 removeAt(index)
             }
+        }
+    }
 
+    // this is when a user denies the request who want to join current user team
+    fun denyUserRequest(index: Int, currentUserId: String?) {
+        val currentList = _combineNotificationList.value
+
+        _combineNotificationList.value = _combineNotificationList.value.toMutableList().apply {
+            if (index in indices) {
+
+
+                val memberNotification = currentList[index]
+
+                // identifying that notification is type of memberInvite notification
+                if (memberNotification is NotificationItems.MemberInviteNotification) {
+                    if (currentUserId != null) {
+                        viewModelScope.launch {
+                            viewNotificationRepository.denyUserRequest(
+                                memberNotification.senderId,
+                                currentUserId, memberNotification.senderId
+                            )
+                        }
+                    }
+                } else {
+                    Log.d("DenyRequest", "Index is not memberInviteNotification")
+                }
+
+            }
         }
     }
 
@@ -101,18 +129,20 @@ class ViewNotificationViewModel @Inject constructor(
     fun fetchCombinedNotifications(currentUserId: String?) {
 
         if (currentUserId != null) {
-            Log.d("ShowNotification","viewmodel current user id is NOT null")
+            Log.d("ShowNotification", "viewmodel current user id is NOT null")
 
             viewModelScope.launch {
                 viewNotificationRepository.fetchCombinedNotifications(currentUserId)
                     .collect { allNotification ->
-                        Log.d("ShowNotification","All notification in viewmodel is ${allNotification.size}")
+                        Log.d(
+                            "ShowNotification",
+                            "All notification in viewmodel is ${allNotification.size}"
+                        )
                         _combineNotificationList.value = allNotification
                     }
             }
-        }
-        else{
-            Log.d("ShowNotification","viewmodel current user id is null")
+        } else {
+            Log.d("ShowNotification", "viewmodel current user id is null")
         }
     }
 

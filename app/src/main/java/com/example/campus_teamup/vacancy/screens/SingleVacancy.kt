@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -47,7 +48,7 @@ import com.example.campus_teamup.myactivities.ViewVacancy
 
 
 @Composable
-fun SingleVacancy(modifier: Modifier = Modifier, vacancy: VacancyDetails) {
+fun SingleVacancy(modifier: Modifier = Modifier, vacancy: VacancyDetails , onSaveVacancy : (VacancyDetails) -> Unit ) {
 
     val context = LocalContext.current
     val textColor = White
@@ -69,7 +70,7 @@ fun SingleVacancy(modifier: Modifier = Modifier, vacancy: VacancyDetails) {
                 .padding(8.dp)
                 .fillMaxWidth()
         ) {
-            val (teamLogo, teamName, roleLookingFor, hackathonName, knowMoreBtn, downIcon, applyBtn, skillRequired) = createRefs()
+            val (teamLogo, teamName, roleLookingFor, hackathonName, knowMoreBtn, downIcon, applyBtn, skillRequired, saveVacancyBtn) = createRefs()
 
 
 
@@ -99,6 +100,21 @@ fun SingleVacancy(modifier: Modifier = Modifier, vacancy: VacancyDetails) {
                     bottom.linkTo(teamLogo.bottom)
                     start.linkTo(teamLogo.end, margin = 8.dp)
                 })
+
+            IconButton(onClick = {
+                                 onSaveVacancy(vacancy)
+            },
+                modifier = Modifier.constrainAs(saveVacancyBtn) {
+                    top.linkTo(teamName.top)
+                    bottom.linkTo(teamName.bottom)
+                    end.linkTo(parent.end)
+                }.size(26.dp)) {
+                Icon(
+                    painter = painterResource(id = R.drawable.saveproject),
+                    contentDescription = null,
+                    tint = White
+                )
+            }
 
             Text(
                 text = "Looking For : ${vacancy.roleLookingFor}",
@@ -133,11 +149,12 @@ fun SingleVacancy(modifier: Modifier = Modifier, vacancy: VacancyDetails) {
                         })
 
 
-                TextButton(onClick = {
-                    val intent = Intent(context, ViewVacancy::class.java)
-                   intent.putExtra("vacancy_details",vacancy)
-                    context.startActivity(intent)
-                },
+                TextButton(
+                    onClick = {
+                        val intent = Intent(context, ViewVacancy::class.java)
+                        intent.putExtra("vacancy_details", vacancy)
+                        context.startActivity(intent)
+                    },
                     modifier = Modifier.constrainAs(applyBtn) {
                         top.linkTo(skillRequired.bottom, margin = 4.dp)
                         start.linkTo(parent.start)
@@ -151,9 +168,7 @@ fun SingleVacancy(modifier: Modifier = Modifier, vacancy: VacancyDetails) {
                 }
             }
 
-
-
-            Text(text = if(isExpanded) stringResource(R.string.view_less) else stringResource(R.string.view_more),
+            Text(text = if (isExpanded) stringResource(R.string.view_less) else stringResource(R.string.view_more),
                 color = textColor,
                 fontWeight = FontWeight.Light,
                 modifier = Modifier
@@ -162,7 +177,6 @@ fun SingleVacancy(modifier: Modifier = Modifier, vacancy: VacancyDetails) {
                             if (isExpanded) skillRequired.bottom else roleLookingFor.bottom,
                             margin = 20.dp
                         )
-
                     }
                     .clickable {
                         isExpanded = !isExpanded

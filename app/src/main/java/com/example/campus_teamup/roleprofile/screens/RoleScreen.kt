@@ -1,5 +1,6 @@
 package com.example.campus_teamup.roleprofile.screens
 
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -43,12 +44,14 @@ import com.example.campus_teamup.viewmodels.SearchRoleVacancy
 @Composable
 fun RolesScreen(
     homeScreenViewModel: HomeScreenViewModel,
-    searchRoleVacancy: SearchRoleVacancy
+    searchRoleVacancy: SearchRoleVacancy,
+    saveRole : (RoleDetails) -> Unit
 ) {
     val textColor = White
     val bgColor = BackGroundColor
 
     val searchText by searchRoleVacancy.searchRoleText.collectAsState()
+    val idOfSavedProject by homeScreenViewModel.listOfSavedRoles.collectAsState()
 
     val isSearching by searchRoleVacancy.isRoleSearching.collectAsState()
 
@@ -154,7 +157,10 @@ fun RolesScreen(
                     top.linkTo(divider.bottom, margin = 10.dp)
                 },
                 roles,
-                homeScreenViewModel
+                homeScreenViewModel, saveRole = {
+                    saveRole(it)
+                },
+                idOfSavedProject
             )
         }
     }
@@ -165,7 +171,9 @@ fun RolesScreen(
 fun ShowListOfRoles(
     modifier: Modifier,
     roles: List<RoleDetails>,
-    homeScreenViewModel: HomeScreenViewModel
+    homeScreenViewModel: HomeScreenViewModel,
+    saveRole: (RoleDetails) -> Unit,
+    idOfSavedProject: List<String>,
 ) {
     var isRefreshing = homeScreenViewModel.isRoleRefreshing.collectAsState()
 
@@ -187,13 +195,17 @@ fun ShowListOfRoles(
         ) {
             items(roles) { role ->
                 ShimmerEffect(modifier, isLoading, contentAfterLoading = {
-                    SingleRole(role)
+                    if(!idOfSavedProject.contains(role.roleId)){
+                        Log.d("FetchedRole","Showing unsaved role")
+                        SingleRole(role , onSaveRoleClicked = {
+                            saveRole(it)
+                        })
+                    }
+
                 })
             }
 
         }
-
-
     }
 }
 

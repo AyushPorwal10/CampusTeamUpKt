@@ -1,6 +1,7 @@
 package com.example.campus_teamup.mydataclass
 
 data class ProjectDetails(
+    val projectId : String = "",
     val postedBy: String = "",
     val postedOn: String = "",
     val teamName: String = "",

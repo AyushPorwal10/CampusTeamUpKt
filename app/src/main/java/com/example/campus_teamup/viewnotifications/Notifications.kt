@@ -75,7 +75,7 @@ fun NotificationsScreen(viewNotificationViewModel: ViewNotificationViewModel, cu
                      }
                      is NotificationItems.MemberInviteNotification -> {
                          Log.d("ShowNotification","Showing MemberInviteNotification")
-                         TeamJointNotification(item )
+                         TeamJointNotification(item ,index , viewNotificationViewModel , currentUserData)
                      }
                  }
              }

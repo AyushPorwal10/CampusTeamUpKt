@@ -113,9 +113,7 @@ class ViewVacancyRepository @Inject constructor(
         requestList: List<String?>
     ) {
 
-        coroutineScope {
             try {
-
                 firebaseFirestore.runTransaction { transaction ->
 
                     updateRequestList(transaction, currentUserId, requestList)
@@ -130,7 +128,7 @@ class ViewVacancyRepository @Inject constructor(
                 Log.e(tag, "Error sending notification: ${e.message}")
                 onNotificationError()
             }
-        }
+
     }
 
     fun checkIfRequestAlreadySent(currentUserId: String?): Flow<List<String>> = callbackFlow {

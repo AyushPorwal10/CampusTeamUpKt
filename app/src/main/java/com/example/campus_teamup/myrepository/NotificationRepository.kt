@@ -60,9 +60,9 @@ class NotificationRepository @Inject constructor(
                 updateRequestList(fcmMessage.message.data["senderId"] ?: "", listOfPeopleUserSentRequest)
                 Log.d("FCM", "Updated request list concurrently")
             }
+
             launch {
                 firebaseFirestore.collection("all_user_id").document(receiverId)
-                    .collection("all_user_details").document("team_invites")
                     .collection("all_invites").add(
                         mapOf(
                             "title" to fcmMessage.message.notification.title,

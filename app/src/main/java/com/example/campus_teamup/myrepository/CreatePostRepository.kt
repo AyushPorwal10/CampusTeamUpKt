@@ -17,69 +17,125 @@ import javax.inject.Inject
 class CreatePostRepository @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
     private val storageReference: StorageReference
-){
+) {
 
 
-    suspend fun postRole(userId : String, roleDetails: RoleDetails){
-        val userRoleRef = firebaseFirestore.collection("all_user_id").document(userId).
-        collection("all_user_details").document("role_posted")
-            .collection("roles").add(roleDetails).await()
+    suspend fun postRole(
+        userId: String,
+        userName: String,
+        userImage: String,
+        role: String,
+        datePosted: String
+    ) {
+
+        val generatedRoleId = firebaseFirestore.collection("all_projects").document().id
+        Log.d("SavedRoles", "Normal id i am getting is $generatedRoleId")
+
+       val roleDetails =  RoleDetails(
+            generatedRoleId,
+            userId,
+            userName,
+            userImage,
+            role,
+            datePosted
+        )
 
 
-        firebaseFirestore
-            .collection("all_roles")
-            .document(userRoleRef.id)
-            .set(roleDetails)
-            .await()
 
+        firebaseFirestore.collection("all_user_id").document(userId).collection("roles_posted")
+            .document(generatedRoleId).set(roleDetails).await()
 
-        Log.d("PostRole","Role posted successfully")
+        firebaseFirestore.collection("all_roles").document(generatedRoleId).set(roleDetails).await()
+
+        Log.d("PostRole", "Role posted successfully")
     }
-    suspend fun fetchImageUrlFromUserDetails(userId : String) : DocumentSnapshot{
-        return   firebaseFirestore.collection("all_user_id").document(userId).
-        collection("all_user_details").document("college_details").get().await()
+
+    suspend fun fetchImageUrlFromUserDetails(userId: String): DocumentSnapshot {
+        return firebaseFirestore.collection("all_user_id").document(userId)
+            .collection("all_user_details").document("college_details").get().await()
     }
 
 
-    suspend fun uploadTeamLogo(userId: String , teamLogoUri : Uri) : String?{
+    suspend fun uploadTeamLogo(userId: String, teamLogoUri: Uri): String? {
         return try {
 
             val imageRef = storageReference.child("team_logo/$userId/teamLogo.jpg")
 
             imageRef.putFile(teamLogoUri).await()
-            Log.d("Vacancy","Logo uploaded")
+            Log.d("Vacancy", "Logo uploaded")
             val downloadUrl = imageRef.downloadUrl.await()
-            Log.d("Vacancy","Logo URL downloaded")
+            Log.d("Vacancy", "Logo URL downloaded")
             downloadUrl.toString()
-        }
-        catch (e : Exception){
-            Log.d("Vacancy",e.toString())
+        } catch (e: Exception) {
+            Log.d("Vacancy", e.toString())
             null
         }
 
     }
-    suspend fun postVacancy(userId : String ,vacancyDetails: VacancyDetails ){
-        val teamVacancyReference = firebaseFirestore.collection("all_user_id").document(userId).
-        collection("all_user_details").document("vacancy_posted")
-            .collection("vacancy").add(vacancyDetails).await()
 
 
-        firebaseFirestore.collection("all_vacancy")
-            .document(teamVacancyReference.id)
-            .set(vacancyDetails)
-            .await()
+     fun postTeamVacancy(currentUserId : String , vacancyDetails: VacancyDetails){
+        firebaseFirestore.runTransaction {transaction->
+            val vacancyId =  firebaseFirestore.collection("all_vacancy").document().id
 
-        Log.d("Vacancy","Vacancy posted successfully")
+            Log.d("SavingVacancy","Vacancy id is $vacancyId <-")
+            vacancyDetails.vacancyId = vacancyId
+
+            Log.d("SavingVacancy","Vacancy details updated with id ${vacancyDetails.vacancyId} <-")
+
+            val toUserDetails  = firebaseFirestore.collection("all_user_id").document(currentUserId).collection("saved_vacancy")
+                .document(vacancyId)
+
+            val toAllVacancy = firebaseFirestore.collection("all_vacancy").document(vacancyId)
+
+            transaction.set(toUserDetails , vacancyDetails)
+            transaction.set(toAllVacancy ,vacancyDetails)
+        }
     }
 
-    suspend fun postProject(userId: String , projectDetails: ProjectDetails){
 
-       val projectReference =  firebaseFirestore.collection("all_user_id").document(userId)
-            .collection("all_user_details").document("project_posted")
-            .collection("project").add(projectDetails).await()
+    fun addProject(
+        userId: String,
+        postedOn: String,
+        teamName: String,
+        hackathonOrPersonal: String,
+        problemStatement: String,
+        githubUrl: String,
+        projectLikes: Int
+    ) {
 
-        firebaseFirestore.collection("all_projects").document(projectReference.id).set(projectDetails).await()
 
+        val batch = firebaseFirestore.batch()
+
+
+        // getting id where project will be stored
+        val projectReferenceId = firebaseFirestore.collection("all_projects").document()
+        Log.d("Project", "Project document id is ${projectReferenceId.id}")
+
+        val projectDetails = ProjectDetails(
+            projectReferenceId.id,
+            userId,
+            postedOn,
+            teamName,
+            hackathonOrPersonal,
+            problemStatement,
+            githubUrl,
+            projectLikes
+        )
+
+        // adding project
+        val addProject =
+            firebaseFirestore.collection("all_projects").document(projectReferenceId.id)
+        val updateProjectPostedList = firebaseFirestore.collection("all_user_id").document(userId)
+
+
+        batch.set(addProject, projectDetails)
+        batch.update(
+            updateProjectPostedList,
+            "listOfProjects",
+            FieldValue.arrayUnion(projectReferenceId.id)
+        )
+        batch.commit()
 
     }
 
