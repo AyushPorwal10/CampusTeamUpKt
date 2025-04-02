@@ -19,7 +19,6 @@ class TeamDetailsRepository @Inject constructor(
 
      fun fetchUserName(query : String , onUpdate : (List<String>) -> Unit  , onError : (Exception)-> Unit ){
 
-
         val userIdReference = firebaseFirestore.collection("search_user_id")
         val userIdList = mutableListOf<String>()
 
@@ -56,7 +55,6 @@ class TeamDetailsRepository @Inject constructor(
             isPresent(false)
             return
         }
-
         firebaseFirestore.collection("all_teams").document(collegeName).collection("teams")
             .whereIn(FieldPath.documentId(), membersToCheck)
             .get()
@@ -69,7 +67,7 @@ class TeamDetailsRepository @Inject constructor(
             }
     }
 
-    suspend fun saveTeamDetails(collegeName: String,listOfTeamMembers: SnapshotStateList<String> , userId : String) = coroutineScope{
+    suspend fun saveTeamDetails(collegeName: String,listOfTeamMembers: SnapshotStateList<String> , userId : String){
         val teamMembers = hashMapOf(
             "members" to listOfTeamMembers.toList()
         )

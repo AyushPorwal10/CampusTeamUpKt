@@ -40,8 +40,6 @@ class UserManager @Inject constructor(private val context: Context) {
             preferences[FCM_TOKEN_KEY] = fcmToken
         }
     }
-
-
     val userData: Flow<UserData> = context.dataStore.data.map { preferences ->
         UserData(
             userId = preferences[USER_ID_KEY] ?: "",

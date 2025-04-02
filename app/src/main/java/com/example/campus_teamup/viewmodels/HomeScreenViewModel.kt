@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -343,9 +344,14 @@ class HomeScreenViewModel @Inject constructor(
 
     private fun getUserImageUrl() {
         viewModelScope.launch {
-
-            _userImage.value = homeScreenRepository.getUserImageUrl(userData.value?.userId)
-            Log.d("Profile", "${_userImage.value} is the userimage")
+            userManager.userData
+                .filter { it.userId.isNotEmpty() }
+                .first()
+                .let {
+                    homeScreenRepository.getUserImageUrl(it.userId).collect{imageUrl ->
+                        _userImage.value = imageUrl
+                    }
+                }
         }
     }
 

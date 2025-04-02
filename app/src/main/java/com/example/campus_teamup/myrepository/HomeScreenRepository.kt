@@ -26,16 +26,28 @@ class HomeScreenRepository @Inject constructor(
     private val userManager: UserManager
 ) {
 
+    suspend fun getUserImageUrl(currentUserId: String) : Flow<String> = callbackFlow {
+//        val document =
+//            firebaseFirestore.collection("user_images").document(userId + "").get().await()
+//
+//        return document.getString("user_image") ?: ""
 
-    fun fetchUserDataFromDataStore(): Flow<UserData> {
-        return userManager.userData
-    }
+        val documentReference = firebaseFirestore.collection("user_images").document(currentUserId)
 
-    suspend fun getUserImageUrl(userId: String?): String {
-        val document =
-            firebaseFirestore.collection("user_images").document(userId + "").get().await()
+        val realTimeImageFetching = documentReference.addSnapshotListener{snapshot , error->
+            if(error != null){
+                close(error)
+                return@addSnapshotListener
+            }
 
-        return document.getString("user_image") ?: ""
+            if(snapshot != null && snapshot.exists()) {
+                val imageUrl = snapshot.getString("user_image") as String
+                Log.d("ImageLoading","Current user image loaded : $imageUrl")
+                trySend(imageUrl)
+            }
+        }
+        awaitClose{realTimeImageFetching.remove()}
+
     }
 
     suspend fun fetchInitialOrPaginatedRoles(lastVisible: DocumentSnapshot?): QuerySnapshot {

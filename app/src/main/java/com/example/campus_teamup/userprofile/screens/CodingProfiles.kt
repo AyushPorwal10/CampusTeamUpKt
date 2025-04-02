@@ -50,10 +50,12 @@ fun CodingProfiles(
     val isEditing = remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        userProfileViewModel.fetchCodingProfiles {
-            codingProfiles.addAll(it)
-        }
+    val fetchedCodingProfiles = userProfileViewModel.codingProfiles.collectAsState()
+
+
+    LaunchedEffect(fetchedCodingProfiles.value) {
+        val newProfiles = fetchedCodingProfiles.value.filterNot { it in codingProfiles }
+        codingProfiles.addAll(newProfiles)
     }
 
     ConstraintLayout(modifier = modifier.fillMaxSize()) {

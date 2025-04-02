@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -85,10 +86,9 @@ fun PostRole(createPostViewModel: CreatePostViewModel) {
             .background(BorderColor))
 
     Box(modifier = Modifier
+        .clip(RoundedCornerShape(22.dp))
         .fillMaxWidth(0.9f)
-        .padding(10.dp)
         .background(BorderColor)
-        .border(0.5.dp, BorderColor, shape = RoundedCornerShape(22.dp))
         .constrainAs(noteForRole) {
             start.linkTo(parent.start)
             end.linkTo(parent.end)
@@ -98,7 +98,8 @@ fun PostRole(createPostViewModel: CreatePostViewModel) {
             text = stringResource(id = R.string.note_for_making_post),
             color = White,
             style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(12.dp)
         )
     }
 

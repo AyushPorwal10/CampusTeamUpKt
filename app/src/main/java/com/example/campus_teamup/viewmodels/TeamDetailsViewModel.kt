@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,7 +27,7 @@ class TeamDetailsViewModel @Inject constructor(
 
 
     private val _userId = MutableStateFlow<String>("")
-    val userId = _userId.asStateFlow()
+    val userId : StateFlow<String>  =  _userId.asStateFlow()
 
     private val _collegeName = MutableStateFlow<String>("")
     val collegeName : StateFlow<String> = _collegeName.asStateFlow()
@@ -43,11 +45,14 @@ class TeamDetailsViewModel @Inject constructor(
 
     fun initializeUserId() {
         viewModelScope.launch {
-            userManager.userData.collect {
-                _userId.value = it.userId
-                _collegeName.value = it.collegeName
-
-            }
+            userManager.userData
+                .filter { it.userId.isNotEmpty()}
+                .first()
+                .let {
+                    Log.d("TeamDetailsUserId","User id is initialized with : ${it.userId}")
+                    _userId.value = it.userId
+                    _collegeName.value = it.collegeName
+                }
         }
     }
 
@@ -107,13 +112,19 @@ class TeamDetailsViewModel @Inject constructor(
     }
 
     fun saveTeamDetails(listOfTeamMembers: SnapshotStateList<String>) {
-
         viewModelScope.launch {
             teamDetailsRepository.saveTeamDetails(collegeName.value.lowercase() , listOfTeamMembers, _userId.value)
         }
     }
 
     suspend fun fetchTeamDetails(): List<String> {
-        return teamDetailsRepository.fetchTeamDetails(_userId.value)
+        Log.d("TeamDetailsUserId","Fetch team details with ${_userId.value}")
+         userManager.userData
+             .filter { it.userId.isNotEmpty() }
+             .first()
+             .let {
+                 Log.d("TeamDetailsUserId","Inside let it is ${it.userId}")
+                return  teamDetailsRepository.fetchTeamDetails(it.userId)
+             }
     }
 }

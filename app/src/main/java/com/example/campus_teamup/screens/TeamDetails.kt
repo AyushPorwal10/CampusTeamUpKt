@@ -69,11 +69,8 @@ import com.example.campus_teamup.viewmodels.TeamDetailsViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TeamDetailsScreen(
-    teamDetailsViewModel: TeamDetailsViewModel = hiltViewModel()
+    teamDetailsViewModel: TeamDetailsViewModel
 ) {
-
-
-
     val context = LocalContext.current
     var isEditing by remember {
         mutableStateOf(false)
@@ -92,7 +89,8 @@ fun TeamDetailsScreen(
     val singleUserName = remember {
         mutableStateOf("")
     }
-    val userId by teamDetailsViewModel.userId.collectAsState()
+    val userId = teamDetailsViewModel.userId.collectAsState()
+    Log.d("TeamDetailsUserId","Collected as state is ${userId.value}")
 
     val suggestionList by teamDetailsViewModel.listOfUserName.collectAsState()
 
@@ -202,7 +200,7 @@ fun TeamDetailsScreen(
                         Log.d("TeamDetails","Going to check is username present")
                         Log.d("TeamDetails","User id is $userId")
 
-                        if (CheckEmptyFields.isUserNameInPresent(teamMembersUserName, userId)) {//checking if current user in team or not
+                        if (CheckEmptyFields.isUserNameInPresent(teamMembersUserName, userId.value)) {//checking if current user in team or not
 
                             teamDetailsViewModel.checkIfUserInOtherTeam(
                                 teamMembersUserName,

@@ -1,5 +1,6 @@
 package com.example.campus_teamup.helper
 
+import android.util.Log
 import androidx.compose.runtime.snapshots.SnapshotStateList
 
 object CheckEmptyFields {
@@ -69,7 +70,7 @@ object CheckEmptyFields {
     }
 
     fun isUserNameInPresent(teamMembersUserName: SnapshotStateList<String> , userName : String): Boolean{
-
+        Log.d("TeamDetailsUserId","isUserNamePresent = $userName")
         teamMembersUserName.forEach{
             if(it == userName)
                 return true

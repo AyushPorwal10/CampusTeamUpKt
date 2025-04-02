@@ -7,16 +7,15 @@ import androidx.lifecycle.viewModelScope
 import com.example.campus_teamup.myactivities.UserManager
 import com.example.campus_teamup.mydataclass.CollegeDetails
 import com.example.campus_teamup.myrepository.UserProfileRepo
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -30,13 +29,28 @@ class UserProfileViewModel @Inject constructor(
     private lateinit var userId: String
     private lateinit var collegeName: String
     private lateinit var userName: String
-
     private val _isLoading = MutableStateFlow<Boolean>(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _collegeDetails = MutableStateFlow<CollegeDetails?>(null)
     val collegeDetails: StateFlow<CollegeDetails?> = _collegeDetails
 
+    private val _codingProfiles = MutableStateFlow<List<String>>(emptyList())
+    val codingProfiles : StateFlow<List<String>> get() = _codingProfiles.asStateFlow()
+
+
+    init {
+        viewModelScope.launch {
+            userManager.userData
+                .filter { it.userId.isNotEmpty() }
+                .first()
+                .let { userData ->
+                    Log.d("Learning", "UserId: ${userData.userId}")
+                    fetchCodingProfiles(userData.userId)
+                }
+        }
+
+    }
 
     suspend fun fetchDataFromDataStore() {
         Log.d("CollegeDetails", "Fetching of data from datastore started")
@@ -47,8 +61,9 @@ class UserProfileViewModel @Inject constructor(
 
         Log.d("UserProfile", "Updated User Id: $userId")
         Log.d("UserProfile", "Fetched User Id $collegeName")
-
     }
+
+
 
     // college details
     fun saveCollegeDetails(
@@ -127,19 +142,13 @@ class UserProfileViewModel @Inject constructor(
 
     }
 
-    suspend fun fetchCodingProfiles(onResult: (List<String>) -> Unit) {
-        viewModelScope.launch {
-            _isLoading.value = true
-
-            Log.d("CodingProfiles", "Going to fetch coding profiles ")
-            val documentSnapshot = withContext(Dispatchers.IO) {
-                userProfileRepo.fetchCodingProfiles(userId)
-            }
-            _isLoading.value = false
-            val result = documentSnapshot.get("profilelist") as? List<String> ?: emptyList()
-            onResult(result)
-        }
-
+    private suspend fun fetchCodingProfiles(currentUserId: String) {
+        _isLoading.value = true
+         userProfileRepo.fetchCodingProfiles(currentUserId).collect {
+             Log.d("Learning","Fetching Coding Profiles")
+             _isLoading.value = false
+             _codingProfiles.value = it
+         }
     }
 
     suspend fun saveSkills(listOfSkills: List<String>) {

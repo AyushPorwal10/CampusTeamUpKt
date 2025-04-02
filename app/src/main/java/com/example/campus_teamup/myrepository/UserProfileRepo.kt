@@ -2,16 +2,22 @@ package com.example.campus_teamup.myrepository
 
 import android.net.Uri
 import android.util.Log
+import com.example.campus_teamup.myactivities.UserManager
 import com.example.campus_teamup.mydataclass.CollegeDetails
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.StorageReference
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class UserProfileRepo @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
-    private val storageReference: StorageReference
+    private val storageReference: StorageReference,
+    private val userManager: UserManager
 ) {
     // college Details
 
@@ -35,6 +41,8 @@ class UserProfileRepo @Inject constructor(
     suspend fun fetchCollegeDetails(userId: String): DocumentSnapshot {
         return firebaseFirestore.collection("all_user_id").document(userId)
             .collection("all_user_details").document("college_details").get().await()
+
+
     }
 
     // coding profiles
@@ -62,9 +70,26 @@ class UserProfileRepo @Inject constructor(
 
     }
 
-    suspend fun fetchCodingProfiles(userId: String): DocumentSnapshot {
-        return firebaseFirestore.collection("all_user_id").document(userId)
-            .collection("all_user_details").document("coding_profiles").get().await()
+    suspend fun fetchCodingProfiles(userId : String) : Flow<List<String>> = callbackFlow {
+
+        val documentRef =  firebaseFirestore.collection("all_user_id").document(userId)
+            .collection("all_user_details").document("coding_profiles")
+
+
+      val codingProfilesListener =   documentRef.addSnapshotListener{snapshot , error->
+
+
+            if(error != null){
+                close(error)
+                Log.d("Coding","Error $error")
+                return@addSnapshotListener
+            }
+            if(snapshot != null && snapshot.exists()){
+                val profiles = snapshot.get("profilelist") as List<String>
+                trySend(profiles)
+            }
+        }
+        awaitClose{codingProfilesListener.remove()}
     }
 
     suspend fun saveSkills(userId: String, listOfSkills: List<String>) {

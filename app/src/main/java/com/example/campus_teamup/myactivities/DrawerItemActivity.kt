@@ -72,7 +72,7 @@ class DrawerItemActivity : ComponentActivity() {
                 }
                 composable("teamDetails") {
                     teamDetailsViewModel.initializeUserId()
-                    TeamDetailsScreen()
+                    TeamDetailsScreen(teamDetailsViewModel)
                 }
                 composable("recentchats") {
                     RecentChatScreen(startChat = {data->

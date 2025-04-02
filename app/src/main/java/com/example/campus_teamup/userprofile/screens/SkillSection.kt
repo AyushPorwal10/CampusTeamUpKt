@@ -61,7 +61,6 @@ fun SkillSection(
         showProgressBar.value = true
         val fetchedSkills = userProfileViewModel.fetchSkills()
         listOfSkills = fetchedSkills
-
         showProgressBar.value = false
         Log.d(tag , "Total Skills are : ${listOfSkills.size}")
 
