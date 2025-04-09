@@ -83,7 +83,7 @@ class CreatePostRepository @Inject constructor(
 
             Log.d("SavingVacancy","Vacancy details updated with id ${vacancyDetails.vacancyId} <-")
 
-            val toUserDetails  = firebaseFirestore.collection("all_user_id").document(currentUserId).collection("saved_vacancy")
+            val toUserDetails  = firebaseFirestore.collection("all_user_id").document(currentUserId).collection("vacancy_posted")
                 .document(vacancyId)
 
             val toAllVacancy = firebaseFirestore.collection("all_vacancy").document(vacancyId)

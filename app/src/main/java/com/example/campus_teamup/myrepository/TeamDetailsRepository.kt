@@ -1,13 +1,8 @@
 package com.example.campus_teamup.myrepository
 
 import android.util.Log
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -47,7 +42,7 @@ class TeamDetailsRepository @Inject constructor(
             }
     }
 
-    fun checkIfUserInOtherTeam(collegeName:String , listOfTeamMembers: SnapshotStateList<String> , isPresent : (Boolean)-> Unit , onError: (Exception) -> Unit) {
+    fun checkIfUserInOtherTeam(collegeName:String , listOfTeamMembers: List<String> , isPresent : (Boolean)-> Unit , onError: (Exception) -> Unit) {
 
         val membersToCheck = listOfTeamMembers.drop(1).take(6)
 
@@ -67,7 +62,9 @@ class TeamDetailsRepository @Inject constructor(
             }
     }
 
-    suspend fun saveTeamDetails(collegeName: String,listOfTeamMembers: SnapshotStateList<String> , userId : String){
+    suspend fun saveTeamDetails(
+        collegeName: String,
+        listOfTeamMembers: List<String>, userId: String, onTeamDetailsSaved: () -> Unit){
         val teamMembers = hashMapOf(
             "members" to listOfTeamMembers.toList()
         )
@@ -86,6 +83,8 @@ class TeamDetailsRepository @Inject constructor(
             .document("teamDetails")
             .set(teamDetailsPath)
             .await()
+
+        onTeamDetailsSaved()
     }
 
     suspend fun fetchTeamDetails(userId: String) : List<String>{

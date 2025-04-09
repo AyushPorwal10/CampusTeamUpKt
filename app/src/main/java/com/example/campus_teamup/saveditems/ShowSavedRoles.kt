@@ -26,7 +26,7 @@ fun ShowSavedRoles(savedRoleList: State<List<RoleDetails>>, onRoleUnsave : (Stri
             SingleRole( it, onSaveRoleClicked = {
                 // this is to unsave projects
                 onRoleUnsave(it.roleId)
-            })
+            } , true)
         }
     }
 }

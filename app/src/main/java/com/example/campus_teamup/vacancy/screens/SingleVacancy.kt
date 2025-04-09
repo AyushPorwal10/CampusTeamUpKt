@@ -48,7 +48,7 @@ import com.example.campus_teamup.myactivities.ViewVacancy
 
 
 @Composable
-fun SingleVacancy(modifier: Modifier = Modifier, vacancy: VacancyDetails , onSaveVacancy : (VacancyDetails) -> Unit ) {
+fun SingleVacancy(modifier: Modifier = Modifier, vacancy: VacancyDetails , onSaveVacancy : (VacancyDetails) -> Unit , isSaved : Boolean) {
 
     val context = LocalContext.current
     val textColor = White
@@ -110,7 +110,7 @@ fun SingleVacancy(modifier: Modifier = Modifier, vacancy: VacancyDetails , onSav
                     end.linkTo(parent.end)
                 }.size(26.dp)) {
                 Icon(
-                    painter = painterResource(id = R.drawable.saveproject),
+                    painter = painterResource(id =  if(isSaved) R.drawable.saved_item else R.drawable.saveproject),
                     contentDescription = null,
                     tint = White
                 )

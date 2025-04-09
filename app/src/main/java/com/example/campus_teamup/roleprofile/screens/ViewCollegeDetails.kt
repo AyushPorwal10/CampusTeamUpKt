@@ -44,29 +44,29 @@ import com.example.campus_teamup.viewmodels.NotificationViewModel
 fun ViewCollegeDetails(
     modifier: Modifier,
     viewProfileViewModel: ViewProfileViewModel,
-    notification: NotificationViewModel,
+    notificationViewModel: NotificationViewModel,
     receiverId: String?
 ) {
 
     Log.d("FCM", "Receiver id in viewcollegeDetails is $receiverId <-")
     val collegeDetails = viewProfileViewModel.collegeDetails.collectAsState()
-    val senderId = notification.senderId.collectAsState()
+    val senderId = notificationViewModel.senderId.collectAsState()
 
-    val isRequestAlreadySent by notification.isRequestAlreadySend.collectAsState()
+    val isRequestAlreadySent by notificationViewModel.isRequestAlreadySend.collectAsState()
 
     var showRequestDialog by remember {
         mutableStateOf(false)
     }
 
     if (showRequestDialog) {
-        ShowRequestDialog(
+        ShowRequestDialog(notificationViewModel,
             onCancel = {
                 showRequestDialog = false
             },
             onConfirm = {
-                notification.fetchReceiverFCMToken(receiverId!! , onFcmFetched = { // first fetch fcm
+                notificationViewModel.fetchReceiverFCMToken(receiverId!! , onFcmFetched = { // first fetch fcm
 
-                        notification.sendNotification("New Request","Team is interested in your profile", receiverId)  // send notification
+                    notificationViewModel.sendNotification("New Request","Team is interested in your profile", receiverId)  // send notification
                         showRequestDialog = false
                 })
             },

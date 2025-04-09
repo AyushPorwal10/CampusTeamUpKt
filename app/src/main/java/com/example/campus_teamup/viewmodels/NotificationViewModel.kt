@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.campus_teamup.helper.TimeAndDate
 import com.example.campus_teamup.myactivities.UserManager
+import com.example.campus_teamup.myinterface.RequestSendingState
 import com.example.campus_teamup.myrepository.NotificationRepository
 import com.example.campus_teamup.notification.FcmMessage
 import com.example.campus_teamup.notification.Message
@@ -24,7 +25,11 @@ import javax.inject.Inject
 class NotificationViewModel @Inject constructor(
     private val notificationRepository: NotificationRepository,
     private val userManager: UserManager
-) : ViewModel() {
+) : ViewModel() , RequestSendingState{
+
+
+    private val _isRequestSending = MutableStateFlow<Boolean>(false)
+    override val isRequestSending : StateFlow<Boolean> get() = _isRequestSending.asStateFlow()
 
 
     private val _receiverFCMToken = MutableStateFlow("")
@@ -61,7 +66,7 @@ class NotificationViewModel @Inject constructor(
     // this will be used to send notification
     fun fetchReceiverFCMToken(receiverId: String , onFcmFetched : () -> Unit) {
         viewModelScope.launch {
-
+            _isRequestSending.value = true
             val receiverFCM = notificationRepository.fetchReceiverFCMToken(receiverId)
             Log.d("FCM", "Receiver FCM Fetched $receiverFCM ttttt")
             if (receiverFCM != null) {
@@ -74,6 +79,7 @@ class NotificationViewModel @Inject constructor(
 fun sendNotification(title: String, body: String, receiverId: String) {
     viewModelScope.launch {
         try {
+            Log.d("NotificationViewModelRequest","${_isRequestSending.value}")
             Log.d(
                 "FCM",
                 "FCM Token ${receiverFCMToken.value} title $title body $body useId ${senderId.value} userName ${senderName.value}"
@@ -99,6 +105,9 @@ fun sendNotification(title: String, body: String, receiverId: String) {
 
             Log.d("FCM", "Sending notification")
             notificationRepository.sendNotification(fcmMessage, _listOfUserId.value, receiverId)
+            _isRequestSending.value = false
+            Log.d("NotificationViewModelRequest"," Just after function ${_isRequestSending.value}")
+
 
         }
         catch (e: HttpException) {

@@ -79,7 +79,7 @@ class ViewNotificationRepository @Inject constructor(private val firebaseFiresto
 
 
             runBatch.delete(deleteOperation)
-            runBatch.update(updateOperation, "request_send_to" , FieldValue.arrayRemove(receiverId))
+            runBatch.update(updateOperation, "role_request_send_to" , FieldValue.arrayRemove(receiverId))
 
             runBatch.commit()
 

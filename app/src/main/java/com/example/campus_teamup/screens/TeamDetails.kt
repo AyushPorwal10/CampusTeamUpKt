@@ -33,14 +33,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -56,9 +53,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.CheckEmptyFields
+import com.example.campus_teamup.helper.ProgressIndicator
 import com.example.campus_teamup.helper.ToastHelper
 import com.example.campus_teamup.myThemes.TextFieldStyle
 import com.example.campus_teamup.ui.theme.BackGroundColor
@@ -75,14 +72,20 @@ fun TeamDetailsScreen(
     var isEditing by remember {
         mutableStateOf(false)
     }
-    var teamMembersUserName = remember { mutableStateListOf<String>() }
 
-    LaunchedEffect(Unit){
-        Log.d("TeamDetails", "Fetched")
-        val list = teamDetailsViewModel.fetchTeamDetails()
-        teamMembersUserName.clear()
-        teamMembersUserName.addAll(list)
-    }
+    val allTeamMembers by teamDetailsViewModel.teamMemberList.collectAsState()
+
+
+    val isTeamDetailsSaving by teamDetailsViewModel.isTeamDetailsSaving.collectAsState()
+
+//    var teamMembersUserName = remember { mutableStateListOf<String>() }
+//
+//    LaunchedEffect(Unit) {
+//        Log.d("TeamDetails", "Fetched")
+//        val list = teamDetailsViewModel.fetchTeamDetails()
+//        teamMembersUserName.clear()
+//        teamMembersUserName.addAll(list)
+//    }
 
     val bgColor = BackGroundColor
     val textColor = White
@@ -90,7 +93,7 @@ fun TeamDetailsScreen(
         mutableStateOf("")
     }
     val userId = teamDetailsViewModel.userId.collectAsState()
-    Log.d("TeamDetailsUserId","Collected as state is ${userId.value}")
+    Log.d("TeamDetailsUserId", "Collected as state is ${userId.value}")
 
     val suggestionList by teamDetailsViewModel.listOfUserName.collectAsState()
 
@@ -98,12 +101,13 @@ fun TeamDetailsScreen(
 
     val searchingText = teamDetailsViewModel.searchUserNameText.collectAsState()
 
+
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
             .background(BackGroundColor)
     ) {
-        val (listOfTeamMembers, addTeamMember, removeTeamMember, userNameInputField, editOrUpdate, divider, topAppBar, teamDetailsHeading) = createRefs()
+        val (listOfTeamMembers, addTeamMember, removeTeamMember, progressBar, userNameInputField, editOrUpdate, divider, topAppBar, teamDetailsHeading) = createRefs()
 
 
 
@@ -152,88 +156,107 @@ fun TeamDetailsScreen(
                     top.linkTo(teamDetailsHeading.bottom)
                 }, verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            items(teamMembersUserName.size) { index ->
+            items(allTeamMembers.size) { index ->
                 AutoComplete(
-                    userName = teamMembersUserName[index],
+                    userName = allTeamMembers[index],
                     onDelete = {
-                        teamMembersUserName.removeAt(index)
+                        isEditing = true
+//                        teamMembersUserName.removeAt(index)
+                        teamDetailsViewModel.removeTeamMember(index)
                     },
                     onUpdate = { it ->
-                        teamMembersUserName[index] = it
+                        isEditing = true
+//                        teamMembersUserName[index] = it
+                        teamDetailsViewModel.updateTeamMember(index, it)
                         teamDetailsViewModel.onSearchTextChange(it)
                     },
                     onUserNameSelect = {
-                        teamMembersUserName[index] = it
+//                        teamMembersUserName[index] = it
+                        teamDetailsViewModel.updateTeamMember(index , it)
                     },
                     index,
-                    suggestionList,
-                    teamMembersUserName
-                )
+                    suggestionList = suggestionList,
+                    allTeamMembers)
             }
         }
-        OutlinedButton(
-            onClick = {
-                Log.d("Add", "Add btn clicked")
-                isEditing = !isEditing
-                if (teamMembersUserName.size < 6)
-                    teamMembersUserName.add("")
-                else
-                    ToastHelper.showToast(context, "You can add maximum 6 members")
 
-            },
-            modifier = Modifier.constrainAs(addTeamMember) {
-                top.linkTo(listOfTeamMembers.bottom, margin = 16.dp)
-            }) {
-            Text(text = "Add", color = White)
-        }
-        OutlinedButton(
-            onClick = {
 
-                if (isEditing) {
+        // if saving than show progress bar
+        if (isTeamDetailsSaving) {
+            ProgressIndicator.showProgressBar(modifier = Modifier.constrainAs(progressBar) {
+                top.linkTo(listOfTeamMembers.bottom)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+            }, canShow = isTeamDetailsSaving)
+        } else {
+            OutlinedButton(
+                onClick = {
+                    Log.d("Add", "Add btn clicked")
+                    isEditing = !isEditing
+                    if (allTeamMembers.size < 6)
+                        //teamMembersUserName.add("")
+                        teamDetailsViewModel.addTeamMember("")
 
-                    Log.d("TeamDetails","Going to check empty username")
-                    // checking empty fields
-                    if (!CheckEmptyFields.checkTeamMemberUserNameIsEmpty(teamMembersUserName)) {
+                    else
+                        ToastHelper.showToast(context, "You can add maximum 6 members")
 
-                        // checking if userId of current user is present or not
+                },
+                modifier = Modifier.constrainAs(addTeamMember) {
+                    top.linkTo(listOfTeamMembers.bottom, margin = 16.dp)
+                }) {
+                Text(text = "Add", color = White)
+            }
+            OutlinedButton(
+                onClick = {
 
-                        Log.d("TeamDetails","Going to check is username present")
-                        Log.d("TeamDetails","User id is $userId")
+                    if (isEditing) {
 
-                        if (CheckEmptyFields.isUserNameInPresent(teamMembersUserName, userId.value)) {//checking if current user in team or not
+                        Log.d("TeamDetails", "Going to check empty username")
+                        // checking empty fields
+                        if (!CheckEmptyFields.checkTeamMemberUserNameIsEmpty(allTeamMembers)) {
 
-                            teamDetailsViewModel.checkIfUserInOtherTeam(
-                                teamMembersUserName,
-                                isPresent = { isUserNamePresent ->
-                                    if (isUserNamePresent) {
-                                        Log.d("TeamDetails","Member is not in any team")
-                                        ToastHelper.showToast(context , "UserName is already present in other team")
-                                    }
-                                    else{
-                                        teamDetailsViewModel.saveTeamDetails(teamMembersUserName)
-                                        isEditing = false
-                                    }
-                                }) {
+                            // checking if userId of current user is present or not
 
+                            Log.d("TeamDetails", "Going to check is username present")
+                            Log.d("TeamDetails", "User id is $userId")
+
+                            if (CheckEmptyFields.isUserNameInPresent(
+                                    allTeamMembers,
+                                    userId.value
+                                )
+                            ) {//checking if current user in team or not
+
+                                teamDetailsViewModel.checkIfUserInOtherTeam(
+                                    allTeamMembers,
+                                    isPresent = { isUserNamePresent ->
+                                        if (isUserNamePresent) {
+                                            Log.d("TeamDetails", "Member is not in any team")
+                                            ToastHelper.showToast(
+                                                context,
+                                                "UserName is already present in other team"
+                                            )
+                                        } else {
+                                            teamDetailsViewModel.saveTeamDetails(allTeamMembers)
+                                            isEditing = false
+                                        }
+                                    }) {
+
+                                }
+                            } else {
+                                ToastHelper.showToast(context, "Your username must be there")
                             }
                         } else {
-                            ToastHelper.showToast(context, "Your username must be there")
+                            ToastHelper.showToast(context, "Username cannot be empty")
                         }
-                    } else {
-                        ToastHelper.showToast(context, "Username cannot be empty")
                     }
-
-
-
-                }
-            },
-            modifier = Modifier.constrainAs(editOrUpdate) {
-                top.linkTo(listOfTeamMembers.bottom, margin = 16.dp)
-            }) {
-            Text(text = if (isEditing) "Save" else "Edit", color = White)
+                },
+                modifier = Modifier.constrainAs(editOrUpdate) {
+                    top.linkTo(listOfTeamMembers.bottom, margin = 16.dp)
+                }) {
+                Text(text = if (isEditing) "Save" else "Edit", color = White)
+            }
+            createHorizontalChain(addTeamMember, editOrUpdate, chainStyle = ChainStyle.Spread)
         }
-
-        createHorizontalChain(addTeamMember, editOrUpdate, chainStyle = ChainStyle.Spread)
 
     }
 }
@@ -246,7 +269,7 @@ fun AutoComplete(
     onUserNameSelect: (String) -> Unit,
     index: Int,
     suggestionList: List<String>,
-    teamMembersUserName: SnapshotStateList<String>,
+    allTeamMembers: List<String>,
 
     ) {
     val context = LocalContext.current
@@ -283,8 +306,8 @@ fun AutoComplete(
                 shape = TextFieldStyle.defaultShape,
                 value = userName,
                 onValueChange = {
-                        onUpdate(it)
-                        expanded = true
+                    onUpdate(it)
+                    expanded = true
                 },
                 placeholder = { Text(if (index == 0) "Team Leader UserName" else "Member Username") },
                 colors = TextFieldStyle.myTextFieldColor(),
@@ -336,7 +359,7 @@ fun AutoComplete(
                     if (userName.isNotEmpty()) {
                         items(suggestionList) {
                             ItemsCategory(title = it) { title ->
-                                if (!teamMembersUserName.contains(title) ||title == userName) {
+                                if (!allTeamMembers.contains(title) || title == userName) {
                                     onUserNameSelect(title)
                                     expanded = false
                                 } else {

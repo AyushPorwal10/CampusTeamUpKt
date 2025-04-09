@@ -1,9 +1,6 @@
 package com.example.campus_teamup.viewmodels
 
 import android.util.Log
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.text.toLowerCase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.campus_teamup.myactivities.UserManager
@@ -38,8 +35,17 @@ class TeamDetailsViewModel @Inject constructor(
     private val _listOfUserName = MutableStateFlow<List<String>>(emptyList())
     val listOfUserName = _listOfUserName.asStateFlow()
 
+    private val _isTeamDetailsSaving = MutableStateFlow<Boolean>(false)
+    val isTeamDetailsSaving : StateFlow<Boolean> get() = _isTeamDetailsSaving.asStateFlow()
+
+
+    private val _teamMemberList = MutableStateFlow<List<String>>(emptyList())
+    val teamMemberList : StateFlow<List<String>>get() = _teamMemberList.asStateFlow()
+
+
     init {
         observeUserNameQuery()
+        fetchTeamDetails()
     }
 
 
@@ -56,6 +62,26 @@ class TeamDetailsViewModel @Inject constructor(
         }
     }
 
+    fun addTeamMember(member : String){
+        _teamMemberList.value = _teamMemberList.value + member
+    }
+
+    fun updateTeamMember(index: Int , newUserName : String){
+
+        _teamMemberList.value = _teamMemberList.value.toMutableList().apply {
+            if(index in indices ){
+                this[index] = newUserName
+            }
+        }
+    }
+
+    fun removeTeamMember(index: Int){
+        _teamMemberList.value = _teamMemberList.value.toMutableList().apply {
+            if(index in indices){
+                removeAt(index)
+            }
+        }
+    }
     private fun observeUserNameQuery() {
         viewModelScope.launch {
             searchUserNameText.debounce(400)
@@ -73,6 +99,7 @@ class TeamDetailsViewModel @Inject constructor(
         Log.d("UserName", "Search text updated $_searchUserNameText")
         _searchUserNameText.value = queryText
     }
+
 
     fun fetchUserNames(query: String) {
 
@@ -96,7 +123,7 @@ class TeamDetailsViewModel @Inject constructor(
 
 
     fun checkIfUserInOtherTeam(
-        listOfTeamMembers: SnapshotStateList<String>,
+        listOfTeamMembers: List<String>,
         isPresent: (Boolean) -> Unit,
         onError: () -> Unit
     ) {
@@ -111,20 +138,29 @@ class TeamDetailsViewModel @Inject constructor(
 
     }
 
-    fun saveTeamDetails(listOfTeamMembers: SnapshotStateList<String>) {
+    fun saveTeamDetails(listOfTeamMembers:List<String>) {
         viewModelScope.launch {
-            teamDetailsRepository.saveTeamDetails(collegeName.value.lowercase() , listOfTeamMembers, _userId.value)
+
+            _isTeamDetailsSaving.value= true
+            teamDetailsRepository.saveTeamDetails(collegeName.value.lowercase() , listOfTeamMembers, _userId.value) {
+                _isTeamDetailsSaving.value = false
+            }
         }
     }
 
-    suspend fun fetchTeamDetails(): List<String> {
-        Log.d("TeamDetailsUserId","Fetch team details with ${_userId.value}")
-         userManager.userData
-             .filter { it.userId.isNotEmpty() }
-             .first()
-             .let {
-                 Log.d("TeamDetailsUserId","Inside let it is ${it.userId}")
-                return  teamDetailsRepository.fetchTeamDetails(it.userId)
-             }
+     fun fetchTeamDetails(){
+
+        viewModelScope.launch {
+            _isTeamDetailsSaving.value = true
+            Log.d("TeamDetailsUserId","Fetch team details with ${_userId.value}")
+            userManager.userData
+                .filter { it.userId.isNotEmpty() }
+                .first()
+                .let {
+                    Log.d("TeamDetailsUserId","Inside let it is ${it.userId}")
+                    _teamMemberList.value  =   teamDetailsRepository.fetchTeamDetails(it.userId)
+                    _isTeamDetailsSaving.value = false
+                }
+        }
     }
 }

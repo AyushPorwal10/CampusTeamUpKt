@@ -101,7 +101,10 @@ fun ShowSavedItems(currentUserData: UserData?, savedItemsViewModel: SavedItemsVi
                 // SAVED ROLES , SAVED VACANCY , SAVED PROJECTS
 
                 OutlinedButton(onClick = {
-                    navController.navigate("savedRoles")
+                    navController.navigate("savedRoles"){
+                        popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                        launchSingleTop = true
+                    }
                 }, colors = ButtonDefaults.buttonColors(
                     containerColor = if (currentDestination == "savedRoles") White else BackGroundColor
                 ), modifier = Modifier.constrainAs(savedRoles) {
@@ -113,7 +116,10 @@ fun ShowSavedItems(currentUserData: UserData?, savedItemsViewModel: SavedItemsVi
                     )
                 }
                 OutlinedButton(onClick = {
-                    navController.navigate("savedVacancy")
+                    navController.navigate("savedVacancy"){
+                        popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                        launchSingleTop = true
+                    }
                 }, colors = ButtonDefaults.buttonColors(
                     containerColor = if (currentDestination == "savedVacancy") White else BackGroundColor
                 ), modifier = Modifier.constrainAs(savedVacancy) {
@@ -125,7 +131,10 @@ fun ShowSavedItems(currentUserData: UserData?, savedItemsViewModel: SavedItemsVi
                     )
                 }
                 OutlinedButton(onClick = {
-                    navController.navigate("savedProjects")
+                    navController.navigate("savedProjects"){
+                        popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                        launchSingleTop = true
+                    }
                 }, colors = ButtonDefaults.buttonColors(
                     containerColor = if (currentDestination == "savedProjects") White else BackGroundColor
                 ), modifier = Modifier.constrainAs(savedProjects) {
@@ -144,7 +153,7 @@ fun ShowSavedItems(currentUserData: UserData?, savedItemsViewModel: SavedItemsVi
                 )
                 ConstraintLayout(modifier = Modifier
                     .constrainAs(savedItemsArea) {
-                        top.linkTo(savedProjects.bottom, margin = 6.dp)
+                        top.linkTo(savedProjects.bottom, margin = 16.dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     }
@@ -153,7 +162,7 @@ fun ShowSavedItems(currentUserData: UserData?, savedItemsViewModel: SavedItemsVi
                         composable("savedRoles") {
                             ShowSavedRoles(savedRolesList, onRoleUnsave = {roleId->
                                 savedItemsViewModel.unSaveRole(roleId , currentUserData?.userId)
-                            })
+                            } )
                         }
                         composable("savedVacancy") {
                             ShowSavedVacancies(savedVacancyList, onVacancyUnsave = {vacancyId->

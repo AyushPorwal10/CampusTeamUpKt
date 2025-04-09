@@ -61,7 +61,7 @@ object CheckEmptyFields {
         return true
     }
 
-    fun checkTeamMemberUserNameIsEmpty(teamMembersUserName: SnapshotStateList<String>): Boolean{
+    fun checkTeamMemberUserNameIsEmpty(teamMembersUserName: List<String>): Boolean{
         teamMembersUserName.forEach{
             if(it.isEmpty())
                 return true
@@ -69,7 +69,7 @@ object CheckEmptyFields {
         return false
     }
 
-    fun isUserNameInPresent(teamMembersUserName: SnapshotStateList<String> , userName : String): Boolean{
+    fun isUserNameInPresent(teamMembersUserName: List<String> , userName : String): Boolean{
         Log.d("TeamDetailsUserId","isUserNamePresent = $userName")
         teamMembersUserName.forEach{
             if(it == userName)

@@ -95,6 +95,7 @@ fun RolesScreen(
                 modifier = Modifier
                     .constrainAs(searchBar) {
                         start.linkTo(parent.start)
+                        end.linkTo(parent.end)
                         top.linkTo(parent.top)
                     }
                     .fillMaxWidth(0.8f),
@@ -120,24 +121,6 @@ fun RolesScreen(
                     )
                 }
             )
-
-            Icon(
-                painter = painterResource(id = R.drawable.filter),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(26.dp)
-                    .constrainAs(filterIcon) {
-                        start.linkTo(searchBar.end, margin = 8.dp)
-                        end.linkTo(parent.end)
-                        top.linkTo(searchBar.top)
-                        bottom.linkTo(searchBar.bottom)
-                    }
-                    .fillMaxWidth(0.1f),
-                tint = White
-            )
-
-            // Horizontal arrangement of search items
-            createHorizontalChain(searchBar, filterIcon, chainStyle = ChainStyle.Spread)
 
             HorizontalDivider(
                 thickness = 1.dp,
@@ -175,20 +158,10 @@ fun ShowListOfRoles(
     saveRole: (RoleDetails) -> Unit,
     idOfSavedProject: List<String>,
 ) {
-    var isRefreshing = homeScreenViewModel.isRoleRefreshing.collectAsState()
-
     val isLoading by homeScreenViewModel.isRoleLoading.collectAsState()
-
     LaunchedEffect(Unit) {
         homeScreenViewModel.observeRolesInRealTime()
     }
-
-    PullToRefreshBox(
-        isRefreshing = isRefreshing.value,
-        onRefresh = {
-            homeScreenViewModel.observeRolesInRealTime()
-        }, modifier = modifier, contentAlignment = Alignment.Center
-    ) {
         LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -199,14 +172,14 @@ fun ShowListOfRoles(
                         Log.d("FetchedRole","Showing unsaved role")
                         SingleRole(role , onSaveRoleClicked = {
                             saveRole(it)
-                        })
+                        }, false)
                     }
 
                 })
             }
 
         }
-    }
+
 }
 
 

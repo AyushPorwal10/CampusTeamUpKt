@@ -47,7 +47,7 @@ class NotificationRepository @Inject constructor(
     suspend fun sendNotification(
         fcmMessage: FcmMessage,
         listOfPeopleUserSentRequest: List<String>,
-        receiverId: String
+        receiverId: String,
     ) {
         coroutineScope {
 
@@ -88,12 +88,12 @@ class NotificationRepository @Inject constructor(
     suspend fun checkIfAlreadyRequestSent(senderId: String, onComplete: (List<String>) -> Unit) {
 
         val document =
-            firebaseFirestore.collection("role_request_send_to").document(senderId).get().await()
+            firebaseFirestore.collection("request_send_by").document(senderId).get().await()
 
         // listOfUser that person sent request
 
-        if (document.get("request_send_to") != null) {
-            val listOfUsers = document.get("request_send_to") as List<String> ?: emptyList()
+        if (document.get("role_request_send_to") != null) {
+            val listOfUsers = document.get("role_request_send_to") as List<String> ?: emptyList()
             onComplete(listOfUsers)
         } else
             onComplete(emptyList())

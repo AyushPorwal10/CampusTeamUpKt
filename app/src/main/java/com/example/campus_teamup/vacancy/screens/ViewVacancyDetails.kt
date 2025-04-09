@@ -179,7 +179,7 @@ fun ViewVacancyDetails(
                 }
 
                 if (showRequestDialog.value) {
-                    ShowRequestDialog(onCancel = {
+                    ShowRequestDialog(viewVacancyViewModel ,  onCancel = {
                         showRequestDialog.value = false
                     }) {
                         Log.d("VacancyNotification", "Confirm clicked")

@@ -286,6 +286,7 @@ class HomeScreenViewModel @Inject constructor(
                     homeScreenRepository.fetchInitialOrPaginatedVacancy(lastVisibleVacancy)
                 val vacancy =
                     snapshot.documents.mapNotNull { it.toObject(VacancyDetails::class.java) }
+                Log.d("SizeOfVacancy","${vacancy.size}")
 
                 if (vacancy.isNotEmpty()) {
                     lastVisibleVacancy = snapshot.documents.last()

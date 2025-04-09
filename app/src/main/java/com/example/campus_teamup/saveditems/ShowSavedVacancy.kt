@@ -28,7 +28,7 @@ fun ShowSavedVacancies(savedVacancy : State<List<VacancyDetails>> , onVacancyUns
             Log.d("FetchingVacancy","Single Vacancy loads")
             SingleVacancy(modifier = Modifier, vacancy , onSaveVacancy ={
                 onVacancyUnsave(it.vacancyId)
-            } )
+            } ,true)
         }
     }
 }

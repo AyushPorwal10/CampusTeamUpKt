@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.campus_teamup.mydataclass.CollegeDetails
+import com.example.campus_teamup.myinterface.RequestSendingState
 import com.example.campus_teamup.myrepository.ViewProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +16,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ViewProfileViewModel @Inject constructor(
 private val viewProfileRepository: ViewProfileRepository
-) : ViewModel() {
+) : ViewModel(){
+
 
     private val _collegeDetails = MutableStateFlow<CollegeDetails?>(null)
     val collegeDetails : StateFlow<CollegeDetails?> get()  = _collegeDetails.asStateFlow()

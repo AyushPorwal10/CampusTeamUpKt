@@ -44,7 +44,7 @@ import com.example.campus_teamup.ui.theme.White
 
 
 @Composable
-fun SingleRole(roleDetails: RoleDetails , onSaveRoleClicked : (RoleDetails) -> Unit) {
+fun SingleRole(roleDetails: RoleDetails , onSaveRoleClicked : (RoleDetails) -> Unit , isSaved : Boolean) {
 
     val context = LocalContext.current
     val textColor = White
@@ -103,7 +103,7 @@ fun SingleRole(roleDetails: RoleDetails , onSaveRoleClicked : (RoleDetails) -> U
                 end.linkTo(parent.end)
             }.size(26.dp)) {
                 Icon(
-                    painter = painterResource(id = R.drawable.saveproject),
+                    painter = painterResource(id =  if(isSaved) R.drawable.saved_item else R.drawable.saveproject),
                     contentDescription = null,
                     tint = White
                    )

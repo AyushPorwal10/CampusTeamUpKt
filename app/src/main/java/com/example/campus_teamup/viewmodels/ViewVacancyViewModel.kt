@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.campus_teamup.helper.TimeAndDate
+import com.example.campus_teamup.myinterface.RequestSendingState
 import com.example.campus_teamup.myrepository.ViewVacancyRepository
 import com.example.campus_teamup.notification.FcmMessage
 import com.example.campus_teamup.notification.Message
@@ -21,7 +22,10 @@ import javax.inject.Inject
 @HiltViewModel
 class ViewVacancyViewModel @Inject constructor(
     private val viewVacancyRepository: ViewVacancyRepository,
-) : ViewModel() {
+) : ViewModel() , RequestSendingState{
+
+    private val _isRequestSending = MutableStateFlow<Boolean>(false)
+    override val isRequestSending : StateFlow<Boolean> get() = _isRequestSending.asStateFlow()
 
 
     val tag = "VacancyNotification"
@@ -85,6 +89,7 @@ class ViewVacancyViewModel @Inject constructor(
     ) {
 
         viewModelScope.launch {
+            _isRequestSending.value = true
             val message = Message(
                 _receiverToken.value,
                 notification = Notification(
@@ -106,6 +111,7 @@ class ViewVacancyViewModel @Inject constructor(
             val fcmMessage = FcmMessage(message)
             viewVacancyRepository.sendNotification(
                 fcmMessage, onNotificationSent = {
+                    _isRequestSending.value = false
                     onNotificationSent()
                 },
                 onNotificationError = {

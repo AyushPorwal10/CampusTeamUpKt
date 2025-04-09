@@ -86,7 +86,7 @@ fun SingleProject(projectDetails: ProjectDetails, onSaveProjectClicked : (String
                         end.linkTo(parent.end)
                     }.size(26.dp)) {
                 Icon(
-                    painterResource(id = R.drawable.saveproject),
+                    painterResource(id =  if(isSaved) R.drawable.saved_item else R.drawable.saveproject),
                     contentDescription = stringResource(
                         id = R.string.save_project
                     ),

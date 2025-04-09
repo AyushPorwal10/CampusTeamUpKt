@@ -226,27 +226,10 @@ fun CollegeDetails(
                     isEditing = !isEditing
                     if (!isEditing) {
 
-
                         Log.d("CollegeDetails", "Coroutine Scope Launched")
 
 
-//                        userProfileViewModel.uploadUserImageToStorage(
-//                            selectedImageFromDevice!!,
-//                            onResult = { url ->
-//
-//                                downloadedImageUrl = url ?: ""
-//
-//                                Log.d("CollegeDetails", " Download url is  $downloadedImageUrl")
-//                                userProfileViewModel.saveCollegeDetails(
-//                                    downloadedImageUrl!!,
-//                                    selectedGraduationYear,
-//                                    selectedBranch,
-//                                    selectedCourse
-//                                )
-//
-//                                Log.d("CollegeDetails", "Done with saving college details")
-//
-//                            })
+
                         if (selectedImageFromDevice != null) {
                             userProfileViewModel.uploadUserImageToStorage(
                                 selectedImageFromDevice!!,
@@ -285,7 +268,8 @@ fun CollegeDetails(
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = BackGroundColor
-                )
+                ),
+                enabled = selectedImageFromDevice.
             ) {
                 Text(text = if (isEditing) "Save" else "Edit", color = White)
             }

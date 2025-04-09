@@ -89,8 +89,8 @@ fun VacanciesScreen(homeScreenViewModel: HomeScreenViewModel,
                 modifier = Modifier
                     .constrainAs(searchBar) {
                         start.linkTo(parent.start)
+                        end.linkTo(parent.end)
                         top.linkTo(parent.top)
-
                     }
                     .fillMaxWidth(0.8f),
                 placeholder = {
@@ -115,23 +115,6 @@ fun VacanciesScreen(homeScreenViewModel: HomeScreenViewModel,
                     )
                 })
 
-            Icon(
-                painter = painterResource(id = R.drawable.filter),
-                contentDescription = null,
-                tint = White,
-                modifier = Modifier
-                    .size(26.dp)
-                    .constrainAs(filterIcon) {
-                        start.linkTo(searchBar.end, margin = 8.dp)
-                        end.linkTo(parent.end)
-                        top.linkTo(searchBar.top)
-                        bottom.linkTo(searchBar.bottom)
-                    }
-                    .fillMaxWidth(0.1f)
-            )
-
-            // horizontal arrangement of search items
-            createHorizontalChain(searchBar, filterIcon, chainStyle = ChainStyle.Spread)
 
             HorizontalDivider(thickness = 1.dp,
                 color = BorderColor,
@@ -173,17 +156,11 @@ fun ShowListOfVacancies(
     idOfSavedVacancy: List<String>,
 ) {
 
-    val isRefreshing = homeScreenViewModel.isVacancyRefreshing.collectAsState()
 
     LaunchedEffect(Unit) {
         Log.d("Vacancy", "Composable Fetching When composable loads")
         homeScreenViewModel.observeVacancyInRealTime()
     }
-    PullToRefreshBox(isRefreshing = isRefreshing.value, onRefresh = {
-        Log.d("Vacancy", "Composable Observing new roles user refresh")
-        homeScreenViewModel.observeVacancyInRealTime()
-    }, modifier = modifier, contentAlignment = Alignment.Center) {
-
         LazyColumn(
             modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -193,15 +170,15 @@ fun ShowListOfVacancies(
                     SingleVacancy(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ,
                         vacancy,
                         onSaveVacancy = {
                             saveVacancy(it)
-                        }
+                        },false
                     )
                 }
 
-            }
         }
     }
 }
