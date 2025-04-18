@@ -42,9 +42,11 @@ object CheckEmptyFields {
         hackathonName: String,
         roleLookingFor: String,
         skills: String
-    ) : Boolean{
+    ): Boolean {
 
-        if(teamName.trim().isEmpty() || hackathonName.trim().isEmpty() || roleLookingFor.trim().isEmpty() || skills.trim().isEmpty())
+        if (teamName.trim().isEmpty() || hackathonName.trim().isEmpty() || roleLookingFor.trim()
+                .isEmpty() || skills.trim().isEmpty()
+        )
             return false;
         return true
     }
@@ -53,28 +55,43 @@ object CheckEmptyFields {
     fun checkProjectFields(
         teamName: String,
         hackathonName: String,
-        problemStatement : String
-    ) : Boolean{
+        problemStatement: String
+    ): Boolean {
 
-        if(teamName.trim().isEmpty() || hackathonName.trim().isEmpty() || problemStatement.trim().isEmpty())
+        if (teamName.trim().isEmpty() || hackathonName.trim().isEmpty() || problemStatement.trim()
+                .isEmpty()
+        )
             return false;
         return true
     }
 
-    fun checkTeamMemberUserNameIsEmpty(teamMembersUserName: List<String>): Boolean{
-        teamMembersUserName.forEach{
-            if(it.isEmpty())
+    fun checkTeamMemberUserNameIsEmpty(teamMembersUserName: List<String>): Boolean {
+        teamMembersUserName.forEach {
+            if (it.isEmpty())
                 return true
         }
         return false
     }
 
-    fun isUserNameInPresent(teamMembersUserName: List<String> , userName : String): Boolean{
-        Log.d("TeamDetailsUserId","isUserNamePresent = $userName")
-        teamMembersUserName.forEach{
-            if(it == userName)
+    fun isUserNameInPresent(teamMembersUserName: List<String>, userName: String): Boolean {
+        Log.d("TeamDetailsUserId", "isUserNamePresent = $userName")
+        teamMembersUserName.forEach {
+            if (it == userName)
                 return true
         }
         return false
     }
+
+    fun isSignUpDetailsAreCorrect(
+        email: String,
+        collegeName: String,
+        name: String,
+        phoneNumber: String
+    ): Boolean {
+
+        return name.isNotEmpty() && collegeName.isNotEmpty() && phoneNumber.length == 10  && isValidEmail(
+            email
+        )
+    }
+
 }

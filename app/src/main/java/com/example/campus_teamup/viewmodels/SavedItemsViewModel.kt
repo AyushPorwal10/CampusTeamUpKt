@@ -40,12 +40,12 @@ class SavedItemsViewModel @Inject constructor(
 
     // START USING GENERIC CLASS CONCEPT
 
-    fun fetchSavedProjects(currentUserId: String?) {
+    fun fetchSavedProjects(phoneNumber: String?) {
 
-        Log.d("FetchingProjects", "Current user id is $currentUserId")
+        Log.d("FetchingProjects", "Current user id is $phoneNumber")
         viewModelScope.launch {
-            if (currentUserId != null) {
-                savedItemsRepository.fetchSavedProjects(currentUserId).catch {
+            if (phoneNumber != null) {
+                savedItemsRepository.fetchSavedProjects(phoneNumber).catch {
                     Log.d("FetchingProjects", "Error fetching projects")
                 }
                     .collect {
@@ -61,11 +61,11 @@ class SavedItemsViewModel @Inject constructor(
         }
     }
 
-    fun fetchSavedRoles(currentUserId: String?) {
-        Log.d("FetchingRoles", "Current user id is $currentUserId")
+    fun fetchSavedRoles(phoneNumber: String?) {
+        Log.d("FetchingRoles", "Current user id is $phoneNumber")
         viewModelScope.launch {
-            if (currentUserId != null) {
-                savedItemsRepository.fetchSavedRoles(currentUserId).catch {
+            if (phoneNumber != null) {
+                savedItemsRepository.fetchSavedRoles(phoneNumber).catch {
                     Log.d("FetchingRoles", "Error fetching roles")
                 }
                     .collect {
@@ -81,11 +81,11 @@ class SavedItemsViewModel @Inject constructor(
         }
     }
 
-    fun fetchSavedVacancy(currentUserId: String?) {
-        Log.d("FetchingVacancy", "Current user id is $currentUserId")
+    fun fetchSavedVacancy(phoneNumber: String?) {
+        Log.d("FetchingVacancy", "Current user id is $phoneNumber")
         viewModelScope.launch {
-            if (currentUserId != null) {
-                savedItemsRepository.fetchSavedVacancies(currentUserId).catch {
+            if (phoneNumber != null) {
+                savedItemsRepository.fetchSavedVacancies(phoneNumber).catch {
                     Log.d("FetchingVacancy", "Error fetching roles")
                 }
                     .collect {
@@ -102,23 +102,23 @@ class SavedItemsViewModel @Inject constructor(
     }
 
 
-    fun unSaveProject(projectId: String, currentUserId: String?) {
+    fun unSaveProject(projectId: String, phoneNumber: String?) {
 
-        if (currentUserId != null) {
-            Log.d("Unsave", "current user id is $currentUserId")
+        if (phoneNumber != null) {
+            Log.d("Unsave", "current user id is $phoneNumber")
             viewModelScope.launch {
-                savedItemsRepository.unSaveProject(currentUserId, projectId)
+                savedItemsRepository.unSaveProject(phoneNumber, projectId)
             }
         } else {
             Log.d("Unsave", "current user id in unsave is null")
         }
     }
 
-    fun unSaveRole(roleId: String, currentUserId: String?) {
-        if (currentUserId != null) {
-            Log.d("UnsaveRole", "current user id is $currentUserId")
+    fun unSaveRole(roleId: String, phoneNumber: String?) {
+        if (phoneNumber != null) {
+            Log.d("UnsaveRole", "current user id is $phoneNumber")
             viewModelScope.launch {
-                savedItemsRepository.unSaveRole(currentUserId, roleId)
+                savedItemsRepository.unSaveRole(phoneNumber, roleId)
                 Log.d("UnsaveRole", "Role unsaved")
             }
         } else {
@@ -126,16 +126,18 @@ class SavedItemsViewModel @Inject constructor(
         }
     }
 
-    fun unSaveVacancy(vacancyId : String , currentUserId: String?){
-        if (currentUserId != null) {
-            Log.d("UnsaveVacancy", "current user id is $currentUserId")
+    fun unSaveVacancy(vacancyId : String , phoneNumber: String?){
+        if (phoneNumber != null) {
+            Log.d("UnsaveVacancy", "current user id is $phoneNumber")
             viewModelScope.launch {
-                savedItemsRepository.unSaveVacancy(currentUserId, vacancyId)
+                savedItemsRepository.unSaveVacancy(phoneNumber, vacancyId)
                 Log.d("UnsaveVacancy", "Role unsaved")
             }
         } else {
             Log.d("UnsaveVacancy", "current user id is null")
         }
     }
+
+
 
 }

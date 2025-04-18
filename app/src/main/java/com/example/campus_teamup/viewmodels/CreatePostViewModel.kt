@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -28,6 +29,7 @@ class CreatePostViewModel @Inject constructor(
 
     private lateinit var userId: String
     private lateinit var userName: String
+    private lateinit var phoneNumber: String
     private val _isLoading = MutableStateFlow<Boolean>(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
@@ -41,45 +43,46 @@ class CreatePostViewModel @Inject constructor(
         val userData = userManager.userData.first()
         userId = userData.userId
         userName = userData.userName
+        phoneNumber = userData.phoneNumber
 
         Log.d("PostRole", "Updated User Id: $userId")
     }
 
-    fun postRole(role: String, datePosted: String) {
+    fun postRole(role: String, datePosted: String, canPostRole: (Boolean) -> Unit) {
 
         viewModelScope.launch {
             _isLoading.value = true
             withContext(Dispatchers.IO) {
-                val snapshot = createPostRepository.fetchImageUrlFromUserDetails(userId)
+                val snapshot = createPostRepository.fetchImageUrlFromUserDetails(phoneNumber)
                 var userImageUrl = snapshot.toObject(CollegeDetails::class.java)
 
                 createPostRepository.postRole(
+                    phoneNumber,
                     userId,
                     userName,
                     userImageUrl?.userImageUrl ?: "",
                     role,
-                    datePosted
+                    datePosted, canPostRole = {
+                        _isLoading.value = false
+                        canPostRole(it)
+                    }
                 )
             }
             _isPosted.value = true
             _isLoading.value = false
-
-            delay(2000)
-            _isPosted.value = false
-
         }
     }
 
-    fun uploadTeamLogo(teamLogoUri: Uri, onResult: (String?) -> Unit) {
+    fun uploadTeamLogo(teamLogoUri: String, onResult: (Boolean, String?) -> Unit) {
         viewModelScope.launch {
             _isLoading.value = true
-
-            val result = withContext(Dispatchers.IO) {
-                createPostRepository.uploadTeamLogo(userId, teamLogoUri)
-            }
-
-            _isLoading.value = false
-            onResult(result)
+            createPostRepository.uploadTeamLogo(
+                phoneNumber,
+                teamLogoUri,
+                canPostVacancy = { canPost, url ->
+                    _isLoading.value = false
+                    onResult(canPost, url)
+                })
         }
     }
 
@@ -91,15 +94,17 @@ class CreatePostViewModel @Inject constructor(
         hackathonName: String,
         roleLookingFor: String,
         skill: String,
-        roleDescription: String
+        roleDescription: String,
+        onVacancyPosted: () -> Unit
     ) {
 
         viewModelScope.launch {
+
             _isLoading.value = true
             Log.d("Vacancy", "Going to post vacancy")
             withContext(Dispatchers.IO) {
                 createPostRepository.postTeamVacancy(
-                    userId, VacancyDetails(
+                    phoneNumber, VacancyDetails(
                         "",   // this will be generated in repo class
                         userId,
                         postedOn,
@@ -108,16 +113,19 @@ class CreatePostViewModel @Inject constructor(
                         hackathonName,
                         roleLookingFor,
                         skill,
-                        roleDescription
+                        roleDescription,
+                        phoneNumber
                     )
                 )
             }
 
             _isLoading.value = false
-            _isPosted.value = true
 
-            delay(2000)
-            _isPosted.value = false
+            onVacancyPosted()
+//            _isPosted.value = true
+//
+//            delay(2000)
+//            _isPosted.value = false
 
         }
     }
@@ -126,7 +134,7 @@ class CreatePostViewModel @Inject constructor(
         postedOn: String,
         teamName: String,
         hackathonOrPersonal: String,
-        problemStatement : String ,
+        problemStatement: String,
         githubUrl: String,
         projectLikes: Int
     ) {
@@ -135,18 +143,19 @@ class CreatePostViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
 
-            withContext(Dispatchers.IO){
-                createPostRepository.addProject(userId ,
-                    postedOn,
-                    teamName,
-                    hackathonOrPersonal,
-                    problemStatement,
-                    githubUrl,
-                    projectLikes
-                )
-            }
+            createPostRepository.addProject(
+                phoneNumber,
+                userId,
+                postedOn,
+                teamName,
+                hackathonOrPersonal,
+                problemStatement,
+                githubUrl,
+                projectLikes
+            )
 
-            _isLoading.value  = false
+
+            _isLoading.value = false
             _isPosted.value = true
         }
     }

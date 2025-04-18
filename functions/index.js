@@ -16,7 +16,7 @@ exports.sendNotification = functions.https.onRequest(async (req, res) => {
     return res.status(400).send("FCM Token is required");
   }
 
-  const {senderId, senderName, time} = message.data || {};
+  const {senderId, senderName, time, phoneNumber} = message.data || {};
   const {title, body} = message.notification || {};
   const fcmToken = message.token;
 
@@ -27,6 +27,7 @@ exports.sendNotification = functions.https.onRequest(async (req, res) => {
       senderId: senderId || "",
       senderName: senderName || "",
       time: time || "",
+      phoneNumber: phoneNumber || "",
     },
   };
 
@@ -62,6 +63,7 @@ exports.sendTeamJointNotification = functions.https.onRequest(
         senderId,
         senderName,
         time,
+        phoneNumber,
       } = message.data || {};
 
       const {title, body} = message.notification || {};
@@ -74,6 +76,7 @@ exports.sendTeamJointNotification = functions.https.onRequest(
           senderId: senderId || "",
           senderName: senderName || "",
           time: time || "",
+          phoneNumber: phoneNumber || "",
         },
       };
 

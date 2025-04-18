@@ -1,11 +1,11 @@
 package com.example.campus_teamup.viewnotifications
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,7 +17,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
@@ -29,7 +28,6 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.campus_teamup.R
-import com.example.campus_teamup.helper.Dimensions
 import com.example.campus_teamup.myactivities.UserData
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.BorderColor
@@ -37,6 +35,7 @@ import com.example.campus_teamup.ui.theme.LightTextColor
 import com.example.campus_teamup.ui.theme.White
 import com.example.campus_teamup.viewmodels.ViewNotificationViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TeamJointNotification(
     memberInviteNotification: NotificationItems.MemberInviteNotification,
@@ -46,23 +45,27 @@ fun TeamJointNotification(
 ) {
 
 
-    Log.d("DenyRequest","In Composable memberRequestId is " +
-            "senderId is ${memberInviteNotification.senderId}" + "senderName is ${memberInviteNotification.senderName}" )
+    Log.d(
+        "DenyRequest", "In Composable memberRequestId is " +
+                "senderId is ${memberInviteNotification.senderId}" + "senderName is ${memberInviteNotification.senderName}"
+    )
 
     val textColor = LightTextColor
     val bgColor = BackGroundColor
 
-    Card(colors = CardDefaults.cardColors(containerColor = BorderColor, contentColor = White)
-        ,modifier = Modifier
-        .fillMaxWidth(0.9f)
-        .background(BorderColor)
-    ){
+    Card(
+        colors = CardDefaults.cardColors(containerColor = BorderColor, contentColor = White),
+        modifier = Modifier
+            .fillMaxWidth(0.9f)
+            .background(BorderColor)
+    ) {
 
-        ConstraintLayout(modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth(1f)
+        ConstraintLayout(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth(1f)
         ) {
-            val (userImage, userName, acceptBtn , rejectBtn , viewProfileBtn) = createRefs()
+            val (userImage, userName, acceptBtn, rejectBtn, viewProfileBtn) = createRefs()
             Image(
                 painter = painterResource(id = R.drawable.profile),
                 contentDescription = null,
@@ -72,11 +75,10 @@ fun TeamJointNotification(
                     .constrainAs(userImage) {
                         top.linkTo(parent.top)
                         start.linkTo(parent.start)
-
                     })
 
             Text(
-                text = "${memberInviteNotification.senderName} wants to join your Team." ,
+                text = "${memberInviteNotification.senderName} wants to join your Team.",
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 2,
                 style = MaterialTheme.typography.titleMedium,
@@ -91,16 +93,20 @@ fun TeamJointNotification(
                         bottom.linkTo(userImage.bottom)
                         end.linkTo(parent.end)
                     }
-                    .fillMaxWidth(0.75f) )
+                    .fillMaxWidth(0.75f))
 
             TextButton(onClick = {
 
-            },modifier = Modifier.constrainAs(viewProfileBtn){
-                top.linkTo(userName.bottom , margin = 6.dp)
+            }, modifier = Modifier.constrainAs(viewProfileBtn) {
+                top.linkTo(userName.bottom, margin = 6.dp)
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
             }) {
-                Text(text = "View Profile" , color = White , style = MaterialTheme.typography.titleSmall)
+                Text(
+                    text = "View Profile",
+                    color = White,
+                    style = MaterialTheme.typography.titleSmall
+                )
             }
 
             Icon(
@@ -113,7 +119,12 @@ fun TeamJointNotification(
                         top.linkTo(viewProfileBtn.bottom, margin = 8.dp)
                         start.linkTo(parent.start)
                         bottom.linkTo(parent.bottom)
-                    } , tint = textColor)
+                    }
+                    .clickable {
+                        Log.d("VacanyRequest","Index is $index")
+                        Log.d("VacancyRequest","Going to accept request")
+                        viewNotificationViewModel.userRequestCreateChatRoom(index, currentUserData?.userId ,currentUserData?.userName ,  currentUserData?.phoneNumber)
+                    }, tint = textColor)
 
             Icon(
                 painter = painterResource(id = R.drawable.rejectbtn),
@@ -122,8 +133,7 @@ fun TeamJointNotification(
                     .clip(RoundedCornerShape(30.dp))
                     .size(28.dp)
                     .clickable {
-
-                        viewNotificationViewModel.denyUserRequest(index , currentUserData?.userId)
+                        viewNotificationViewModel.denyUserRequest(index, currentUserData?.userId , currentUserData?.phoneNumber)
                     }
                     .constrainAs(rejectBtn) {
                         top.linkTo(viewProfileBtn.bottom, margin = 8.dp)
@@ -131,8 +141,8 @@ fun TeamJointNotification(
                         bottom.linkTo(parent.bottom)
 
 
-                    } , tint = textColor)
-            createHorizontalChain(acceptBtn , rejectBtn , chainStyle = ChainStyle.Spread )
+                    }, tint = textColor)
+            createHorizontalChain(acceptBtn, rejectBtn, chainStyle = ChainStyle.Spread)
         }
     }
 }

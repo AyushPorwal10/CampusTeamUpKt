@@ -55,10 +55,8 @@ fun CollegeDetails(
     val listOfGraduationYear =
         listOf("Before 2022", "2022", "2023", "2024", "2025", "2026", "2027", "2028")
 
-
-
-
-
+    val currentUserImage = userProfileViewModel.currentUserImage.collectAsState()
+    Log.d("CollegeDetails","Current user image is $currentUserImage.va")
 
     val isLoading = userProfileViewModel.isLoading.collectAsState()
     val collegeDetails = userProfileViewModel.collegeDetails.collectAsState().value
@@ -85,7 +83,6 @@ fun CollegeDetails(
     }
     var selectedImageFromDevice by remember { mutableStateOf<Uri?>(null) }
     val context = LocalContext.current
-
 
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -122,7 +119,7 @@ fun CollegeDetails(
         val (userImage, editPhotoButton, progressBar, courseBranchYear, editOrUpdateBtn) = createRefs()
 
         AsyncImage(
-            model = selectedImageFromDevice ?: R.drawable.profile,
+            model = selectedImageFromDevice ?: currentUserImage.value.isNotEmpty(),
             contentDescription = "User Profile",
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -237,26 +234,20 @@ fun CollegeDetails(
                                     downloadedImageUrl = url ?: downloadedImageUrl
 
                                     Log.d("CollegeDetails", "Download URL is $downloadedImageUrl")
-                                    userProfileViewModel.saveCollegeDetails(
-                                        downloadedImageUrl ?: "",
-                                        selectedGraduationYear,
-                                        selectedBranch,
-                                        selectedCourse
-                                    )
+
+                                        userProfileViewModel.saveCollegeDetails(
+                                            downloadedImageUrl ?: currentUserImage.value,
+                                            selectedGraduationYear,
+                                            selectedBranch,
+                                            selectedCourse
+                                        )
+
+
                                     Log.d("CollegeDetails", "Done with saving college details")
                                 })
-                        } else {
-
-                            Log.d("CollegeDetails", "No new image selected, using existing URL: $downloadedImageUrl")
-
-                            userProfileViewModel.saveCollegeDetails(
-                                downloadedImageUrl ?: "",
-                                selectedGraduationYear,
-                                selectedBranch,
-                                selectedCourse
-                            )
                         }
-
+                        else
+                            ToastHelper.showToast(context , "Please add your profile image")
                     }
 
 
@@ -269,8 +260,8 @@ fun CollegeDetails(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = BackGroundColor
                 ),
-                enabled = selectedImageFromDevice.
             ) {
+                Log.d("CollegeDetails","$selectedImageFromDevice <-")
                 Text(text = if (isEditing) "Save" else "Edit", color = White)
             }
         }

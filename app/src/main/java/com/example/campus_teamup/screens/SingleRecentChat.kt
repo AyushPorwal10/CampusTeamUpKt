@@ -63,17 +63,6 @@ fun SingleRecentChat(chatData : RecentChats , onClick : () -> Unit){
                     }
                     .fillMaxWidth(0.75f) )
 
-            Box(modifier = Modifier
-                .size(30.dp)
-                .constrainAs(notificationCount) {
-                    top.linkTo(userName.top)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(userName.bottom)
-                }
-                .clip(RoundedCornerShape(15.dp))
-                .border(1.dp, BorderColor, RoundedCornerShape(15.dp)) , contentAlignment = Alignment.Center){
-                Text(text = "28" , color = White , style = MaterialTheme.typography.bodySmall)
-            }
 
             Text(text = "Created on ${chatData.createdOn}" ,
                 style = MaterialTheme.typography.bodySmall ,

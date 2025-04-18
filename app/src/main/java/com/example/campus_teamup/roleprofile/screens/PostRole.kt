@@ -85,90 +85,101 @@ fun PostRole(createPostViewModel: CreatePostViewModel) {
             .fillMaxWidth()
             .background(BorderColor))
 
-    Box(modifier = Modifier
-        .clip(RoundedCornerShape(22.dp))
-        .fillMaxWidth(0.9f)
-        .background(BorderColor)
-        .constrainAs(noteForRole) {
-            start.linkTo(parent.start)
-            end.linkTo(parent.end)
-            top.linkTo(divider.bottom, margin = 10.dp)
-        }) {
-        Text(
-            text = stringResource(id = R.string.note_for_making_post),
-            color = White,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(12.dp)
-        )
-    }
+        Box(modifier = Modifier
+            .clip(RoundedCornerShape(22.dp))
+            .fillMaxWidth(0.9f)
+            .background(BorderColor)
+            .constrainAs(noteForRole) {
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                top.linkTo(divider.bottom, margin = 10.dp)
+            }) {
+            Text(
+                text = stringResource(id = R.string.note_for_making_post),
+                color = White,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(12.dp)
+            )
+        }
 
-    OutlinedTextField(value = role,
-        onValueChange = { role = it },
-        colors = TextFieldStyle.myTextFieldColor(),
-        shape = TextFieldStyle.defaultShape,
-        maxLines = 1,
-        placeholder = {
-            Box(
-                modifier = Modifier.animateContentSize(),
-                contentAlignment = Alignment.CenterStart
-            ) {
+        OutlinedTextField(value = role,
+            onValueChange = { role = it },
+            colors = TextFieldStyle.myTextFieldColor(),
+            shape = TextFieldStyle.defaultShape,
+            maxLines = 1,
+            placeholder = {
+                Box(
+                    modifier = Modifier.animateContentSize(),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Text(
+                        text = placeholders[currentPlaceholderIndex],
+                        style = MaterialTheme.typography.titleMedium,
+                        color = White
+                    )
+                }
+            },
+            leadingIcon = {
+                Icon(
+                    painterResource(id = R.drawable.roles), contentDescription = "Email Icon",
+                    modifier = Modifier.size(22.dp), tint = White
+                )
+            }, modifier = Modifier
+                .constrainAs(enterRole) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(noteForRole.bottom, margin = 10.dp)
+                }
+                .fillMaxWidth(0.9f))
+
+
+
+        if (isLoading.value) {
+            ProgressIndicator.showProgressBar(
+                modifier = Modifier.constrainAs(progressBar) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(enterRole.bottom, margin = 10.dp)
+                },
+                true
+            )
+        } else {
+            OutlinedButton(onClick = {
+                if (role.isEmpty()) {
+                    ToastHelper.showToast(context, "Please Enter a role")
+                } else {
+                    Log.d("PostRole", "Post Button Clicked ${LocalDate.now()}")
+                    createPostViewModel.postRole(
+                        role,
+                        LocalDate.now().toString(),
+                        canPostRole = {
+                            // user is allowed to post only three roles
+                            role = ""
+                            if (it)
+                                ToastHelper.showToast(context, "Role Posted Successfully")
+                            else
+                                ToastHelper.showToast(context, "You can post only 3 roles")
+                        })
+
+                }
+            },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = BackGroundColor,
+                    contentColor = White
+                ), modifier = Modifier.constrainAs(postRoleBtn) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(enterRole.bottom, margin = 10.dp)
+                })
+            {
                 Text(
-                    text = placeholders[currentPlaceholderIndex],
-                    style = MaterialTheme.typography.titleMedium,
+                    text = stringResource(id = R.string.post_role),
                     color = White
                 )
             }
-        },
-        leadingIcon = {
-            Icon(
-                painterResource(id = R.drawable.roles), contentDescription = "Email Icon",
-                modifier = Modifier.size(22.dp), tint = White
-            )
-        }, modifier = Modifier
-            .constrainAs(enterRole) {
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                top.linkTo(noteForRole.bottom, margin = 10.dp)
-            }
-            .fillMaxWidth(0.9f))
-
-
-
-    if (isLoading.value) {
-        ProgressIndicator.showProgressBar(
-            modifier = Modifier.constrainAs(progressBar) {
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                top.linkTo(enterRole.bottom, margin = 10.dp)
-            },
-            true
-        )
-    } else {
-        OutlinedButton(onClick = {
-            if (role.isEmpty()) {
-                ToastHelper.showToast(context, "Please Enter a role")
-            } else {
-                Log.d("PostRole", "Post Button Clicked ${LocalDate.now()}")
-                createPostViewModel.postRole(role, LocalDate.now().toString())
-            }
-        },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = BackGroundColor,
-                contentColor = White
-            ), modifier = Modifier.constrainAs(postRoleBtn) {
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                top.linkTo(enterRole.bottom, margin = 10.dp)
-            })
-        {
-            Text(
-                text = stringResource(id = R.string.post_role),
-                color = White
-            )
         }
-    }
 
-}
+    }
 
 }

@@ -30,10 +30,12 @@ import androidx.compose.ui.text.style.TextOverflow
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.AsyncImage
 import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.Dimensions
+import com.example.campus_teamup.helper.TimeAndDate
 import com.example.campus_teamup.mydataclass.RoleDetails
 import com.example.campus_teamup.myactivities.ViewUserProfile
 import com.example.campus_teamup.ui.theme.BackGroundColor
@@ -44,7 +46,11 @@ import com.example.campus_teamup.ui.theme.White
 
 
 @Composable
-fun SingleRole(roleDetails: RoleDetails , onSaveRoleClicked : (RoleDetails) -> Unit , isSaved : Boolean) {
+fun SingleRole(
+    roleDetails: RoleDetails,
+    onSaveRoleClicked: (RoleDetails) -> Unit,
+    isSaved: Boolean
+) {
 
     val context = LocalContext.current
     val textColor = White
@@ -64,7 +70,7 @@ fun SingleRole(roleDetails: RoleDetails , onSaveRoleClicked : (RoleDetails) -> U
                 .padding(8.dp)
                 .fillMaxWidth()
         ) {
-            val (userImage, userName, roleLookingFor, viewProfileBtn, saveProjectBtn) = createRefs()
+            val (userImage, userName, roleLookingFor, viewProfileBtn, postedOn, saveProjectBtn) = createRefs()
 
 
 
@@ -97,22 +103,24 @@ fun SingleRole(roleDetails: RoleDetails , onSaveRoleClicked : (RoleDetails) -> U
 
             IconButton(onClick = {
                 onSaveRoleClicked(roleDetails)
-            }, modifier = Modifier.constrainAs(saveProjectBtn) {
-                top.linkTo(parent.top)
-                bottom.linkTo(userName.bottom)
-                end.linkTo(parent.end)
-            }.size(26.dp)) {
+            }, modifier = Modifier
+                .constrainAs(saveProjectBtn) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(userName.bottom)
+                    end.linkTo(parent.end)
+                }
+                .size(26.dp)) {
                 Icon(
-                    painter = painterResource(id =  if(isSaved) R.drawable.saved_item else R.drawable.saveproject),
+                    painter = painterResource(id = if (isSaved) R.drawable.saved_item else R.drawable.saveproject),
                     contentDescription = null,
                     tint = White
-                   )
+                )
 
             }
 
 
             Text(
-                text = "Looking For : ${roleDetails.role}",
+                text = "Role : ${roleDetails.role}",
                 maxLines = 1,
                 fontWeight = FontWeight.Medium,
                 overflow = TextOverflow.Ellipsis,
@@ -125,6 +133,9 @@ fun SingleRole(roleDetails: RoleDetails , onSaveRoleClicked : (RoleDetails) -> U
                 })
 
 
+
+
+
             TextButton(
                 onClick = {
                     val intent = Intent(context, ViewUserProfile::class.java)
@@ -133,12 +144,11 @@ fun SingleRole(roleDetails: RoleDetails , onSaveRoleClicked : (RoleDetails) -> U
                         "User id taken from vacancy activity ${roleDetails.postedBy} <- here it is "
                     )
                     intent.putExtra("userId", roleDetails.postedBy)
+                    intent.putExtra("phone_number",roleDetails.phoneNumber)
                     context.startActivity(intent)
                 },
                 modifier = Modifier.constrainAs(viewProfileBtn) {
                     top.linkTo(roleLookingFor.bottom, margin = 4.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
                 }, contentPadding = PaddingValues(vertical = 2.dp, horizontal = 10.dp)
             ) {
                 Text(
@@ -148,6 +158,18 @@ fun SingleRole(roleDetails: RoleDetails , onSaveRoleClicked : (RoleDetails) -> U
                 )
             }
 
+            TextButton(onClick = {  } , enabled = false, modifier = Modifier.constrainAs(postedOn) {
+                top.linkTo(roleLookingFor.bottom, margin = 4.dp)
+            }) {
+
+                Text(
+                    text = "Posted ${TimeAndDate.getTimeAgoFromDate(roleDetails.postedOn)}",
+                    color = LightTextColor,
+                    fontSize = 12.sp
+                )
+
+            }
+            createHorizontalChain(viewProfileBtn, postedOn, chainStyle = ChainStyle.Spread)
 
         }
     }

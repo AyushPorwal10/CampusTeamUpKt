@@ -5,16 +5,20 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -32,8 +36,11 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.campus_teamup.R
+import com.example.campus_teamup.helper.LoadAnimation
+import com.example.campus_teamup.helper.ShimmerEffect
 import com.example.campus_teamup.myThemes.TextFieldStyle
 import com.example.campus_teamup.mydataclass.VacancyDetails
+import com.example.campus_teamup.roleprofile.screens.SingleRole
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.White
@@ -71,7 +78,8 @@ fun VacanciesScreen(homeScreenViewModel: HomeScreenViewModel,
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(bgColor)
+            .background(bgColor),
+        contentAlignment = Alignment.Center
     ) {
 
 
@@ -146,7 +154,6 @@ fun VacanciesScreen(homeScreenViewModel: HomeScreenViewModel,
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShowListOfVacancies(
     modifier: Modifier,
@@ -156,29 +163,59 @@ fun ShowListOfVacancies(
     idOfSavedVacancy: List<String>,
 ) {
 
+    val isVacancyLoading = homeScreenViewModel.isVacancyLoading.collectAsState()
 
     LaunchedEffect(Unit) {
         Log.d("Vacancy", "Composable Fetching When composable loads")
         homeScreenViewModel.observeVacancyInRealTime()
     }
+
+
+
+
         LazyColumn(
-            modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             items(vacancies) { vacancy ->
-
-                if(!idOfSavedVacancy.contains(vacancy.vacancyId)){
-                    SingleVacancy(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                        ,
-                        vacancy,
-                        onSaveVacancy = {
-                            saveVacancy(it)
-                        },false
-                    )
+                ShimmerEffect(modifier = modifier, isLoading = isVacancyLoading.value) {
+                    if(!idOfSavedVacancy.contains(vacancy.vacancyId)){
+                        SingleVacancy(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ,
+                            vacancy,
+                            onSaveVacancy = {
+                                saveVacancy(it)
+                            },false
+                        )
+                    }
                 }
 
+
         }
+
+            item {
+                if(vacancies.isEmpty() || (vacancies.size-idOfSavedVacancy.size)==0) {
+                    Box( contentAlignment = Alignment.Center) {
+                        LoadAnimation(
+                            modifier = Modifier.size(200.dp),
+                            animation = R.raw.noresult,
+                            playAnimation = true
+                        )
+                    }
+                }
+            }
+
+                item {
+
+                        OutlinedButton(onClick = {
+                            homeScreenViewModel.observeVacancyInRealTime()
+                        }) {
+                            Text(text = "Refresh", color = White)
+                        }
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
     }
 }

@@ -139,6 +139,7 @@ fun ChatScreen(senderName: String? ,chatRoomId : String? ,  currentUserId : Stri
 
                 TextField(
                     modifier = Modifier
+                        .fillMaxWidth(0.9f)
                         .padding(4.dp)
                         .border(1.dp, BorderColor, RoundedCornerShape(22.dp)),
                     value = messageText, onValueChange = { text ->
@@ -150,7 +151,7 @@ fun ChatScreen(senderName: String? ,chatRoomId : String? ,  currentUserId : Stri
                      colors = TextFieldStyle.myTextFieldColor()
                 )
 
-                if(messageText.isNotEmpty()){
+                if(messageText.trim().isNotEmpty()){
                     IconButton(onClick = {
                         if (chatRoomId != null) {
                             chatViewModel.sendMessage(SendMessage(

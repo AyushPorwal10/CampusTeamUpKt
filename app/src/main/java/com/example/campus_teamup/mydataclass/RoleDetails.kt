@@ -1,6 +1,7 @@
 package com.example.campus_teamup.mydataclass
 
 data class RoleDetails(
+    val phoneNumber : String = "",
     val roleId : String = "",
     val postedBy: String = "",
     val userName: String = "",

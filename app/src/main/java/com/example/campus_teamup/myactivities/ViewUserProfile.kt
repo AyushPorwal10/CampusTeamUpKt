@@ -21,12 +21,13 @@ class ViewUserProfile : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // this is receiver is
+        // this is receiver
         val userId = intent.getStringExtra("userId")
+        val receiverPhoneNumber = intent.getStringExtra("phone_number") // person who posted this role
 
         Log.d("FCM","Received UserId $userId <-")
         setContent{
-            ViewUserProfiles(viewProfileViewModel ,notificationViewModel ,  userId)
+            ViewUserProfiles(viewProfileViewModel ,notificationViewModel ,  userId , receiverPhoneNumber)
         }
         Log.d("ViewUserProfile","Going to fetch college details")
 
@@ -34,9 +35,9 @@ class ViewUserProfile : ComponentActivity() {
         notificationViewModel.fetchSenderId()
 
         notificationViewModel.checkIfAlreadyRequestSent(userId!!)
-        viewProfileViewModel.fetchCollegeDetails(userId)
-        viewProfileViewModel.fetchCodingProfileDetails(userId)
-        viewProfileViewModel.fetchSkills(userId)
+        viewProfileViewModel.fetchCollegeDetails(userId , receiverPhoneNumber)
+        viewProfileViewModel.fetchCodingProfileDetails(userId , receiverPhoneNumber )
+        viewProfileViewModel.fetchSkills(userId, receiverPhoneNumber)
     }
     override fun onPause() {
         super.onPause()

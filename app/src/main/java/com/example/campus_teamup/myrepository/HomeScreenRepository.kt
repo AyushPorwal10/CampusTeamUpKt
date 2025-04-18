@@ -27,10 +27,6 @@ class HomeScreenRepository @Inject constructor(
 ) {
 
     suspend fun getUserImageUrl(currentUserId: String) : Flow<String> = callbackFlow {
-//        val document =
-//            firebaseFirestore.collection("user_images").document(userId + "").get().await()
-//
-//        return document.getString("user_image") ?: ""
 
         val documentReference = firebaseFirestore.collection("user_images").document(currentUserId)
 
@@ -47,7 +43,6 @@ class HomeScreenRepository @Inject constructor(
             }
         }
         awaitClose{realTimeImageFetching.remove()}
-
     }
 
     suspend fun fetchInitialOrPaginatedRoles(lastVisible: DocumentSnapshot?): QuerySnapshot {
@@ -176,18 +171,18 @@ class HomeScreenRepository @Inject constructor(
         if (fcmToken.isEmpty())
             return
         Log.d("FCM", "FCM is saved in firestore $fcmToken")
-        firebaseFirestore.collection("all_user_id").document(userId)
+        firebaseFirestore.collection("all_fcm").document(userId)
             .set(mapOf("fcm_token" to fcmToken), SetOptions.merge()).await()
     }
 
     suspend fun saveProject(
-        currentUserId: String,
+        phoneNumber: String,
         projectDetails: ProjectDetails,
         onProjectSaved: () -> Unit,
         onError: (Exception) -> Unit
     ) {
         savedItem(
-            currentUserId,
+            phoneNumber,
             "project_saved",
             projectDetails.projectId,
             projectDetails,
@@ -201,24 +196,24 @@ class HomeScreenRepository @Inject constructor(
     }
 
     suspend fun saveRole(
-        currentUserId: String,
+        phoneNumber: String,
         roleDetails: RoleDetails,
         onRoleSaved: () -> Unit,
         onError: (Exception) -> Unit
     ) {
-        savedItem(currentUserId, "saved_roles", roleDetails.roleId, roleDetails, "SavingRoles", {
+        savedItem(phoneNumber, "saved_roles", roleDetails.roleId, roleDetails, "SavingRoles", {
             onRoleSaved()
         }, {
             onError(it)
         })
     }
     suspend fun saveVacancy(
-        currentUserId: String,
+        phoneNumber: String,
         vacancyDetails: VacancyDetails,
         onVacancySaved: () -> Unit,
         onError: (Exception) -> Unit
     ) {
-        savedItem(currentUserId, "saved_vacancy", vacancyDetails.vacancyId, vacancyDetails, "SavingVacancies", {
+        savedItem(phoneNumber, "saved_vacancy", vacancyDetails.vacancyId, vacancyDetails, "SavingVacancies", {
             onVacancySaved()
         }, {
             onError(it)
@@ -227,7 +222,7 @@ class HomeScreenRepository @Inject constructor(
 
 
     private suspend inline fun <T : Any> savedItem(
-        currentUserId: String,
+        phoneNumber: String,
         collection: String,
         itemId: String,
         item: T,
@@ -237,10 +232,9 @@ class HomeScreenRepository @Inject constructor(
     ) {
 
         try {
-            firebaseFirestore.collection("all_user_id").document(currentUserId)
+            firebaseFirestore.collection("all_user_id").document(phoneNumber)
                 .collection(collection).document(itemId)
                 .set(item).await()
-
             Log.d(logTag, "Items saved success")
             onItemSaved()
         } catch (e: Exception) {
@@ -250,25 +244,25 @@ class HomeScreenRepository @Inject constructor(
     }
 
 
-    fun fetchCurrentUserSavedPost(currentUserId: String): Flow<List<String>> =
-        fetchSavedItems(currentUserId, "project_saved", "Saving")
+    fun fetchCurrentUserSavedPost(phoneNumber: String): Flow<List<String>> =
+        fetchSavedItems(phoneNumber, "project_saved", "Saving")
 
-    fun fetchCurrentUserSavedRole(currentUserId: String): Flow<List<String>> =
-        fetchSavedItems(currentUserId, "saved_roles", "FetchedRole")
+    fun fetchCurrentUserSavedRole(phoneNumber: String): Flow<List<String>> =
+        fetchSavedItems(phoneNumber, "saved_roles", "FetchedRole")
 
-    fun fetchCurrentUserSavedVacancy(currentUserId: String): Flow<List<String>> =
-        fetchSavedItems(currentUserId, "saved_vacancy", "FetchedVacancy")
+    fun fetchCurrentUserSavedVacancy(phoneNumber: String): Flow<List<String>> =
+        fetchSavedItems(phoneNumber, "saved_vacancy", "FetchedVacancy")
 
 
     // this can be projects , roles , vacancies
     private fun fetchSavedItems(
-        currentUserId: String,
+        phoneNumber: String,
         subCollection: String,
         logTag: String
     ): Flow<List<String>> = callbackFlow {
 
         val collectionReference =
-            firebaseFirestore.collection("all_user_id").document(currentUserId)
+            firebaseFirestore.collection("all_user_id").document(phoneNumber)
                 .collection(subCollection)
         val listener = collectionReference.addSnapshotListener { snapshot, error ->
             if (error != null) {

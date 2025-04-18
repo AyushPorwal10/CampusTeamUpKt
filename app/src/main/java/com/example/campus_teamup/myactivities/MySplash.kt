@@ -32,10 +32,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.campus_teamup.R
+import com.example.campus_teamup.myotp.SignUpLogin
 import com.example.campus_teamup.screens.OnboardingScreen
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.White
-import com.example.campus_teamup.viewmodels.SplashViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -55,20 +55,16 @@ class MySplash  : ComponentActivity() {
     lateinit var userManager: UserManager
 
 
-    private lateinit var splashViewModel: SplashViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val emailLink = intent.data.toString()
             val context = LocalContext.current
 
-            splashViewModel = hiltViewModel()
             SplashScreen(auth , context) {
                 setContent {
-                    OnboardingScreen(auth , userManager , splashViewModel,emailLink,context
-                    ) {
-                        startActivity(Intent(this, LoginAndSignUp::class.java))
+                    OnboardingScreen{
+                        startActivity(Intent(this, SignUpLogin::class.java))
                         finish()
                     }
                 }
@@ -77,13 +73,10 @@ class MySplash  : ComponentActivity() {
 
     }
 }
-
 @Composable
 fun SplashScreen(auth: FirebaseAuth, context : Context, navigateToOnboardingScreen : () -> Unit) {
 
-    var showOnBoardingScreen = remember {
-        mutableStateOf(false)
-    }
+
     val textColor = White
     Box(
         modifier = Modifier
@@ -111,17 +104,17 @@ fun SplashScreen(auth: FirebaseAuth, context : Context, navigateToOnboardingScre
         }
 
     }
-
     LaunchedEffect(Unit){
         delay(1200)
-        // if user is already logged in than don't ask for login or signup
-
         if(auth.currentUser != null){
             val activity = context as Activity
             activity.startActivity(Intent(context, MainActivity::class.java))
             activity.finish()
         }
-        navigateToOnboardingScreen()
+        else{
+            navigateToOnboardingScreen()
+        }
+
 
     }
 }

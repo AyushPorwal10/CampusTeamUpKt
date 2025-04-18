@@ -20,6 +20,7 @@ import com.example.campus_teamup.viewmodels.UserDataSharedViewModel
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
 
 
 @AndroidEntryPoint
@@ -33,7 +34,8 @@ class MainActivity : ComponentActivity() {
         Log.d("Post", "MainActivity Created")
 
 
-
+        val cacheDirSize = File(this@MainActivity.cacheDir.path).walk().sumOf { it.length() }
+        Log.d("CacheDebug", "App cache size: ${cacheDirSize / (1024 * 1024)} MB")
 
         setContent {
             val userData = userDataSharedViewModel.userData.collectAsState()

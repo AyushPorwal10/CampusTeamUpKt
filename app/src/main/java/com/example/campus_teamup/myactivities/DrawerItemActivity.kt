@@ -18,24 +18,26 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.campus_teamup.chatsection.screens.ChatScreen
 import com.example.campus_teamup.helper.StartChatDialog
+import com.example.campus_teamup.helper.ToastHelper
 import com.example.campus_teamup.saveditems.ShowSavedItems
+import com.example.campus_teamup.screens.FeedbackScreen
 import com.example.campus_teamup.viewnotifications.NotificationsScreen
 import com.example.campus_teamup.screens.RecentChatScreen
-import com.example.campus_teamup.screens.TeamDetailsScreen
 import com.example.campus_teamup.viewmodels.SavedItemsViewModel
-import com.example.campus_teamup.viewmodels.TeamDetailsViewModel
 import com.example.campus_teamup.viewmodels.UserDataSharedViewModel
 import com.example.campus_teamup.viewmodels.ViewNotificationViewModel
+import com.example.campus_teamup.yourposts.YourPost
+import com.example.campus_teamup.yourposts.YourPostViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 
 @AndroidEntryPoint
 class DrawerItemActivity : ComponentActivity() {
 
-    private val teamDetailsViewModel: TeamDetailsViewModel by viewModels()
     private val viewNotificationViewModel: ViewNotificationViewModel by viewModels()
     private val savedItemsViewModel : SavedItemsViewModel by viewModels()
     private val userDataSharedViewModel : UserDataSharedViewModel by viewModels()
+    private val yourPostViewModel : YourPostViewModel by viewModels()
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,21 +59,18 @@ class DrawerItemActivity : ComponentActivity() {
 
             val startDestination = when (intent.getStringExtra("DrawerItem")) {
                 "notifications" -> "notifications"
-                "teamDetails" -> "teamDetails"
                 "recentchats" -> "recentchats"
                 "savedItems" -> "savedItems"
+                "feedback" -> "feedback"
+                "yourposts" -> "yourposts"
                 else -> "notifications"
             }
 
             NavHost(navController, startDestination = startDestination) {
                 composable("notifications") {
-                    viewNotificationViewModel.fetchCombinedNotifications(currentUserData.value?.userId)
+                    viewNotificationViewModel.fetchCombinedNotifications(currentUserData.value?.phoneNumber)
 
                     NotificationsScreen(viewNotificationViewModel ,currentUserData.value)
-                }
-                composable("teamDetails") {
-                    teamDetailsViewModel.initializeUserId()
-                    TeamDetailsScreen(teamDetailsViewModel)
                 }
                 composable("recentchats") {
                     RecentChatScreen(startChat = {data->
@@ -87,11 +86,27 @@ class DrawerItemActivity : ComponentActivity() {
                     val currentUserId = backStackEntry.arguments?.getString("currentUserId")
                     ChatScreen(senderName,chatRoomId , currentUserId)
                 }
+                composable("yourposts"){
+                    yourPostViewModel.fetchUserPostedRoles()
+                    yourPostViewModel.fetchUserPostedVacancy()
+                    yourPostViewModel.fetchUserPostedProjects()
+                    YourPost(yourPostViewModel)
+                }
+
+
                 composable("savedItems"){
-                    savedItemsViewModel.fetchSavedProjects(currentUserData.value?.userId)
-                    savedItemsViewModel.fetchSavedRoles(currentUserData.value?.userId)
-                    savedItemsViewModel.fetchSavedVacancy(currentUserData.value?.userId)
+                    savedItemsViewModel.fetchSavedProjects(currentUserData.value?.phoneNumber)
+                    savedItemsViewModel.fetchSavedRoles(currentUserData.value?.phoneNumber)
+                    savedItemsViewModel.fetchSavedVacancy(currentUserData.value?.phoneNumber)
                     ShowSavedItems(currentUserData.value , savedItemsViewModel)
+                }
+
+                composable ("feedback"){
+                    FeedbackScreen(onSubmit = {
+                        userDataSharedViewModel.sendFeedback(it , onError = {
+                            ToastHelper.showToast(this@DrawerItemActivity , "Something Went Wrong !")
+                        })
+                    } , userDataSharedViewModel)
                 }
 
             }

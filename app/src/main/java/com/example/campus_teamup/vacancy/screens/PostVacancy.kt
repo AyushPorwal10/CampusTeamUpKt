@@ -53,7 +53,6 @@ import java.time.LocalDate
 fun PostVacancy(createPostViewModel : CreatePostViewModel) {
 
     val isLoading = createPostViewModel.isLoading.collectAsState()
-    val isPosted = createPostViewModel.isPosted.collectAsState()
 
     val scrollState = rememberScrollState()
     val teamName = remember { mutableStateOf("") }
@@ -64,30 +63,19 @@ fun PostVacancy(createPostViewModel : CreatePostViewModel) {
 
     val context = LocalContext.current
 
-    var selectedTeamLogo by remember { mutableStateOf<Uri?>(null) }
+    var selectedTeamLogo by remember { mutableStateOf<String>("") }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null) {
             Log.d("Vacancy","Logo selected $uri")
-            selectedTeamLogo = uri
+            selectedTeamLogo = uri.toString()
         }
         else{
             ToastHelper.showToast(context , "No Image Selected")
         }
     }
-
-    if(isPosted.value){
-        teamName.value = ""
-        hackathonName.value = ""
-        roleLookingFor.value = ""
-        skills.value = ""
-        roleDescription.value = ""
-        ToastHelper.showToast(context,"Vacancy Posted Successfully")
-    }
-
-
     Column(
         modifier = Modifier
             .verticalScroll(scrollState)
@@ -222,8 +210,10 @@ fun PostVacancy(createPostViewModel : CreatePostViewModel) {
 
                     if(isAllRequiredFieldsCorrect){
 
-                        createPostViewModel.uploadTeamLogo(selectedTeamLogo!!) { url ->
-                            val downloadImageUrl = url ?: ""
+                        createPostViewModel.uploadTeamLogo(selectedTeamLogo) {canPost ,  url ->
+
+                            if(canPost){
+                                val downloadImageUrl = url ?: ""
                                 createPostViewModel.postVacancy(
                                     LocalDate.now().toString(),
                                     downloadImageUrl,
@@ -231,8 +221,18 @@ fun PostVacancy(createPostViewModel : CreatePostViewModel) {
                                     hackathonName.value,
                                     roleLookingFor.value,
                                     skills.value,
-                                    roleDescription.value
-                                )
+                                    roleDescription.value , onVacancyPosted = {
+                                        teamName.value = ""
+                                        hackathonName.value  =""
+                                        roleDescription.value = ""
+                                        skills.value = ""
+                                        roleDescription.value = ""
+                                        ToastHelper.showToast(context , "Vacancy Posted Successfully")
+                                    })
+                            }
+                            else
+                                ToastHelper.showToast(context , "You can post only 4 vacancy")
+
                         }
                     }
                     else{

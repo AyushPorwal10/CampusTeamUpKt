@@ -1,6 +1,8 @@
 package com.example.campus_teamup.viewnotifications
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
@@ -31,6 +33,7 @@ import com.example.campus_teamup.ui.theme.White
 import com.example.campus_teamup.viewmodels.ViewNotificationViewModel
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TeamInviteNotification(
     teamInviteNotification: NotificationItems.TeamInviteNotification,
@@ -54,7 +57,7 @@ fun TeamInviteNotification(
         RejectTeamInviteDialog(onCancel = {
             rejectTeamInviteDialog = false
         }) {
-            viewNotificationViewModel.denyTeamRequest(index , currentUserData?.userId)
+            viewNotificationViewModel.denyTeamRequest(index , currentUserData?.userId, currentUserData?.phoneNumber)
         }
     }
 
@@ -108,7 +111,7 @@ fun TeamInviteNotification(
             // This is when user accept to do communication with sender chat option is open for them
 
             IconButton(onClick = {
-                viewNotificationViewModel.createChatRoom(index,currentUserData?.userId)
+                viewNotificationViewModel.createChatRoom(index,currentUserData?.userId ,currentUserData?.userName , currentUserData?.phoneNumber)
             }, modifier = Modifier.constrainAs(acceptBtn) {
                 top.linkTo(viewTeamDetailsBtn.bottom, margin = 4.dp)
             }) {

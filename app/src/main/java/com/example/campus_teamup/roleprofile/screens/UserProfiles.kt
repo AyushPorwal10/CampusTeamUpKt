@@ -45,7 +45,8 @@ import com.example.campus_teamup.viewmodels.NotificationViewModel
 fun ViewUserProfiles(
     viewProfileViewModel: ViewProfileViewModel,
     notificationViewModel: NotificationViewModel,
-    receiverId: String?
+    receiverId: String?,
+    receiverPhoneNumber: String?
 ) {
 
     Log.d("FCM","All three composable screen is $receiverId <-")
@@ -141,7 +142,8 @@ fun ViewUserProfiles(
                         },
                     viewProfileViewModel,
                     notificationViewModel,
-                    receiverId
+                    receiverId,
+                    receiverPhoneNumber
                 )
 
                 "codingProfiles" -> ViewCodingProfiles(

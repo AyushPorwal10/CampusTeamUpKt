@@ -2,10 +2,12 @@ package com.example.campus_teamup.userprofile.screens
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -13,14 +15,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -28,6 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.campus_teamup.R
+import com.example.campus_teamup.helper.LoadAnimation
+import com.example.campus_teamup.helper.rememberNetworkStatus
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.Black
 import com.example.campus_teamup.ui.theme.BorderColor
@@ -47,6 +54,8 @@ fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
         mutableStateOf("collegeDetails")
     }
 
+    val isConnected = rememberNetworkStatus()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(topBar = {
         TopAppBar(
@@ -71,6 +80,16 @@ fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
             }
         )
     }) { paddingValues ->
+
+
+        LaunchedEffect(isConnected) {
+            if (!isConnected) {
+                snackbarHostState.showSnackbar(
+                    message = "No Internet Connection",
+                    actionLabel = "OK"
+                )
+            }
+        }
 
         ConstraintLayout(
             modifier = Modifier
@@ -138,9 +157,7 @@ fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
 
 
 
-
-
-
+            if(isConnected){
                 when (selectedLayout) {
                     "collegeDetails" -> CollegeDetails(
                         userProfileViewModel,
@@ -179,6 +196,13 @@ fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
                                 }
                         )
                 }
+            }
+            else {
+                Box(modifier = Modifier.padding(paddingValues).fillMaxSize().background(BackGroundColor) , contentAlignment = Alignment.Center){
+                    LoadAnimation(modifier = Modifier.size(200.dp) , animation = R.raw.otp, playAnimation = true)
+                }
+            }
+
 
 
 

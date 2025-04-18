@@ -16,6 +16,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -43,6 +44,10 @@ class NotificationViewModel @Inject constructor(
 
     val isRequestAlreadySend : StateFlow<Boolean>get() = _isRequestAlreadySent.asStateFlow()
 
+    private val _isChatRoomAlreadyCreated = MutableStateFlow(false)
+    val isChatRoomAlreadyCreated : StateFlow<Boolean> get() = _isChatRoomAlreadyCreated.asStateFlow()
+
+
     private val _senderid = MutableStateFlow<String>("")
      val senderId: StateFlow<String> get() = _senderid.asStateFlow()
 
@@ -50,6 +55,8 @@ class NotificationViewModel @Inject constructor(
     private val senderName: StateFlow<String> get() = _senderName.asStateFlow()
 
 
+    private val _senderPhoneNumber = MutableStateFlow<String>("")
+    private val senderPhoneNumber: StateFlow<String> get() = _senderPhoneNumber.asStateFlow()
 
     // fetching sender id so that it can be sent with message payload
 
@@ -58,6 +65,7 @@ class NotificationViewModel @Inject constructor(
             val userData = userManager.userData.first()
             _senderid.value = userData.userId
             _senderName.value = userData.userName
+            _senderPhoneNumber.value = userData.phoneNumber
             Log.d("FCM", "Sender id fetched ${senderId.value} <-")
             Log.d("FCM","Sender username is ${senderName.value}")
         }
@@ -76,7 +84,7 @@ class NotificationViewModel @Inject constructor(
         }
     }
 @RequiresApi(Build.VERSION_CODES.O)
-fun sendNotification(title: String, body: String, receiverId: String) {
+fun sendNotification(title: String, body: String, receiverId: String, phoneNumber: String) {
     viewModelScope.launch {
         try {
             Log.d("NotificationViewModelRequest","${_isRequestSending.value}")
@@ -98,17 +106,16 @@ fun sendNotification(title: String, body: String, receiverId: String) {
                 data = mapOf(
                     "senderId" to senderId.value,
                     "senderName" to senderName.value,
-                    "time" to TimeAndDate.getCurrentTime()
+                    "time" to TimeAndDate.getCurrentTime(),
+                    "phoneNumber" to senderPhoneNumber.value
                 )
             )
             val fcmMessage = FcmMessage(message)
 
             Log.d("FCM", "Sending notification")
-            notificationRepository.sendNotification(fcmMessage, _listOfUserId.value, receiverId)
+            notificationRepository.sendNotification(fcmMessage, _listOfUserId.value, receiverId, phoneNumber)
             _isRequestSending.value = false
             Log.d("NotificationViewModelRequest"," Just after function ${_isRequestSending.value}")
-
-
         }
         catch (e: HttpException) {
             Log.e("FCM", "HTTP Exception: ${e.response()?.errorBody()?.string()}")
@@ -131,6 +138,13 @@ fun sendNotification(title: String, body: String, receiverId: String) {
                     _isRequestAlreadySent.value = true
                 }
             })
+        }
+
+        viewModelScope.launch {
+            userManager.userData.collectLatest {
+                _isChatRoomAlreadyCreated.value = notificationRepository.checkIfChatRoomAlreadyCreated(it.userId , receiverId)
+
+            }
         }
     }
 

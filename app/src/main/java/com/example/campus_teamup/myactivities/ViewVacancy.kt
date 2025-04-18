@@ -43,9 +43,9 @@ class ViewVacancy : ComponentActivity() {
             LaunchedEffect(currentUserData.value?.userId){
                 currentUserData.value?.userId.let {userId->
                     viewVacancyViewModel.checkIfRequestAlreadySent(userId, vacancy.postedBy)
+
                 }
             }
-            viewVacancyViewModel.fetchTeamDetails(vacancy.postedBy)
             viewVacancyViewModel.getFcmWhoPostedVacancy(vacancy.postedBy)
         }
     }

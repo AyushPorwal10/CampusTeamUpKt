@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -58,8 +59,11 @@ class HomeScreenViewModel @Inject constructor(
     val isRoleRefreshing: StateFlow<Boolean> = _isRoleRefreshing
 
     private val _isRoleLoading = MutableStateFlow(false)
-    val isRoleLoading: StateFlow<Boolean> = _isRoleLoading
+    val isRoleLoading: StateFlow<Boolean> = _isRoleLoading.asStateFlow()
 
+
+    private val _isVacancyLoading = MutableStateFlow(false)
+    val isVacancyLoading: StateFlow<Boolean> = _isVacancyLoading.asStateFlow()
 
     // vacancy
     private val _vacancyStateFlow = MutableStateFlow<List<VacancyDetails>>(emptyList())
@@ -83,19 +87,19 @@ class HomeScreenViewModel @Inject constructor(
     val isProjectLoading: StateFlow<Boolean> = _isProjectLoading
 
     private var lastProject: DocumentSnapshot? = null
-    private var lastFetchedUserId : String? = null
+    private var lastFetchedUserPhoneNumber: String? = null
 
 
     private val _listOfSavedPost = MutableStateFlow<List<String>>(emptyList())
-    val listOfSavedPost : StateFlow<List<String>>get() = _listOfSavedPost.asStateFlow()
+    val listOfSavedPost: StateFlow<List<String>> get() = _listOfSavedPost.asStateFlow()
 
 
     private val _listOfSavedRoles = MutableStateFlow<List<String>>(emptyList())
-    val listOfSavedRoles : StateFlow<List<String>>get() = _listOfSavedRoles.asStateFlow()
+    val listOfSavedRoles: StateFlow<List<String>> get() = _listOfSavedRoles.asStateFlow()
 
 
     private val _listOfSavedVacancy = MutableStateFlow<List<String>>(emptyList())
-    val listOfSavedVacancy : StateFlow<List<String>>get() = _listOfSavedVacancy.asStateFlow()
+    val listOfSavedVacancy: StateFlow<List<String>> get() = _listOfSavedVacancy.asStateFlow()
 
     // this is to fetch initial projects when screen loads
 
@@ -105,35 +109,40 @@ class HomeScreenViewModel @Inject constructor(
         _isProjectLoading.value = true
 
         viewModelScope.launch {
-            userData.collectLatest {data->
-                    val newUserid = data?.userId
-                if(newUserid != null && newUserid != lastFetchedUserId){
+
+            userData.collectLatest { data ->
+                val newPhoneNumber = data?.phoneNumber
+                Log.d(
+                    "HomeScreen",
+                    "User data is phone ${data?.phoneNumber}  userId is ${data?.userId} userName ${data?.userName}"
+                )
+                if (newPhoneNumber != null && newPhoneNumber != lastFetchedUserPhoneNumber) {
 
                     launch {
-                        homeScreenRepository.fetchCurrentUserSavedPost(data.userId ).catch {
-                            Log.d("SavedList","Error fetching saved list ${it}")
-                        }.collect{
+                        homeScreenRepository.fetchCurrentUserSavedPost(data.phoneNumber).catch {
+                            Log.d("SavedList", "Error fetching saved list ${it}")
+                        }.collect {
                             _listOfSavedPost.value = it
-                            Log.d("SavedList"," fetched  saved list viewmodel")
+                            Log.d("SavedList", " fetched  saved list viewmodel")
                         }
                     }
 
                     launch {
-                        homeScreenRepository.fetchCurrentUserSavedRole(data.userId ).catch {
-                            Log.d("FetchedRole","Error fetching saved list ${it}")
-                        }.collect{
+                        homeScreenRepository.fetchCurrentUserSavedRole(data.phoneNumber).catch {
+                            Log.d("FetchedRole", "Error fetching saved list ${it}")
+                        }.collect {
                             _listOfSavedRoles.value = it
 
-                            Log.d("FetchedRole"," fetched  saved list viewmodel")
+                            Log.d("FetchedRole", " fetched  saved list viewmodel")
                         }
                     }
                     launch {
-                        homeScreenRepository.fetchCurrentUserSavedVacancy(data.userId ).catch {
-                            Log.d("FetchedVacancy","Error fetching saved list $it")
-                        }.collect{
+                        homeScreenRepository.fetchCurrentUserSavedVacancy(data.phoneNumber).catch {
+                            Log.d("FetchedVacancy", "Error fetching saved list $it")
+                        }.collect {
                             _listOfSavedVacancy.value = it
 
-                            Log.d("FetchedVacancy"," fetched  saved list viewmodel")
+                            Log.d("FetchedVacancy", " fetched  saved list viewmodel")
                         }
                     }
 
@@ -143,12 +152,10 @@ class HomeScreenViewModel @Inject constructor(
     }
 
 
-
-
     fun fetchProjects() {
         viewModelScope.launch {
             Log.d("Project", "Going to fetch project lastProject is $lastProject")
-
+            _isProjectLoading.value = true
             val initialProject = homeScreenRepository.fetchProjects(lastProject)
 
             if (!initialProject.isEmpty) {
@@ -158,63 +165,82 @@ class HomeScreenViewModel @Inject constructor(
                 }
                 _isProjectLoading.value = false
             }
+            else {
+                _isProjectLoading.value = false
+            }
         }
     }
 
 
     // when current user wants to save a specific project
 
-    fun saveProject(projectDetails: ProjectDetails ,onProjectSaved : () -> Unit ,onError : (Exception) -> Unit  ) {
+    fun saveProject(
+        projectDetails: ProjectDetails,
+        onProjectSaved: () -> Unit,
+        onError: (Exception) -> Unit
+    ) {
 
-            viewModelScope.launch {
-                userData.collectLatest {data->
-                    val newUserid = data?.userId
-                    Log.d("VacancySaved","ViewModel current user id is $newUserid <-")
-                    if(newUserid != null && newUserid != lastFetchedUserId){
-                        homeScreenRepository.saveProject(newUserid ,  projectDetails , onProjectSaved = {
-                            Log.d("ProjectSaved","ViewModel Role saved ")
+        viewModelScope.launch {
+            userData.collectLatest { data ->
+                val newPhoneNumber = data?.phoneNumber
+                Log.d("VacancySaved", "ViewModel current user id is $newPhoneNumber <-")
+                if (newPhoneNumber != null && newPhoneNumber != lastFetchedUserPhoneNumber) {
+                    homeScreenRepository.saveProject(
+                        newPhoneNumber,
+                        projectDetails,
+                        onProjectSaved = {
+                            Log.d("ProjectSaved", "ViewModel Role saved ")
                             onProjectSaved()
-                        } , onError = {
+                        },
+                        onError = {
                             onError(it)
                         })
-                    }
-                }
-            }
-    }
-
-
-    fun saveRole(roleDetails: RoleDetails , onRoleSaved: () -> Unit , onError: (Exception) -> Unit){
-        
-        viewModelScope.launch {
-            userData.collectLatest {data->
-                val newUserid = data?.userId
-                Log.d("RoleSaved","Viewmodle current user id is $newUserid <-")
-                if(newUserid != null && newUserid != lastFetchedUserId){
-                   homeScreenRepository.saveRole(newUserid ,  roleDetails , onRoleSaved = {
-                       Log.d("RoleSaved","Viewmodel Role saved ")
-                       onRoleSaved()
-                   } , onError = {
-                       onError(it)
-                   })
                 }
             }
         }
     }
 
 
-    fun saveVacancy(vacancyDetails: VacancyDetails , onVacancySaved: () -> Unit , onError: (Exception) -> Unit){
+    fun saveRole(roleDetails: RoleDetails, onRoleSaved: () -> Unit, onError: (Exception) -> Unit) {
 
         viewModelScope.launch {
-            userData.collectLatest {data->
-                val newUserid = data?.userId
-                Log.d("VacancySaved","ViewModle current user id is $newUserid <-")
-                if(newUserid != null && newUserid != lastFetchedUserId){
-                    homeScreenRepository.saveVacancy(newUserid , vacancyDetails  , onVacancySaved = {
-                        Log.d("Vacancy","ViewModel Role saved ")
-                        onVacancySaved()
-                    } , onError = {
+            userData.collectLatest { data ->
+                val newPhoneNumber = data?.phoneNumber
+                Log.d("RoleSaved", "Viewmodle current user id is $newPhoneNumber <-")
+                if (newPhoneNumber != null && newPhoneNumber != lastFetchedUserPhoneNumber) {
+                    homeScreenRepository.saveRole(newPhoneNumber, roleDetails, onRoleSaved = {
+                        Log.d("RoleSaved", "Viewmodel Role saved ")
+                        onRoleSaved()
+                    }, onError = {
                         onError(it)
                     })
+                }
+            }
+        }
+    }
+
+
+    fun saveVacancy(
+        vacancyDetails: VacancyDetails,
+        onVacancySaved: () -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+
+        viewModelScope.launch {
+            userData.collectLatest { data ->
+                val newPhoneNumber = data?.phoneNumber
+                Log.d("VacancySaved", "ViewModle current user id is $newPhoneNumber <-")
+                if (newPhoneNumber != null && newPhoneNumber != lastFetchedUserPhoneNumber) {
+                    homeScreenRepository.saveVacancy(
+                        newPhoneNumber,
+                        vacancyDetails,
+                        onVacancySaved = {
+                            Log.d("Vacancy", "ViewModel Role saved ")
+                            onVacancySaved()
+                        },
+                        onError = {
+                            onError(it)
+                        })
                 }
             }
         }
@@ -225,6 +251,7 @@ class HomeScreenViewModel @Inject constructor(
         Log.d("Roles", "ViewModel Going to fetch Initial roles")
         viewModelScope.launch {
             try {
+
                 _isRoleLoading.value = true
                 val snapshot = withContext(Dispatchers.IO) {
                     homeScreenRepository.fetchInitialOrPaginatedRoles(null)
@@ -251,7 +278,9 @@ class HomeScreenViewModel @Inject constructor(
         Log.d("Roles", "ViewModel Observing roles in real-time")
         viewModelScope.launch {
             _isRoleLoading.value = true
+            delay(700)
             try {
+
                 homeScreenRepository.observeRoles(
                     lastVisible = null,
                     onUpdate = { roles, newLastVisible ->
@@ -282,19 +311,23 @@ class HomeScreenViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
+                _isVacancyLoading.value = true
                 val snapshot =
                     homeScreenRepository.fetchInitialOrPaginatedVacancy(lastVisibleVacancy)
                 val vacancy =
                     snapshot.documents.mapNotNull { it.toObject(VacancyDetails::class.java) }
-                Log.d("SizeOfVacancy","${vacancy.size}")
+                Log.d("SizeOfVacancy", "${vacancy.size}")
 
                 if (vacancy.isNotEmpty()) {
                     lastVisibleVacancy = snapshot.documents.last()
                     lastVacancyPostedOn = vacancy.first().postedOn
                 }
 
+                _isVacancyLoading.value = false
+
                 _vacancyStateFlow.value = vacancy
             } catch (e: Exception) {
+                _isVacancyLoading.value = false
                 Log.e("Vacancy", "$e")
             }
         }
@@ -303,6 +336,8 @@ class HomeScreenViewModel @Inject constructor(
 
     fun observeVacancyInRealTime() {
         viewModelScope.launch {
+            _isVacancyLoading.value = true
+            delay(700)
             Log.d("Vacancy", "ViewModel Observing new roles user refresh")
             homeScreenRepository.observeVacancy(lastVisible = null,
                 onUpdate = { vacancy, newLastVisible ->
@@ -314,8 +349,10 @@ class HomeScreenViewModel @Inject constructor(
                         _vacancyStateFlow.value = emptyList()
                         Log.d("Vacancy", "ViewModel Observing new roles got empty on  refresh")
                     }
+                    _isVacancyLoading.value = false
                 },
                 onError = { error ->
+                    _isVacancyLoading.value = false
                     Log.e("Vacancy", "$error")
                 })
 
@@ -349,7 +386,7 @@ class HomeScreenViewModel @Inject constructor(
                 .filter { it.userId.isNotEmpty() }
                 .first()
                 .let {
-                    homeScreenRepository.getUserImageUrl(it.userId).collect{imageUrl ->
+                    homeScreenRepository.getUserImageUrl(it.userId).collect { imageUrl ->
                         _userImage.value = imageUrl
                     }
                 }
@@ -358,7 +395,9 @@ class HomeScreenViewModel @Inject constructor(
 
     fun saveFCMToken() {
         viewModelScope.launch {
-            userData.value?.userId?.let { homeScreenRepository.saveFcmToken(FCMToken.value, it) }
+            userData.value?.userId?.let {
+                homeScreenRepository.saveFcmToken(FCMToken.value, it)
+            }
         }
     }
 

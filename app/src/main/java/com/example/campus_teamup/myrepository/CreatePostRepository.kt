@@ -2,6 +2,7 @@ package com.example.campus_teamup.myrepository
 
 import android.net.Uri
 import android.util.Log
+import androidx.core.net.toUri
 import com.example.campus_teamup.mydataclass.ProjectDetails
 import com.example.campus_teamup.mydataclass.RoleDetails
 import com.example.campus_teamup.mydataclass.VacancyDetails
@@ -21,17 +22,25 @@ class CreatePostRepository @Inject constructor(
 
 
     suspend fun postRole(
+        phoneNumber : String ,
         userId: String,
         userName: String,
         userImage: String,
         role: String,
-        datePosted: String
+        datePosted: String,
+        canPostRole: (Boolean) -> Unit,
     ) {
 
-        val generatedRoleId = firebaseFirestore.collection("all_projects").document().id
+        // checking if total role posted is less than 3
+
+        if(!canPost("roles_posted" , phoneNumber , 3))
+            return canPostRole(false)
+
+        val generatedRoleId = firebaseFirestore.collection("all_roles").document().id
         Log.d("SavedRoles", "Normal id i am getting is $generatedRoleId")
 
-       val roleDetails =  RoleDetails(
+        val roleDetails = RoleDetails(
+            phoneNumber,
             generatedRoleId,
             userId,
             userName,
@@ -42,59 +51,71 @@ class CreatePostRepository @Inject constructor(
 
 
 
-        firebaseFirestore.collection("all_user_id").document(userId).collection("roles_posted")
+        firebaseFirestore.collection("all_user_id").document(phoneNumber).collection("roles_posted")
             .document(generatedRoleId).set(roleDetails).await()
 
         firebaseFirestore.collection("all_roles").document(generatedRoleId).set(roleDetails).await()
 
+
+        canPostRole(true)
+
         Log.d("PostRole", "Role posted successfully")
     }
 
-    suspend fun fetchImageUrlFromUserDetails(userId: String): DocumentSnapshot {
-        return firebaseFirestore.collection("all_user_id").document(userId)
+    suspend fun fetchImageUrlFromUserDetails(phoneNumber: String): DocumentSnapshot {
+        return firebaseFirestore.collection("all_user_id").document(phoneNumber)
             .collection("all_user_details").document("college_details").get().await()
     }
 
 
-    suspend fun uploadTeamLogo(userId: String, teamLogoUri: Uri): String? {
-        return try {
+    suspend fun uploadTeamLogo(phoneNumber: String, teamLogoUri: String , canPostVacancy : (Boolean , String?) -> Unit ){
+         try {
+            if(!canPost("vacancy_posted", phoneNumber, 4)){
+                canPostVacancy(false , "")
+                return
+            }
 
-            val imageRef = storageReference.child("team_logo/$userId/teamLogo.jpg")
 
-            imageRef.putFile(teamLogoUri).await()
+
+            val imageRef = storageReference.child("team_logo/$phoneNumber/teamLogo.jpg")
+            Log.d("Vacancy", "Image uri is ${teamLogoUri.toUri()}")
+
+            imageRef.putFile(teamLogoUri.toUri()).await()
             Log.d("Vacancy", "Logo uploaded")
             val downloadUrl = imageRef.downloadUrl.await()
             Log.d("Vacancy", "Logo URL downloaded")
-            downloadUrl.toString()
+             canPostVacancy(true , downloadUrl.toString())
         } catch (e: Exception) {
             Log.d("Vacancy", e.toString())
-            null
+             canPostVacancy(true , null)
         }
-
     }
 
 
-     fun postTeamVacancy(currentUserId : String , vacancyDetails: VacancyDetails){
-        firebaseFirestore.runTransaction {transaction->
-            val vacancyId =  firebaseFirestore.collection("all_vacancy").document().id
+    fun postTeamVacancy(phoneNumber: String, vacancyDetails: VacancyDetails) {
+        firebaseFirestore.runTransaction { transaction ->
 
-            Log.d("SavingVacancy","Vacancy id is $vacancyId <-")
+            val vacancyId = firebaseFirestore.collection("all_vacancy").document().id
+
+            Log.d("SavingVacancy", "Vacancy id is $vacancyId <-")
             vacancyDetails.vacancyId = vacancyId
 
-            Log.d("SavingVacancy","Vacancy details updated with id ${vacancyDetails.vacancyId} <-")
+            Log.d("SavingVacancy", "Vacancy details updated with id ${vacancyDetails.vacancyId} <-")
 
-            val toUserDetails  = firebaseFirestore.collection("all_user_id").document(currentUserId).collection("vacancy_posted")
+            val toUserDetails = firebaseFirestore.collection("all_user_id").document(phoneNumber)
+                .collection("vacancy_posted")
                 .document(vacancyId)
 
             val toAllVacancy = firebaseFirestore.collection("all_vacancy").document(vacancyId)
 
-            transaction.set(toUserDetails , vacancyDetails)
-            transaction.set(toAllVacancy ,vacancyDetails)
+            transaction.set(toUserDetails, vacancyDetails)
+            transaction.set(toAllVacancy, vacancyDetails)
         }
     }
 
 
     fun addProject(
+        phoneNumber: String,
         userId: String,
         postedOn: String,
         teamName: String,
@@ -126,16 +147,26 @@ class CreatePostRepository @Inject constructor(
         // adding project
         val addProject =
             firebaseFirestore.collection("all_projects").document(projectReferenceId.id)
-        val updateProjectPostedList = firebaseFirestore.collection("all_user_id").document(userId)
 
+        val updateProjectPostedList = firebaseFirestore.collection("all_user_id").document(phoneNumber).collection("project_posted").document(projectReferenceId.id)
+
+        batch.set(updateProjectPostedList , projectDetails)
 
         batch.set(addProject, projectDetails)
-        batch.update(
-            updateProjectPostedList,
-            "listOfProjects",
-            FieldValue.arrayUnion(projectReferenceId.id)
-        )
+
         batch.commit()
+
+    }
+
+    suspend fun canPost(subCollection : String , phoneNumber: String , limit : Int) : Boolean{
+        val snapshot =
+            firebaseFirestore.collection("all_user_id").document(phoneNumber).collection(subCollection)
+                .get()
+                .await()  // suspend function — this is KEY to linear flow
+
+        val count = snapshot.size()
+
+        return count < limit
 
     }
 

@@ -8,6 +8,7 @@ sealed class NotificationItems {
         val time: String = "",
         val senderId: String = "",
         val senderName: String = "",
+        val senderPhoneNumber : String = "",
     ) : NotificationItems()
 
     // this is when a user wants to join team
@@ -15,6 +16,7 @@ sealed class NotificationItems {
     data class MemberInviteNotification(
         val time : String = "",
         val senderId : String = "",
-        val senderName : String = ""
+        val senderName : String = "",
+        val senderPhoneNumber : String = "",
     ) : NotificationItems()
 }

@@ -3,9 +3,11 @@ package com.example.campus_teamup.saveditems
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -14,11 +16,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -33,6 +39,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.campus_teamup.R
+import com.example.campus_teamup.helper.LoadAnimation
+import com.example.campus_teamup.helper.rememberNetworkStatus
 import com.example.campus_teamup.myactivities.UserData
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.Black
@@ -48,6 +56,8 @@ fun ShowSavedItems(currentUserData: UserData?, savedItemsViewModel: SavedItemsVi
     val bgColor = BackGroundColor
     val textColor = White
 
+    val isConnected = rememberNetworkStatus()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val savedProjectList = savedItemsViewModel.showProjectList.collectAsState()
     val savedRolesList = savedItemsViewModel.savedRolesList.collectAsState()
@@ -79,6 +89,15 @@ fun ShowSavedItems(currentUserData: UserData?, savedItemsViewModel: SavedItemsVi
         }, content = { paddingValues ->
 
 
+            LaunchedEffect(isConnected) {
+                if (!isConnected) {
+                    snackbarHostState.showSnackbar(
+                        message = "No Internet Connection",
+                        actionLabel = "OK"
+                    )
+                }
+            }
+
             val navController = rememberNavController()
 
             val currentDestination =
@@ -91,7 +110,7 @@ fun ShowSavedItems(currentUserData: UserData?, savedItemsViewModel: SavedItemsVi
                     .fillMaxSize()
             ) {
 
-                val (divider, savedRoles, savedVacancy, savedProjects, projectList, rolesList , savedItemsArea) = createRefs()
+                val (divider, savedRoles, savedVacancy, savedProjects, projectList, rolesList, savedItemsArea) = createRefs()
 
                 HorizontalDivider(modifier = Modifier
                     .fillMaxWidth()
@@ -101,7 +120,7 @@ fun ShowSavedItems(currentUserData: UserData?, savedItemsViewModel: SavedItemsVi
                 // SAVED ROLES , SAVED VACANCY , SAVED PROJECTS
 
                 OutlinedButton(onClick = {
-                    navController.navigate("savedRoles"){
+                    navController.navigate("savedRoles") {
                         popUpTo(navController.graph.startDestinationId) { inclusive = false }
                         launchSingleTop = true
                     }
@@ -116,7 +135,7 @@ fun ShowSavedItems(currentUserData: UserData?, savedItemsViewModel: SavedItemsVi
                     )
                 }
                 OutlinedButton(onClick = {
-                    navController.navigate("savedVacancy"){
+                    navController.navigate("savedVacancy") {
                         popUpTo(navController.graph.startDestinationId) { inclusive = false }
                         launchSingleTop = true
                     }
@@ -131,7 +150,7 @@ fun ShowSavedItems(currentUserData: UserData?, savedItemsViewModel: SavedItemsVi
                     )
                 }
                 OutlinedButton(onClick = {
-                    navController.navigate("savedProjects"){
+                    navController.navigate("savedProjects") {
                         popUpTo(navController.graph.startDestinationId) { inclusive = false }
                         launchSingleTop = true
                     }
@@ -151,37 +170,68 @@ fun ShowSavedItems(currentUserData: UserData?, savedItemsViewModel: SavedItemsVi
                     savedProjects,
                     chainStyle = ChainStyle.Spread
                 )
-                ConstraintLayout(modifier = Modifier
-                    .constrainAs(savedItemsArea) {
-                        top.linkTo(savedProjects.bottom, margin = 16.dp)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }
-                    .fillMaxSize()) {
-                    NavHost(navController, startDestination = "savedRoles") {
-                        composable("savedRoles") {
-                            ShowSavedRoles(savedRolesList, onRoleUnsave = {roleId->
-                                savedItemsViewModel.unSaveRole(roleId , currentUserData?.userId)
-                            } )
+
+
+
+
+                if (isConnected) {
+                    ConstraintLayout(modifier = Modifier
+                        .constrainAs(savedItemsArea) {
+                            top.linkTo(savedProjects.bottom, margin = 16.dp)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
                         }
-                        composable("savedVacancy") {
-                            ShowSavedVacancies(savedVacancyList, onVacancyUnsave = {vacancyId->
-                                savedItemsViewModel.unSaveVacancy(vacancyId , currentUserData?.userId)
-                            })
-                        }
-                        composable("savedProjects") {
-                            Log.d(
-                                "FetchingProjects",
-                                "In ShowSavedItems size is ${savedProjectList.value.size}"
-                            )
-                            ShowSavedProjects(
-                                savedProjectList,
-                                onProjectUnsave = {
-                                    savedItemsViewModel.unSaveProject(it, currentUserData?.userId)
+                        .fillMaxSize()) {
+                        NavHost(navController, startDestination = "savedRoles") {
+                            composable("savedRoles") {
+                                ShowSavedRoles(savedRolesList, onRoleUnsave = { roleId ->
+                                    savedItemsViewModel.unSaveRole(
+                                        roleId,
+                                        currentUserData?.phoneNumber
+                                    )
                                 })
+                            }
+                            composable("savedVacancy") {
+                                ShowSavedVacancies(
+                                    savedVacancyList,
+                                    onVacancyUnsave = { vacancyId ->
+                                        savedItemsViewModel.unSaveVacancy(
+                                            vacancyId,
+                                            currentUserData?.phoneNumber
+                                        )
+                                    })
+                            }
+                            composable("savedProjects") {
+                                Log.d(
+                                    "FetchingProjects",
+                                    "In ShowSavedItems size is ${savedProjectList.value.size}"
+                                )
+                                ShowSavedProjects(
+                                    savedProjectList,
+                                    onProjectUnsave = {
+                                        savedItemsViewModel.unSaveProject(
+                                            it,
+                                            currentUserData?.phoneNumber
+                                        )
+                                    })
+                            }
                         }
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .padding(paddingValues)
+                            .fillMaxSize()
+                            .background(BackGroundColor), contentAlignment = Alignment.Center
+                    ) {
+                        LoadAnimation(
+                            modifier = Modifier.size(200.dp),
+                            animation = R.raw.otp,
+                            playAnimation = true
+                        )
                     }
                 }
+
             }
         })
 }

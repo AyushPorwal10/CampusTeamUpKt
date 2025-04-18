@@ -3,14 +3,13 @@ package com.example.campus_teamup.screens
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -33,12 +32,12 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -67,10 +66,12 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.HandleLogoutDialog
+import com.example.campus_teamup.helper.LoadAnimation
 import com.example.campus_teamup.helper.ToastHelper
+import com.example.campus_teamup.helper.rememberNetworkStatus
 import com.example.campus_teamup.myactivities.DrawerItemActivity
-import com.example.campus_teamup.myactivities.LoginAndSignUp
 import com.example.campus_teamup.myactivities.UserProfile
+import com.example.campus_teamup.myotp.SignUpLogin
 import com.example.campus_teamup.mysealedClass.BottomNavScreens
 import com.example.campus_teamup.project.screens.ProjectsScreen
 import com.example.campus_teamup.roleprofile.screens.RolesScreen
@@ -93,6 +94,10 @@ fun HomeScreen(
     searchRoleVacancy: SearchRoleVacancy,
     userId: String?
 ) {
+
+
+    val isConnected = rememberNetworkStatus()
+
 
     Log.d("Saving", "currentUserId in homescreen is $userId <-")
 
@@ -148,6 +153,8 @@ fun HomeScreen(
                     .fillMaxWidth(0.8f),
                 drawerContainerColor = BackGroundColor
             ) {
+
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -201,61 +208,77 @@ fun HomeScreen(
 
                 // Notifications menu item
 
-                NavItem(
-                    coroutineScope,
-                    drawerState,
-                    R.drawable.notifications,
-                    stringResource(id = R.string.notifications)
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
                 ) {
-                    val intent = Intent(context, DrawerItemActivity::class.java)
-                    intent.putExtra("DrawerItem", "notifications")
-                    context.startActivity(intent)
+                    NavItem(
+                        coroutineScope,
+                        drawerState,
+                        R.drawable.notifications,
+                        stringResource(id = R.string.notifications)
+                    ) {
+                        val intent = Intent(context, DrawerItemActivity::class.java)
+                        intent.putExtra("DrawerItem", "notifications")
+                        context.startActivity(intent)
+                    }
+
+
+
+                    // recents chats
+
+                    NavItem(
+                        coroutineScope,
+                        drawerState,
+                        R.drawable.chats,
+                        stringResource(id = R.string.chats)
+                    ) {
+                        val intent = Intent(context, DrawerItemActivity::class.java)
+                        intent.putExtra("DrawerItem", "recentchats")
+                        context.startActivity(intent)
+                    }
+
+
+                    NavItem(
+                        coroutineScope,
+                        drawerState,
+                        R.drawable.saveproject,
+                        stringResource(id = R.string.your_posts)
+                    ) {
+                        val intent = Intent(context, DrawerItemActivity::class.java)
+                        intent.putExtra("DrawerItem", "yourposts")
+                        context.startActivity(intent)
+                    }
+                    // saved items
+
+                    NavItem(
+                        coroutineScope,
+                        drawerState,
+                        R.drawable.saveproject,
+                        stringResource(id = R.string.saved_items)
+                    ) {
+                        val intent = Intent(context, DrawerItemActivity::class.java)
+                        intent.putExtra("DrawerItem", "savedItems")
+                        context.startActivity(intent)
+                    }
+
+                    // logout button
+
+                    LogOutButton(homeScreenViewModel)
+
+                    NavItem(
+                        coroutineScope,
+                        drawerState,
+                        R.drawable.feedback,
+                        stringResource(id = R.string.feedback)
+                    ) {
+                        val intent = Intent(context, DrawerItemActivity::class.java)
+                        intent.putExtra("DrawerItem", "feedback")
+                        context.startActivity(intent)
+                    }
+
                 }
 
-                // Team Details menu item
-
-                NavItem(
-                    coroutineScope,
-                    drawerState,
-                    R.drawable.vacancies,
-                    stringResource(id = R.string.teamDetails)
-                ) {
-                    val intent = Intent(context, DrawerItemActivity::class.java)
-                    intent.putExtra("DrawerItem", "teamDetails")
-                    context.startActivity(intent)
-                }
-
-
-                // recents chats
-
-                NavItem(
-                    coroutineScope,
-                    drawerState,
-                    R.drawable.chats,
-                    stringResource(id = R.string.chats)
-                ) {
-                    val intent = Intent(context, DrawerItemActivity::class.java)
-                    intent.putExtra("DrawerItem", "recentchats")
-                    context.startActivity(intent)
-                }
-
-
-                // saved items
-
-                NavItem(
-                    coroutineScope,
-                    drawerState,
-                    R.drawable.saveproject,
-                    stringResource(id = R.string.saved_items)
-                ) {
-                    val intent = Intent(context, DrawerItemActivity::class.java)
-                    intent.putExtra("DrawerItem", "savedItems")
-                    context.startActivity(intent)
-                }
-
-                // logout button
-
-                LogOutButton(homeScreenViewModel)
             }
         }
     ) {
@@ -305,65 +328,85 @@ fun HomeScreen(
                 }
             }
         ) { paddingValues ->
-            NavHost(
-                navController = navController,
-                startDestination = BottomNavScreens.Roles.screen,
-                modifier = Modifier.padding(paddingValues)
-            ) {
 
-                composable(BottomNavScreens.Roles.screen) {
-                    RolesScreen(homeScreenViewModel, searchRoleVacancy, saveRole = { roleDetails ->
-                        homeScreenViewModel.saveRole(roleDetails, onRoleSaved = {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = "Role Saved Successfully.",
-                                    actionLabel = "Ok"
-                                )
-                            }
-                        }, onError = {
-                            Log.e("RoleSaved", "Error is $it")
-                            ToastHelper.showToast(context, "Something went wrong !")
-                        })
-                    })
-                }
-                composable(BottomNavScreens.Projects.screen) {
-                    ProjectsScreen(
-                        homeScreenViewModel,
-                        saveProject = {
-                            homeScreenViewModel.saveProject(it, onProjectSaved = {
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = "Project Saved Successfully.",
-                                        actionLabel = "Ok"
-                                    )
-                                }
-                            },
-                                onError = {
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(message = "Something went wrong.")
-                                    }
-                                })
-                        }
-                    )
-                }
-                composable(BottomNavScreens.Vacancies.screen) {
-                    VacanciesScreen(
-                        homeScreenViewModel, searchRoleVacancy,
-                        saveVacancy = {
-                            homeScreenViewModel.saveVacancy(it , onVacancySaved = {
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = "Vacancy Saved Successfully.",
-                                        actionLabel = "Ok"
-                                    )
-                                }
-                            },
-                                onError = {
-                                })
-                        }
+
+            LaunchedEffect(isConnected) {
+                if (!isConnected) {
+                    snackbarHostState.showSnackbar(
+                        message = "No Internet Connection",
+                        actionLabel = "OK"
                     )
                 }
             }
+
+
+            if(isConnected){
+                NavHost(
+                    navController = navController,
+                    startDestination = BottomNavScreens.Roles.screen,
+                    modifier = Modifier.padding(paddingValues)
+                ) {
+
+                    composable(BottomNavScreens.Roles.screen) {
+                        RolesScreen(homeScreenViewModel, searchRoleVacancy) { roleDetails ->
+                            homeScreenViewModel.saveRole(roleDetails, onRoleSaved = {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Role Saved Successfully.",
+                                        actionLabel = "Ok"
+                                    )
+                                }
+                            }, onError = {
+                                Log.e("RoleSaved", "Error is $it")
+                                ToastHelper.showToast(context, "Something went wrong !")
+                            })
+                        }
+                    }
+                    composable(BottomNavScreens.Projects.screen) {
+                        ProjectsScreen(
+                            homeScreenViewModel,
+                            saveProject = {
+                                homeScreenViewModel.saveProject(it, onProjectSaved = {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "Project Saved Successfully.",
+                                            actionLabel = "Ok"
+                                        )
+                                    }
+                                },
+                                    onError = {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(message = "Something went wrong.")
+                                        }
+                                    })
+                            }
+                        )
+                    }
+                    composable(BottomNavScreens.Vacancies.screen) {
+                        VacanciesScreen(
+                            homeScreenViewModel, searchRoleVacancy,
+                            saveVacancy = {
+                                homeScreenViewModel.saveVacancy(it, onVacancySaved = {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "Vacancy Saved Successfully.",
+                                            actionLabel = "Ok"
+                                        )
+                                    }
+                                },
+                                    onError = {
+                                    })
+                            }
+                        )
+                    }
+                }
+            }
+            else {
+                Box(modifier = Modifier.padding(paddingValues).fillMaxSize().background(BackGroundColor) , contentAlignment = Alignment.Center){
+                        LoadAnimation(modifier = Modifier.size(200.dp) , animation = R.raw.otp, playAnimation = true)
+                }
+            }
+
 
         }
     }
@@ -522,7 +565,7 @@ fun LogOutButton(homeScreenViewModel: HomeScreenViewModel) {
             onConfirm = {
                 showDialog = false
                 homeScreenViewModel.logoutUser(onLogoutSuccess = {
-                    val navigateToLogin = Intent(context, LoginAndSignUp::class.java)
+                    val navigateToLogin = Intent(context, SignUpLogin::class.java)
                     navigateToLogin.flags =
                         Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     context.startActivity(navigateToLogin)

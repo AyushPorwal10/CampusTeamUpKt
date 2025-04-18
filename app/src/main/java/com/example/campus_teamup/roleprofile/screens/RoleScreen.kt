@@ -1,19 +1,25 @@
 package com.example.campus_teamup.roleprofile.screens
 
 import android.util.Log
+import android.widget.Space
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -31,7 +37,9 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.campus_teamup.R
+import com.example.campus_teamup.helper.LoadAnimation
 import com.example.campus_teamup.helper.ShimmerEffect
+import com.example.campus_teamup.helper.rememberNetworkStatus
 import com.example.campus_teamup.myThemes.TextFieldStyle
 import com.example.campus_teamup.mydataclass.RoleDetails
 import com.example.campus_teamup.ui.theme.BackGroundColor
@@ -45,15 +53,14 @@ import com.example.campus_teamup.viewmodels.SearchRoleVacancy
 fun RolesScreen(
     homeScreenViewModel: HomeScreenViewModel,
     searchRoleVacancy: SearchRoleVacancy,
-    saveRole : (RoleDetails) -> Unit
+    saveRole: (RoleDetails) -> Unit
 ) {
+
     val textColor = White
     val bgColor = BackGroundColor
 
     val searchText by searchRoleVacancy.searchRoleText.collectAsState()
-    val idOfSavedProject by homeScreenViewModel.listOfSavedRoles.collectAsState()
-
-    val isSearching by searchRoleVacancy.isRoleSearching.collectAsState()
+    val idOfSavedRoles by homeScreenViewModel.listOfSavedRoles.collectAsState()
 
     // if user is searching than observing search roles else observing all roles
 
@@ -62,7 +69,6 @@ fun RolesScreen(
     } else {
         homeScreenViewModel.rolesStateFlow.collectAsState()
     }
-
 
 
     val placeholders = listOf("Search by Role", "Search by Name")
@@ -79,7 +85,8 @@ fun RolesScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(bgColor)
+            .background(bgColor),
+        contentAlignment = Alignment.Center
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (searchBar, filterIcon, divider, rolesList) = createRefs()
@@ -143,7 +150,7 @@ fun RolesScreen(
                 homeScreenViewModel, saveRole = {
                     saveRole(it)
                 },
-                idOfSavedProject
+                idOfSavedRoles
             )
         }
     }
@@ -156,29 +163,56 @@ fun ShowListOfRoles(
     roles: List<RoleDetails>,
     homeScreenViewModel: HomeScreenViewModel,
     saveRole: (RoleDetails) -> Unit,
-    idOfSavedProject: List<String>,
+    idOfSavedRoles: List<String>,
 ) {
+
     val isLoading by homeScreenViewModel.isRoleLoading.collectAsState()
+
     LaunchedEffect(Unit) {
         homeScreenViewModel.observeRolesInRealTime()
     }
-        LazyColumn(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(roles) { role ->
-                ShimmerEffect(modifier, isLoading, contentAfterLoading = {
-                    if(!idOfSavedProject.contains(role.roleId)){
-                        Log.d("FetchedRole","Showing unsaved role")
-                        SingleRole(role , onSaveRoleClicked = {
-                            saveRole(it)
-                        }, false)
-                    }
 
-                })
-            }
 
+
+    LazyColumn(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(roles) { role ->
+            ShimmerEffect(modifier, isLoading, contentAfterLoading = {
+                if (!idOfSavedRoles.contains(role.roleId)) {
+                    Log.d("FetchedRole", "Showing unsaved role")
+                    SingleRole(role, onSaveRoleClicked = {
+                        saveRole(it)
+                    }, false)
+                }
+
+            })
         }
+
+
+        item {
+
+            if(roles.isEmpty() || (roles.size-idOfSavedRoles.size)==0) {
+                Box( contentAlignment = Alignment.Center) {
+                    LoadAnimation(
+                        modifier = Modifier.size(200.dp),
+                        animation = R.raw.noresult,
+                        playAnimation = true
+                    )
+                }
+            }
+        }
+            item {
+                    OutlinedButton(onClick = {
+                        homeScreenViewModel.observeRolesInRealTime()
+                    }) {
+                        Text(text = "Refresh", color = White)
+                    }
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+    }
 
 }
 

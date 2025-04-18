@@ -1,5 +1,6 @@
-package com.example.campus_teamup.loginsignup.screens
+package com.example.campus_teamup.myotp
 
+import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -7,64 +8,65 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.campus_teamup.helper.AskForEmailVerification
+import androidx.navigation.NavHostController
 import com.example.campus_teamup.R
-import com.example.campus_teamup.helper.CheckEmptyFields
 import com.example.campus_teamup.helper.ProgressIndicator
 import com.example.campus_teamup.helper.ToastHelper
+import com.example.campus_teamup.helper.rememberNetworkStatus
 import com.example.campus_teamup.myAnimation.TextAnimation
 import com.example.campus_teamup.myThemes.TextFieldStyle
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.White
-import com.example.campus_teamup.viewmodels.LoginViewModel
-import kotlinx.coroutines.launch
 
 
 @Composable
-fun LoginScreen(
-    navigateToSignUpScreen: () -> Unit = {},
-    navigateToHomeScreen: () -> Unit = {},
-    loginViewModel: LoginViewModel = hiltViewModel() // here you should ask why write hiltViewModel here jab ki hum activity se pass kar rahe he
+fun LoginWithOtp(
+    signUpLoginViewModel: SignUpLoginViewModel,
+    context: Activity,
+    navController: NavHostController,
 ) {
 
-    var email = remember { mutableStateOf("") }
+    var phoneNumber = remember { mutableStateOf("") }
+
+    val isConnected = rememberNetworkStatus()
+    val snackbarHostState = remember { SnackbarHostState() }
+
     val context = LocalContext.current
     val textColor = White
-    val isEmailSent by loginViewModel._isEmailSent.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
-    val showProgressBar = remember { mutableStateOf(false) }
+    val isPhoneVerificationSuccess =
+        signUpLoginViewModel.isPhoneVerificationSuccess.collectAsState()
+    val isPhoneVerificationInProgress =
+        signUpLoginViewModel.isVerificationInProgress.collectAsState()
 
-    if (isEmailSent) {
-        showProgressBar.value = false
-        LaunchedEffect(Unit){
-            loginViewModel.saveUserData(email.value)
+
+    LaunchedEffect(isPhoneVerificationSuccess.value) {
+        if (isPhoneVerificationSuccess.value) {
+            navController.navigate("otpverification/${"login"}/${phoneNumber.value}")
         }
-        AskForEmailVerification()
     }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -72,7 +74,7 @@ fun LoginScreen(
     ) {
 
         ConstraintLayout() {
-            val (appLogo, welComeText, loginHeading, emailField, progressBar, loginButton, forgotPassword, signUp) = createRefs()
+            val (appLogo, welComeText, loginHeading, phoneNumberField, progressBar, loginButton, signUp) = createRefs()
 
             Image(
                 painterResource(id = R.drawable.app_logo), contentDescription = stringResource(
@@ -106,57 +108,82 @@ fun LoginScreen(
 
             )
 
-            // email
 
-            LoginEmailInputField(modifier = Modifier
-                .constrainAs(emailField) {
+            // mobile number
+
+            LoginPhoneNumberInputField(modifier = Modifier
+                .constrainAs(phoneNumberField) {
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                     top.linkTo(loginHeading.bottom, margin = 20.dp)
                 }
-                .fillMaxWidth(0.85f), email)
+                .fillMaxWidth(0.85f), phoneNumber)
 
 
 
-            if(showProgressBar.value){
+
+            if (isPhoneVerificationInProgress.value) {
                 ProgressIndicator.showProgressBar(modifier = Modifier
-                    .constrainAs(progressBar) {
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        top.linkTo(emailField.bottom, margin = 20.dp)
-                    }, showProgressBar.value)
-            }
-            else {
-                LoginButton(modifier = Modifier
                     .constrainAs(loginButton) {
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
-                        top.linkTo(emailField.bottom, margin = 20.dp)
-                    },
-                    signInWithEmail = {
-                        val checkEmail = CheckEmptyFields.checkEmail(email.value.trim())
-                        if (checkEmail == "") {
-                            showProgressBar.value = true
-                            coroutineScope.launch {
-                                loginViewModel.signInWithEmailLink(email.value.trim(),
-                                    onFailure = {
-                                        showProgressBar.value = false
-                                        ToastHelper.showToast(context, it.message + "")
-                                    })
-                            }
-
-                        } else
-                            ToastHelper.showMessageForEmptyEmail(context, email.value.trim())
-
-                    })
+                        top.linkTo(phoneNumberField.bottom, margin = 20.dp)
+                    }, canShow = isPhoneVerificationInProgress.value
+                )
             }
+            else if(phoneNumber.value.length == 10) {
+                SendOtp(modifier = Modifier
+                    .constrainAs(loginButton) {
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        top.linkTo(phoneNumberField.bottom, margin = 20.dp)
+                    },
+                    signInWithPhoneNumber = {
+                        if (phoneNumber.value.isNotBlank()) {
+                            signUpLoginViewModel.isEmailOrPhoneNumberRegistered(
+                                "test@gmail", // no need to check for email when user login
+                                phoneNumber.value,
+
+                                // if phone number is already there you can start sending otp
+                                isEmailOrPhoneNumberRegistered = {
+                                    if (it) {
+                                        signUpLoginViewModel.startVerification(
+                                            phoneNumber.value,
+                                            context as Activity
+                                        )
+                                    } else {
+                                        ToastHelper.showToast(
+                                            context,
+                                            "No account registered \n Please SignUp ."
+                                        )
+                                    }
+                                })
+
+                        }
+                    })
+
+            }
+
+
+                LaunchedEffect(isConnected) {
+                    if (!isConnected) {
+                        snackbarHostState.showSnackbar(
+                            message = "No Internet Connection",
+                            actionLabel = "OK"
+                        )
+                    }
+                }
+
+
 
 
             // new account sign up button
             NewAccountSignUpButton(modifier = Modifier.constrainAs(signUp) {
                 end.linkTo(parent.end)
-                top.linkTo(if(showProgressBar.value) progressBar.bottom else loginButton.bottom, margin = 30.dp)
-            }, onClick = navigateToSignUpScreen)
+                top.linkTo(phoneNumberField.bottom , margin = 20.dp)
+            }, onClick = {
+                navController.navigate("signup")
+            })
         }
     }
 }
@@ -171,15 +198,17 @@ fun NewAccountSignUpButton(modifier: Modifier, onClick: () -> Unit) {
 
 
 @Composable
-fun LoginButton(modifier: Modifier, signInWithEmail: () -> Unit) {
+fun SendOtp(modifier: Modifier, signInWithPhoneNumber: () -> Unit) {
 
-    OutlinedButton(onClick = {
-        signInWithEmail()
-    },
+    OutlinedButton(
+        onClick = {
+            signInWithPhoneNumber()
+        },
         colors = ButtonDefaults.buttonColors(
             containerColor = BackGroundColor,
             contentColor = White
-        ), modifier = modifier)
+        ), modifier = modifier
+    )
     {
         Text(
             text = stringResource(id = R.string.Login),
@@ -190,20 +219,23 @@ fun LoginButton(modifier: Modifier, signInWithEmail: () -> Unit) {
 }
 
 @Composable
-fun LoginEmailInputField(modifier: Modifier, email: MutableState<String>) {
+fun LoginPhoneNumberInputField(modifier: Modifier, phoneNumber: MutableState<String>) {
 
-    OutlinedTextField(value = email.value,
-        onValueChange = { email.value = it },
+    OutlinedTextField(
+        value = phoneNumber.value,
+        onValueChange = { phoneNumber.value = it },
         colors = TextFieldStyle.myTextFieldColor(),
         shape = TextFieldStyle.defaultShape,
         maxLines = 1,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         label = {
-            Text(text = stringResource(id = R.string.enter_email))
+            Text(text = stringResource(id = R.string.enter_phone_number))
         },
         leadingIcon = {
             Icon(
-                painterResource(id = R.drawable.email), contentDescription = "Email Icon",
+                painterResource(id = R.drawable.phone), contentDescription = "Phone Icon",
                 modifier = Modifier.size(22.dp), tint = White
             )
-        }, modifier = modifier)
+        }, modifier = modifier
+    )
 }

@@ -17,6 +17,7 @@ import com.google.firebase.messaging.RemoteMessage
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
@@ -38,16 +39,6 @@ class FirebaseMessage : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-//        val title = remoteMessage.notification?.title ?: "New Notification"
-//        val message = remoteMessage.notification?.body ?: "You have a new message"
-//        val senderId = remoteMessage.data["userId"] ?: ""
-//        val senderName = remoteMessage.data["userName"] ?: ""
-//        val notificationSentOn = remoteMessage.data["time"] ?: ""
-//
-//        Log.d("Testing","Time is $notificationSentOn")
-//        Log.d("FCM"," OnMessageReceived title $title useId $senderId userName $senderName")
-//        Log.d("Open","sender id is $senderId and name is $senderName")
-//        sendNotification(title, message, senderId, senderName)
 
         val notification = remoteMessage.notification
         val data = remoteMessage.data
@@ -67,14 +58,16 @@ class FirebaseMessage : FirebaseMessagingService() {
         val senderId = payload?.optString("senderId") ?: data["senderId"] ?: ""
         val senderName = payload?.optString("senderName") ?: data["senderName"] ?: ""
         val notificationSentOn = payload?.optString("time") ?: data["time"] ?: ""
+        val phoneNumber = payload?.optString("phoneNumber") ?: data["phoneNumber"] ?: ""
+
 
         Log.d("FCM", "Received Notification - Title: $title, Message: $message")
-        Log.d("FCM", "Sender ID: $senderId, Sender Name: $senderName, Time: $notificationSentOn")
+        Log.d("FCM", "PhoneNumber is $phoneNumber , Sender ID: $senderId, Sender Name: $senderName, Time: $notificationSentOn")
 
-        sendNotification(title, message, senderId, senderName)
+        sendNotification(title, message, senderId, senderName , phoneNumber)
     }
 
-    private fun sendNotification(title: String, message: String, userId: String, userName: String) {
+    private fun sendNotification(title: String, message: String, userId: String, userName: String, phoneNumber : String ) {
 
         // to open the notification section of
         val intent = Intent(this, DrawerItemActivity::class.java).apply {
@@ -82,6 +75,7 @@ class FirebaseMessage : FirebaseMessagingService() {
             putExtra("DrawerItem","notifications") // this will open the notification section
             putExtra("userId", userId)
             putExtra("userName", userName)
+            putExtra("phoneNumber",phoneNumber)
         }
 
         val pendingIntent = PendingIntent.getActivity(
@@ -133,9 +127,13 @@ class FirebaseMessage : FirebaseMessagingService() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                Log.d("FCM", "Saving FCM Token for user: $userId")
-                homeScreenRepository.saveFcmToken(token, userId)
-                Log.d("FCM", "New token saved successfully")
+                userManager.userData.collectLatest {
+
+                    Log.d("FCM", "Saving FCM Token for user: $userId")
+                    homeScreenRepository.saveFcmToken(token, userId)
+                    Log.d("FCM", "New token saved successfully")
+                }
+
             } catch (e: HttpException) {
                 Log.e("FCM", "HTTP error while saving token: ${e.code()} - ${e.message()}", e)
                 Log.e("FCM", "Response error body: ${e.response()?.errorBody()?.string()}")

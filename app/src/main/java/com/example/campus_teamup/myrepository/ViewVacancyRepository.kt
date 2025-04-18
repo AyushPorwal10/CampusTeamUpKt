@@ -1,12 +1,12 @@
 package com.example.campus_teamup.myrepository
 
 import android.util.Log
+import com.example.campus_teamup.helper.ChatRoomId
 import com.example.campus_teamup.notification.FCMApiService
 import com.example.campus_teamup.notification.FcmMessage
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Transaction
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
@@ -18,68 +18,11 @@ class ViewVacancyRepository @Inject constructor(
 ) {
 
     private val tag = "VacancyNotification"
-
-    fun fetchTeamDetails(userId: String): Flow<List<String>> = callbackFlow {
-        Log.d("Team", userId)
-        val teamDetailsSnapshot = firebaseFirestore.collection("all_user_id").document(userId)
-            .collection("all_user_details").document("teamDetails").get().await()
-
-        val teamReferencePath = teamDetailsSnapshot.getString("teamReference")
-
-        //  only reason it can null if person who posted
-        if (teamReferencePath == null) {
-            Log.d("Team", "Team referece path is null")
-            close(IllegalStateException("teamReference is null"))
-            return@callbackFlow
-        }
-        Log.d("Team", teamReferencePath)
-
-        val realTimeTeamDetailsUpdate =
-            firebaseFirestore.document(teamReferencePath).addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    close(error)
-                    return@addSnapshotListener
-                }
-                if (snapshot != null) {
-                    val listOfTeamMembers = snapshot?.get("members") as? List<String> ?: emptyList()
-                    Log.d("Team", "Size of team in repository is ${listOfTeamMembers.size}")
-
-                    trySend(listOfTeamMembers)
-                }
-
-            }
-        awaitClose { realTimeTeamDetailsUpdate.remove() }
-    }
-
-    suspend fun fetchMemberImage(userIds: List<String>): Map<String, String> {
-        val imageMap = mutableMapOf<String, String>()
-
-        return try {
-            val tasks = userIds.map { userId ->
-                firebaseFirestore.collection("user_images").document(userId).get()
-            }
-            val results = tasks.map { it.await() }
-
-            for ((index, document) in results.withIndex()) {
-                val userId = userIds[index]
-                val imageUrl = document.getString("user_image") ?: ""
-                imageMap[userId] = imageUrl
-            }
-
-
-            imageMap
-        } catch (e: Exception) {
-            Log.e("Testing", "Error fetching user images", e)
-            userIds.associateWith { "" } // Return map with empty strings on failure
-        }
-    }
-
-
     suspend fun getFcmWhoPostedVacancy(receiverId: String): Flow<String> = callbackFlow {
 
         Log.d(tag, "Receiver id is $receiverId <-")
 
-        val documentReference = firebaseFirestore.collection("all_user_id").document(receiverId)
+        val documentReference = firebaseFirestore.collection("all_fcm").document(receiverId)
 
 
         val realTimeTokenListener = documentReference.addSnapshotListener { snapshot, error ->
@@ -105,6 +48,8 @@ class ViewVacancyRepository @Inject constructor(
     }
 
     suspend fun sendNotification(
+        currentUserPhoneNumber : String ,
+        phoneNumberWhoPosted : String ,
         fcmMessage: FcmMessage,
         onNotificationSent: () -> Unit,
         onNotificationError: () -> Unit,
@@ -113,11 +58,16 @@ class ViewVacancyRepository @Inject constructor(
         requestList: List<String?>
     ) {
 
+
             try {
                 firebaseFirestore.runTransaction { transaction ->
 
+                    // list of userid to whom current user send request will be updated
+
                     updateRequestList(transaction, currentUserId, requestList)
-                    updateNotificationList(transaction, postedBy, fcmMessage)
+
+                    // person who posted will find notification section updated
+                    updateNotificationList(transaction, postedBy, fcmMessage ,phoneNumberWhoPosted)
 
                 }.await()
                 fcmApiService.sendNotification(fcmMessage)
@@ -131,6 +81,21 @@ class ViewVacancyRepository @Inject constructor(
 
     }
 
+
+    suspend fun checkIfChatRoomAlreadyCreated(currentUserId: String , personWhoPostedVacancy : String ) : Boolean{
+
+        val chatRoomId = ChatRoomId.getChatRoomId(currentUserId , personWhoPostedVacancy)
+        val documentRef = firebaseFirestore.collection("chat_rooms").document(chatRoomId)
+
+        return try{
+            val document = documentRef.get().await()
+            document.exists()
+        }
+        catch (e : Exception){
+            Log.d("ChatRoomId","Error checking chat created or not $e")
+            false
+        }
+    }
     fun checkIfRequestAlreadySent(currentUserId: String?): Flow<List<String>> = callbackFlow {
         if (currentUserId == null) {
             close(Exception("User_Id_is_null"))
@@ -184,7 +149,8 @@ class ViewVacancyRepository @Inject constructor(
     private fun updateNotificationList(
         transaction: Transaction,
         requestReceiverId: String,
-        fcmMessage: FcmMessage
+        fcmMessage: FcmMessage,
+        phoneNumberWhoPosted: String,
     ) {
         Log.d(tag, "Updating notification list of $requestReceiverId")
         val data = mapOf(
@@ -192,7 +158,8 @@ class ViewVacancyRepository @Inject constructor(
             "message" to fcmMessage.message.notification.body,
             "senderId" to fcmMessage.message.data["senderId"],
             "senderName" to fcmMessage.message.data["senderName"],
-            "time" to fcmMessage.message.data["time"]
+            "time" to fcmMessage.message.data["time"],
+            "senderPhoneNumber" to fcmMessage.message.data["phoneNumber"]
         )
         Log.d(
             tag, "Updating notification list with data ${fcmMessage.message.notification.title} " +
@@ -200,8 +167,8 @@ class ViewVacancyRepository @Inject constructor(
         )
         Log.d("ShowNotification","Receiver id is $requestReceiverId <-")
         val documentReference =
-            firebaseFirestore.collection("all_user_id").document(requestReceiverId)
-                .collection("team_join_request")
+            firebaseFirestore.collection("all_user_id").document(phoneNumberWhoPosted)
+                .collection("member_invites")
                 .document(fcmMessage.message.data["senderId"]!!)
 
         transaction.set(documentReference, data)

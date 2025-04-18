@@ -15,8 +15,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,10 +31,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.ShowRequestDialog
+import com.example.campus_teamup.helper.rememberNetworkStatus
 import com.example.campus_teamup.myThemes.TextFieldStyle
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.viewmodels.ViewProfileViewModel
@@ -45,14 +47,22 @@ fun ViewCollegeDetails(
     modifier: Modifier,
     viewProfileViewModel: ViewProfileViewModel,
     notificationViewModel: NotificationViewModel,
-    receiverId: String?
+    receiverId: String?,
+    receiverPhoneNumber: String?
 ) {
+
+
+
+    val isConnected = rememberNetworkStatus()
+    val snackbarHostState = remember { SnackbarHostState() }
+
 
     Log.d("FCM", "Receiver id in viewcollegeDetails is $receiverId <-")
     val collegeDetails = viewProfileViewModel.collegeDetails.collectAsState()
     val senderId = notificationViewModel.senderId.collectAsState()
 
     val isRequestAlreadySent by notificationViewModel.isRequestAlreadySend.collectAsState()
+    val isChatRoomAlreadyCreated = notificationViewModel.isChatRoomAlreadyCreated.collectAsState()
 
     var showRequestDialog by remember {
         mutableStateOf(false)
@@ -66,11 +76,20 @@ fun ViewCollegeDetails(
             onConfirm = {
                 notificationViewModel.fetchReceiverFCMToken(receiverId!! , onFcmFetched = { // first fetch fcm
 
-                    notificationViewModel.sendNotification("New Request","Team is interested in your profile", receiverId)  // send notification
+                    notificationViewModel.sendNotification("New Request","Team is interested in your profile", receiverId ,receiverPhoneNumber!!)  // send notification
                         showRequestDialog = false
                 })
             },
         )
+    }
+
+    LaunchedEffect(isConnected) {
+        if (!isConnected) {
+            snackbarHostState.showSnackbar(
+                message = "No Internet Connection",
+                actionLabel = "OK"
+            )
+        }
     }
     ConstraintLayout(modifier = modifier.fillMaxSize()) {
 
@@ -120,17 +139,19 @@ fun ViewCollegeDetails(
             // ON click of this notification will be sent to user who posted role
 
 
-            if(senderId.value == receiverId)
-                Text(text = "" , color = White , style = MaterialTheme.typography.titleMedium)
-            else if(isRequestAlreadySent){
-                Text(text = "Request sent" , color = White , style = MaterialTheme.typography.titleMedium)
-            }
-            else{
-                OutlinedButton(onClick = {
-                    showRequestDialog = true
+            if(isConnected){
+                if(senderId.value == receiverId)
+                    Text(text = "" , color = White , style = MaterialTheme.typography.titleMedium)
+                else if(isRequestAlreadySent || isChatRoomAlreadyCreated.value){
+                    Text(text = if(isChatRoomAlreadyCreated.value) "Request Accepted" else "Request Sent"  , color = White , style = MaterialTheme.typography.titleMedium)
+                }
+                else{
+                    OutlinedButton(onClick = {
+                        showRequestDialog = true
 
-                }, colors = ButtonDefaults.buttonColors(containerColor = BackGroundColor)) {
-                    Text(text = "Send Request")
+                    }, colors = ButtonDefaults.buttonColors(containerColor = BackGroundColor)) {
+                        Text(text = "Send Request")
+                    }
                 }
             }
 

@@ -14,7 +14,8 @@ data class VacancyDetails(
     val hackathonName: String = "",
     val roleLookingFor: String = "",
     val skills: String = "",
-    val roleDescription: String = ""
+    val roleDescription: String = "",
+    val phoneNumber : String = "",
 ) : Parcelable {
     fun doesMatchSearchQuery(query: String): Boolean {
         return listOf(roleLookingFor, teamName,hackathonName).any {

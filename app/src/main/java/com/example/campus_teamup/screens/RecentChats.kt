@@ -38,6 +38,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.Dimensions
+import com.example.campus_teamup.helper.LoadAnimation
 import com.example.campus_teamup.helper.ProgressIndicator
 import com.example.campus_teamup.mydataclass.RecentChats
 import com.example.campus_teamup.ui.theme.BackGroundColor
@@ -54,7 +55,7 @@ fun RecentChatScreen(startChat : (RecentChats) -> Unit){
 
     val recentChatViewModel : RecentChatsViewModel = hiltViewModel()
 
-    recentChatViewModel.fetchRecentChats("ayushporwal1010")
+    recentChatViewModel.fetchRecentChats()
     val userAllChats = recentChatViewModel.userAllChats.collectAsState()
     val areChatsLoading = recentChatViewModel.areChatsLoading.collectAsState()
 
@@ -87,12 +88,25 @@ fun RecentChatScreen(startChat : (RecentChats) -> Unit){
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
-                .background(BackGroundColor)
+                .background(BackGroundColor),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             items(userAllChats.value) { singleRecentChat ->
                 SingleRecentChat(singleRecentChat , onClick = {
                     startChat(singleRecentChat)
                 })
+            }
+            item {
+
+                if(userAllChats.value.isEmpty()) {
+                    Box( contentAlignment = Alignment.Center) {
+                        LoadAnimation(
+                            modifier = Modifier.size(200.dp),
+                            animation = R.raw.noresult,
+                            playAnimation = true
+                        )
+                    }
+                }
             }
         }
     }

@@ -27,47 +27,19 @@ class ViewVacancyViewModel @Inject constructor(
     private val _isRequestSending = MutableStateFlow<Boolean>(false)
     override val isRequestSending : StateFlow<Boolean> get() = _isRequestSending.asStateFlow()
 
+    private val _isChatRoomAlreadyCreated = MutableStateFlow(false)
+    val isChatRoomAlreadyCreated : StateFlow<Boolean> get() = _isChatRoomAlreadyCreated.asStateFlow()
 
     val tag = "VacancyNotification"
     private val _teamDetails = MutableStateFlow<List<String>>(emptyList())
 
-    val teamDetails: StateFlow<List<String>> = _teamDetails.asStateFlow()
-
-    val _userIdWithMap = MutableStateFlow<Map<String, String>>(emptyMap())
-    val userIdWithMap: StateFlow<Map<String, String>> get() = _userIdWithMap.asStateFlow()
 
     private val _receiverToken = MutableStateFlow<String>("")
-    val receiverToken: StateFlow<String> get() = _receiverToken.asStateFlow()
 
     private val _listOfTeamsThatUserSendRequest = MutableStateFlow<List<String>>(emptyList())
-    val listOfTeamsThatUserSendRequest: StateFlow<List<String>> get() = _listOfTeamsThatUserSendRequest.asStateFlow()
 
     private val _isRequestSent = MutableStateFlow<Boolean>(false)
     val isRequestSent: StateFlow<Boolean> get() = _isRequestSent.asStateFlow()
-
-
-    fun fetchTeamDetails(postedBy: String) {
-        viewModelScope.launch {
-            viewVacancyRepository.fetchTeamDetails(postedBy)
-                .catch {
-                    Log.e("Team", "No team details found")
-                }.collect {
-                    Log.d("Testing", "Size of teamUserId in viewmodel is ${it.size}")
-                    _teamDetails.value = it
-                    fetchMemberImage()
-                }
-        }
-    }
-
-    private fun fetchMemberImage() {
-        viewModelScope.launch {
-
-            _userIdWithMap.value = viewVacancyRepository.fetchMemberImage(_teamDetails.value)
-            Log.d("Testing", "Size of map in viewmodel is ${userIdWithMap.value.size}")
-            Log.d("Userid", "Map size is ${_userIdWithMap.value.size}")
-        }
-    }
-
 
     fun getFcmWhoPostedVacancy(receiverId: String) {
 
@@ -81,11 +53,13 @@ class ViewVacancyViewModel @Inject constructor(
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun sendNotification(
+        currentUserPhoneNumber : String ,
         currentUserId: String,
         senderName: String,
         onNotificationSent: () -> Unit,
         onNotificationError : ()-> Unit,
-        postedBy: String
+        postedBy: String,
+        phoneNumberWhoPosted : String
     ) {
 
         viewModelScope.launch {
@@ -100,8 +74,10 @@ class ViewVacancyViewModel @Inject constructor(
                     "senderId" to currentUserId,
                     "senderName" to senderName,
                     "time" to TimeAndDate.getCurrentTime(),
+                    "phoneNumber" to currentUserPhoneNumber,
                 )
             )
+            Log.d("VacancyRequest","Sender name is $senderName , Sender phone number is $currentUserPhoneNumber")
 
 
             // this is list of teams that current user sent request till now
@@ -110,6 +86,8 @@ class ViewVacancyViewModel @Inject constructor(
 
             val fcmMessage = FcmMessage(message)
             viewVacancyRepository.sendNotification(
+                currentUserPhoneNumber,// this is sender means current user phone number
+                phoneNumberWhoPosted,
                 fcmMessage, onNotificationSent = {
                     _isRequestSending.value = false
                     onNotificationSent()
@@ -139,8 +117,10 @@ class ViewVacancyViewModel @Inject constructor(
                 else{
                     _isRequestSent.value = false
                 }
-
             }
+        }
+        viewModelScope.launch {
+            _isChatRoomAlreadyCreated.value = viewVacancyRepository.checkIfChatRoomAlreadyCreated(currentUserId , personWhoPostedVacancy)
         }
     }
 }

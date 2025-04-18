@@ -21,9 +21,10 @@ class UserManager @Inject constructor(private val context: Context) {
         private val USER_COLLEGE_KEY = stringPreferencesKey("user_college")
         private val LOGIN_OR_SIGNUP_KEY = stringPreferencesKey("login_or_signup")
         private val FCM_TOKEN_KEY = stringPreferencesKey("fcm_token")
+        private val PHONE_NUMBER = stringPreferencesKey("phone_number")
     }
 
-    suspend fun saveUserData(userId: String, userName : String , email: String, college: String , loginOrSignUp : String) {
+    suspend fun saveUserData(userId: String, userName : String , email: String, college: String ,phoneNumber : String ,  loginOrSignUp : String) {
         context.dataStore.edit { preferences ->
             Log.d("Signup","User data saved $userId , $userName ,$email , $college , $loginOrSignUp" )
             preferences[USER_ID_KEY] = userId
@@ -31,6 +32,7 @@ class UserManager @Inject constructor(private val context: Context) {
             preferences[USER_EMAIL_KEY] = email
             preferences[USER_COLLEGE_KEY] = college
             preferences[LOGIN_OR_SIGNUP_KEY] = loginOrSignUp
+            preferences[PHONE_NUMBER] = phoneNumber
         }
 
     }
@@ -46,8 +48,8 @@ class UserManager @Inject constructor(private val context: Context) {
             userName = preferences[USER_NAME_KEY] ?: "",
             email = preferences[USER_EMAIL_KEY] ?: "",
             collegeName = preferences[USER_COLLEGE_KEY] ?: "",
-            loginOrSignUp = preferences[LOGIN_OR_SIGNUP_KEY] ?: ""
-
+            loginOrSignUp = preferences[LOGIN_OR_SIGNUP_KEY] ?: "",
+            phoneNumber = preferences[PHONE_NUMBER] ?: ""
         )
     }
 
@@ -61,8 +63,9 @@ class UserManager @Inject constructor(private val context: Context) {
     }
 }
 
-data class UserData(val userId: String,
-                    val userName: String,
-                    val email: String,
-                    val collegeName: String ,
-                     val loginOrSignUp: String)
+data class UserData(val userId: String = "",
+                    val userName: String = "",
+                    val email: String = "",
+                    val collegeName: String = "",
+                    val loginOrSignUp: String = "",
+                    val phoneNumber: String = "")

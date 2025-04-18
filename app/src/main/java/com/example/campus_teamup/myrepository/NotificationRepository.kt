@@ -1,6 +1,7 @@
 package com.example.campus_teamup.myrepository
 
 import android.util.Log
+import com.example.campus_teamup.helper.ChatRoomId
 import com.example.campus_teamup.notification.FCMApiService
 import com.example.campus_teamup.notification.FcmMessage
 import com.google.firebase.firestore.FirebaseFirestore
@@ -23,7 +24,7 @@ class NotificationRepository @Inject constructor(
 
         return try {
             val snapshot =
-                firebaseFirestore.collection("all_user_id").document(userId).get().await()
+                firebaseFirestore.collection("all_fcm").document(userId).get().await()
 
             if (snapshot.exists()) {
                 val token = snapshot.getString("fcm_token")
@@ -48,6 +49,7 @@ class NotificationRepository @Inject constructor(
         fcmMessage: FcmMessage,
         listOfPeopleUserSentRequest: List<String>,
         receiverId: String,
+        phoneNumber: String,
     ) {
         coroutineScope {
 
@@ -62,14 +64,15 @@ class NotificationRepository @Inject constructor(
             }
 
             launch {
-                firebaseFirestore.collection("all_user_id").document(receiverId)
-                    .collection("all_invites").add(
+                firebaseFirestore.collection("all_user_id").document(phoneNumber)
+                    .collection("team_invites").add(
                         mapOf(
                             "title" to fcmMessage.message.notification.title,
                             "message" to fcmMessage.message.notification.body,
                             "senderId" to fcmMessage.message.data["senderId"],
                             "senderName" to fcmMessage.message.data["senderName"],
-                            "time" to fcmMessage.message.data["time"]
+                            "time" to fcmMessage.message.data["time"],
+                            "senderPhoneNumber" to fcmMessage.message.data["phoneNumber"]
                         )
                     )
                 Log.d("FCM", "Saved notification data to Firestore")
@@ -98,5 +101,21 @@ class NotificationRepository @Inject constructor(
         } else
             onComplete(emptyList())
 
+    }
+
+
+    suspend fun checkIfChatRoomAlreadyCreated(currentUserId: String , userWhoPostedRole : String ) : Boolean{
+
+        val chatRoomId = ChatRoomId.getChatRoomId(currentUserId , userWhoPostedRole)
+        val documentRef = firebaseFirestore.collection("chat_rooms").document(chatRoomId)
+
+        return try{
+            val document = documentRef.get().await()
+            document.exists()
+        }
+        catch (e : Exception){
+            Log.d("ChatRoomId","Error checking chat created or not $e")
+            false
+        }
     }
 }

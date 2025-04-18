@@ -15,24 +15,24 @@ class SavedItemsRepository @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore
 ) {
 
-    suspend fun unSaveProject(currentUserId: String, projectId: String) {
-        firebaseFirestore.collection("all_user_id").document(currentUserId)
+    suspend fun unSaveProject(phoneNumber: String, projectId: String) {
+        firebaseFirestore.collection("all_user_id").document(phoneNumber)
             .collection("project_saved").document(projectId).delete()
             .addOnFailureListener {
                 Log.d("FetchingProjects", "Error Unsaving project")
             }.await()
     }
 
-    suspend fun unSaveRole(currentUserId: String, roleId: String) {
-        firebaseFirestore.collection("all_user_id").document(currentUserId)
+    suspend fun unSaveRole(phoneNumber: String, roleId: String) {
+        firebaseFirestore.collection("all_user_id").document(phoneNumber)
             .collection("saved_roles").document(roleId).delete()
             .addOnFailureListener {
                 Log.d("UnsaveRole", "Error Unsaving roles")
             }.await()
     }
 
-    suspend fun unSaveVacancy(currentUserId: String, vacancyId: String) {
-        firebaseFirestore.collection("all_user_id").document(currentUserId)
+    suspend fun unSaveVacancy(phoneNumber: String, vacancyId: String) {
+        firebaseFirestore.collection("all_user_id").document(phoneNumber)
             .collection("saved_vacancy").document(vacancyId).delete()
             .addOnFailureListener {
                 Log.d("UnsaveVacancy", "Error Unsaving vacancy")
@@ -40,22 +40,22 @@ class SavedItemsRepository @Inject constructor(
     }
 
 
-    fun fetchSavedRoles(currentUserId: String): Flow<List<RoleDetails>> =
-        fetchSavedData(currentUserId, "saved_roles")
+    fun fetchSavedRoles(phoneNumber: String): Flow<List<RoleDetails>> =
+        fetchSavedData(phoneNumber, "saved_roles")
 
-    fun fetchSavedProjects(currentUserId: String): Flow<List<ProjectDetails>> =
-        fetchSavedData(currentUserId, "project_saved")
+    fun fetchSavedProjects(phoneNumber: String): Flow<List<ProjectDetails>> =
+        fetchSavedData(phoneNumber, "project_saved")
 
-    fun fetchSavedVacancies(currentUserId: String) : Flow<List<VacancyDetails>> =
-        fetchSavedData(currentUserId , "saved_vacancy")
+    fun fetchSavedVacancies(phoneNumber: String) : Flow<List<VacancyDetails>> =
+        fetchSavedData(phoneNumber , "saved_vacancy")
 
     private inline fun <reified T> fetchSavedData(
-        currentUserId: String,
+        phoneNumber: String,
         collection: String
     ): Flow<List<T>> = callbackFlow {
 
         val collectionReference =
-            firebaseFirestore.collection("all_user_id").document(currentUserId)
+            firebaseFirestore.collection("all_user_id").document(phoneNumber)
                 .collection(collection)
 
         val listener = collectionReference.addSnapshotListener { snapshot, error ->
@@ -69,6 +69,8 @@ class SavedItemsRepository @Inject constructor(
         }
         awaitClose { listener.remove() }
     }
+
+
 
 
 }

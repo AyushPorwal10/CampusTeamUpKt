@@ -46,7 +46,7 @@
     <string name="problem_statement">*Problem Statement</string>
     <string name="project_github_url">Project Github URL</string>
     <string name="hackathon_personal_project">Hackathon or Personal Project</string>
-    <string name="interested_in_project">Interested in Project ? Let\'s Collaborate</string>
+    <string name="interested_in_project">Interested in Project ? Let\'s Collaborate !</string>
     <string name="view_less">View less</string>
     <string name="view_more">View more</string>
     <string name="send_request">Send Request</string>
@@ -61,4 +61,8 @@
     <string name="start_chat_message">Now you can start sending messages.</string>
     <string name="request_already_sent">Request Sent</string>
     <string name="saved_items">Saved Items</string>
+    <string name="feedback">Feedback</string>
+    <string name="enter_phone_number">Phone Number</string>
+    <string name="request_accepted">Request Accepted</string>
+    <string name="your_posts">Your Posts</string>
 </resources>
