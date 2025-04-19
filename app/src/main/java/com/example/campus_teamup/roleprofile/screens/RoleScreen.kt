@@ -71,7 +71,7 @@ fun RolesScreen(
     }
 
 
-    val placeholders = listOf("Search by Role", "Search by Name")
+    val placeholders = listOf("Search by Role", "Search by Name","Search by College Name")
     var currentPlaceholderIndex by remember { mutableIntStateOf(0) }
 
 

@@ -22,6 +22,7 @@ class CreatePostRepository @Inject constructor(
 
 
     suspend fun postRole(
+        collegeName : String ,
         phoneNumber : String ,
         userId: String,
         userName: String,
@@ -41,6 +42,7 @@ class CreatePostRepository @Inject constructor(
 
         val roleDetails = RoleDetails(
             phoneNumber,
+            collegeName,
             generatedRoleId,
             userId,
             userName,

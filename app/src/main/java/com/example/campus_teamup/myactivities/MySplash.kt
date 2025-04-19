@@ -105,7 +105,7 @@ fun SplashScreen(auth: FirebaseAuth, context : Context, navigateToOnboardingScre
 
     }
     LaunchedEffect(Unit){
-        delay(1200)
+        delay(1000)
         if(auth.currentUser != null){
             val activity = context as Activity
             activity.startActivity(Intent(context, MainActivity::class.java))

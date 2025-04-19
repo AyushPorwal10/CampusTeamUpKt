@@ -70,12 +70,12 @@ fun SingleRole(
                 .padding(8.dp)
                 .fillMaxWidth()
         ) {
-            val (userImage, userName, roleLookingFor, viewProfileBtn, postedOn, saveProjectBtn) = createRefs()
+            val (userImage, userName, roleLookingFor, viewProfileBtn, collegeName  , postedOn, saveProjectBtn) = createRefs()
 
 
 
             AsyncImage(
-                model = roleDetails.userImageUrl ?: R.drawable.profile,
+                model = roleDetails.userImageUrl.ifEmpty { R.drawable.profile },
                 contentDescription = "User Profile",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -133,6 +133,19 @@ fun SingleRole(
                 })
 
 
+            Text(
+                text = "College : ${roleDetails.collegeName}",
+                maxLines = 2,
+                fontWeight = FontWeight.Medium,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false,
+                style = MaterialTheme.typography.titleMedium,
+                color = LightTextColor,
+                modifier = Modifier.constrainAs(collegeName) {
+                    top.linkTo(roleLookingFor.bottom, margin = 12.dp)
+                    start.linkTo(parent.start)
+                })
+
 
 
 
@@ -148,7 +161,7 @@ fun SingleRole(
                     context.startActivity(intent)
                 },
                 modifier = Modifier.constrainAs(viewProfileBtn) {
-                    top.linkTo(roleLookingFor.bottom, margin = 4.dp)
+                    top.linkTo(collegeName.bottom, margin = 4.dp)
                 }, contentPadding = PaddingValues(vertical = 2.dp, horizontal = 10.dp)
             ) {
                 Text(
@@ -159,7 +172,7 @@ fun SingleRole(
             }
 
             TextButton(onClick = {  } , enabled = false, modifier = Modifier.constrainAs(postedOn) {
-                top.linkTo(roleLookingFor.bottom, margin = 4.dp)
+                top.linkTo(collegeName.bottom, margin = 4.dp)
             }) {
 
                 Text(

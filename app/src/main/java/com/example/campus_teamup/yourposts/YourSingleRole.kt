@@ -64,7 +64,7 @@ fun YourSingleRole(
                 .padding(8.dp)
                 .fillMaxWidth()
         ) {
-            val (userImage, userName, roleLookingFor, viewProfileBtn, postedOn, saveProjectBtn) = createRefs()
+            val (userImage, userName, roleLookingFor, collegeName , postedOn, saveProjectBtn) = createRefs()
 
 
 
@@ -126,12 +126,25 @@ fun YourSingleRole(
                     start.linkTo(parent.start)
                 })
 
+            Text(
+                text = "College : ${roleDetails.collegeName}",
+                maxLines = 2,
+                fontWeight = FontWeight.Medium,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false,
+                style = MaterialTheme.typography.titleMedium,
+                color = LightTextColor,
+                modifier = Modifier.constrainAs(collegeName) {
+                    top.linkTo(roleLookingFor.bottom, margin = 12.dp)
+                    start.linkTo(parent.start)
+                })
+
 
 
             TextButton(onClick = {  } , enabled = false, modifier = Modifier.constrainAs(postedOn) {
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
-                top.linkTo(roleLookingFor.bottom, margin = 4.dp)
+                top.linkTo(collegeName.bottom, margin = 4.dp)
             }) {
 
                 Text(

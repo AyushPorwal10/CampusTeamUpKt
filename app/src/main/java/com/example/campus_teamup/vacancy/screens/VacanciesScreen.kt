@@ -58,7 +58,7 @@ fun VacanciesScreen(homeScreenViewModel: HomeScreenViewModel,
 
     val searchText by searchRoleVacancy.searchVacancyText.collectAsState()
 
-    val searchOption = listOf("Search by Team Name", "Search by Role", "Search by Hackathon")
+    val searchOption = listOf("Search by Team Name", "Search by Role", "Search by Hackathon", "Search by Skills", "Search by College Name")
     var placeHolderIndex by remember {
         mutableIntStateOf(0)
     }

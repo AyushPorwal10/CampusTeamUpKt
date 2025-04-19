@@ -72,6 +72,9 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging:24.1.0")
     testImplementation("junit:junit:4.13.2")
 
+
+    debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.14")
+
     // splash screen
     implementation("androidx.core:core-splashscreen:1.0.1")
 

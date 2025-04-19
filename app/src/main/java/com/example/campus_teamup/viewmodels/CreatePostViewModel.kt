@@ -30,6 +30,7 @@ class CreatePostViewModel @Inject constructor(
     private lateinit var userId: String
     private lateinit var userName: String
     private lateinit var phoneNumber: String
+    private lateinit var collegeName : String
     private val _isLoading = MutableStateFlow<Boolean>(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
@@ -44,6 +45,7 @@ class CreatePostViewModel @Inject constructor(
         userId = userData.userId
         userName = userData.userName
         phoneNumber = userData.phoneNumber
+        collegeName = userData.collegeName
 
         Log.d("PostRole", "Updated User Id: $userId")
     }
@@ -57,6 +59,7 @@ class CreatePostViewModel @Inject constructor(
                 var userImageUrl = snapshot.toObject(CollegeDetails::class.java)
 
                 createPostRepository.postRole(
+                    collegeName,
                     phoneNumber,
                     userId,
                     userName,
@@ -102,12 +105,14 @@ class CreatePostViewModel @Inject constructor(
 
             _isLoading.value = true
             Log.d("Vacancy", "Going to post vacancy")
-            withContext(Dispatchers.IO) {
+
+
                 createPostRepository.postTeamVacancy(
                     phoneNumber, VacancyDetails(
                         "",   // this will be generated in repo class
                         userId,
                         postedOn,
+                        collegeName,
                         teamLogo,
                         teamName,
                         hackathonName,
@@ -117,7 +122,6 @@ class CreatePostViewModel @Inject constructor(
                         phoneNumber
                     )
                 )
-            }
 
             _isLoading.value = false
 

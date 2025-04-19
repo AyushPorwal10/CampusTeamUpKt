@@ -24,7 +24,7 @@ fun ShowSavedProjects(
     onProjectUnsave: (String) -> Unit,
 ) {
     Log.d("FetchingProjects", "In lazy it is ${savedProjectList.value.size}")
-    LazyColumn(modifier = Modifier.background(BackGroundColor)) {
+    LazyColumn(modifier = Modifier.background(BackGroundColor) , horizontalAlignment = Alignment.CenterHorizontally) {
         items(savedProjectList.value) {
             Log.d("FetchingProjects", "Single Project loads")
             SingleProject(it, onSaveProjectClicked = {

@@ -9,6 +9,7 @@ data class VacancyDetails(
     var vacancyId : String = "",
     val postedBy: String = "",
     val postedOn: String = "",
+    val collegeName : String = "",
     val teamLogo: String = "",
     val teamName: String = "",
     val hackathonName: String = "",
@@ -18,7 +19,7 @@ data class VacancyDetails(
     val phoneNumber : String = "",
 ) : Parcelable {
     fun doesMatchSearchQuery(query: String): Boolean {
-        return listOf(roleLookingFor, teamName,hackathonName).any {
+        return listOf(roleLookingFor, teamName,hackathonName,skills,collegeName).any {
             it.contains(query, ignoreCase = true)
         }
     }

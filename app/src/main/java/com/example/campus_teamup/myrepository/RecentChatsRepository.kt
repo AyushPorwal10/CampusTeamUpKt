@@ -33,9 +33,6 @@ class RecentChatsRepository @Inject constructor(
             val userAllChats = snapshot?.documents
                 ?.mapNotNull { singleChat ->
                     singleChat.toObject(RecentChats::class.java)
-                }
-                ?.sortedByDescending { chat ->
-                    TimeAndDate.parseToDate(chat.lastMessageSentAt)
                 } ?: emptyList()
             trySend(userAllChats)
         }
