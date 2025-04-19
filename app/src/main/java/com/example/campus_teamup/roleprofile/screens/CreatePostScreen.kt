@@ -1,5 +1,6 @@
 package com.example.campus_teamup.roleprofile.screens
 
+import android.app.Activity
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -20,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -41,7 +43,7 @@ fun CreatePostScreen(screenToOpen : String , createPostViewModel: CreatePostView
     val isConnected = rememberNetworkStatus()
     val snackbarHostState = remember { SnackbarHostState() }
 
-
+    val activity = LocalContext.current as? Activity
     Scaffold(topBar = {
         TopAppBar(
             title = {
@@ -55,7 +57,9 @@ fun CreatePostScreen(screenToOpen : String , createPostViewModel: CreatePostView
                 navigationIconContentColor = White
             ),
             navigationIcon = {
-                IconButton(onClick = { }) {
+                IconButton(onClick = {
+                    activity?.finish()
+                }) {
                     Icon(
                         painter = painterResource(id = R.drawable.browseback),
                         contentDescription = null,

@@ -116,7 +116,7 @@ fun PostVacancy(createPostViewModel : CreatePostViewModel) {
             },
             leadingIcon = {
                 Icon(
-                    painterResource(id = R.drawable.email), contentDescription = null,
+                    painterResource(id = R.drawable.vacancies), contentDescription = null,
                     modifier = Modifier.size(22.dp), tint = White
                 )
             }
@@ -135,7 +135,7 @@ fun PostVacancy(createPostViewModel : CreatePostViewModel) {
             },
             leadingIcon = {
                 Icon(
-                    painterResource(id = R.drawable.email), contentDescription = null,
+                    painterResource(id = R.drawable.hackathon), contentDescription = null,
                     modifier = Modifier.size(22.dp), tint = White
                 )
             }
@@ -174,7 +174,7 @@ fun PostVacancy(createPostViewModel : CreatePostViewModel) {
             },
             leadingIcon = {
                 Icon(
-                    painterResource(id = R.drawable.profile), contentDescription = null,
+                    painterResource(id = R.drawable.skills), contentDescription = null,
                     modifier = Modifier.size(22.dp), tint = White
                 )
             }

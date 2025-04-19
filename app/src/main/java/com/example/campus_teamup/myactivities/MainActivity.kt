@@ -79,12 +79,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onPause() {
         super.onPause()
-        Log.d("Activity", "MainActivity is on Pause")
+        Log.d("Navigation", "MainActivity is on Pause")
     }
 
     override fun onResume() {
         super.onResume()
-
+        Log.d("Navigation", "MainActivity is on Resumed")
         checkGooglePlayServices()
 
     }

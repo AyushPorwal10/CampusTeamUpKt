@@ -87,7 +87,7 @@ fun SplashScreen(auth: FirebaseAuth, context : Context, navigateToOnboardingScre
     ){
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
-                painter = painterResource(id = R.drawable.white_theme_logo),
+                painter = painterResource(id = R.drawable.campus_teamup_circle),
                 contentDescription = "App Logo",
                 modifier = Modifier
                     .size(200.dp)

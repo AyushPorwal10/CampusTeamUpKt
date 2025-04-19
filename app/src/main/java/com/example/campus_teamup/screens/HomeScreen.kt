@@ -254,7 +254,7 @@ fun HomeScreen(
                     NavItem(
                         coroutineScope,
                         drawerState,
-                        R.drawable.saveproject,
+                        R.drawable.saved_item,
                         stringResource(id = R.string.saved_items)
                     ) {
                         val intent = Intent(context, DrawerItemActivity::class.java)

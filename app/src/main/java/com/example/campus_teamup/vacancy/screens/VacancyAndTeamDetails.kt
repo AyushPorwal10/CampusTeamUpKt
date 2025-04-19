@@ -1,5 +1,6 @@
 package com.example.campus_teamup.vacancy.screens
 
+import android.app.Activity
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -29,6 +30,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -53,9 +55,8 @@ fun VacancyAndTeamDetails(
     currentUserData: State<UserData?>,
 ) {
 
-    // reusing viewmodel of role profile
 
-
+    val activity = LocalContext.current as? Activity
 
     Scaffold(topBar = {
         TopAppBar(title = {
@@ -65,7 +66,9 @@ fun VacancyAndTeamDetails(
         }, colors = TopAppBarDefaults.topAppBarColors(
             containerColor = BackGroundColor, navigationIconContentColor = White
         ), navigationIcon = {
-            IconButton(onClick = { }) {
+            IconButton(onClick = {
+                activity?.finish()
+            }) {
                 Icon(
                     painter = painterResource(id = R.drawable.browseback),
                     contentDescription = null,

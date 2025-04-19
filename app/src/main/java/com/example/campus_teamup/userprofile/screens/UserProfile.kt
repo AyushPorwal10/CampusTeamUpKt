@@ -1,5 +1,6 @@
 package com.example.campus_teamup.userprofile.screens
 
+import android.app.Activity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -27,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -49,7 +51,7 @@ import com.example.campus_teamup.viewmodels.UserProfileViewModel
 fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
 
     var isClicked by remember { mutableStateOf(false) }
-
+    val activity = LocalContext.current as? Activity
     var selectedLayout by remember {
         mutableStateOf("collegeDetails")
     }
@@ -70,7 +72,9 @@ fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
                 navigationIconContentColor = White
             ),
             navigationIcon = {
-                IconButton(onClick = { }) {
+                IconButton(onClick = {
+                    activity?.finish()
+                }) {
                     Icon(
                         painter = painterResource(id = R.drawable.browseback),
                         contentDescription = null,

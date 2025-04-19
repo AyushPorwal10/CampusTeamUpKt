@@ -65,7 +65,7 @@ fun PostProject(createPostViewModel: CreatePostViewModel) {
     }
 
     
-    Column {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
         OutlinedTextField(value = teamName.value,
             onValueChange = { teamName.value = it },
@@ -93,7 +93,7 @@ fun PostProject(createPostViewModel: CreatePostViewModel) {
             },
             leadingIcon = {
                 Icon(
-                    painterResource(id = R.drawable.email), contentDescription = null,
+                    painterResource(id = R.drawable.projects), contentDescription = null,
                     modifier = Modifier.size(22.dp), tint = White
                 )
             }
@@ -109,7 +109,7 @@ fun PostProject(createPostViewModel: CreatePostViewModel) {
             },
             leadingIcon = {
                 Icon(
-                    painterResource(id = R.drawable.email), contentDescription = null,
+                    painterResource(id = R.drawable.problem_statement), contentDescription = null,
                     modifier = Modifier.size(22.dp), tint = White
                 )
             }

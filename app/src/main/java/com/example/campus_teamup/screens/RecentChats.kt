@@ -1,5 +1,6 @@
 package com.example.campus_teamup.screens
 
+import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -54,7 +56,7 @@ import com.example.campus_teamup.viewmodels.RecentChatsViewModel
 fun RecentChatScreen(startChat : (RecentChats) -> Unit){
 
     val recentChatViewModel : RecentChatsViewModel = hiltViewModel()
-
+    val activity = LocalContext.current as? Activity
     recentChatViewModel.fetchRecentChats()
     val userAllChats = recentChatViewModel.userAllChats.collectAsState()
     val areChatsLoading = recentChatViewModel.areChatsLoading.collectAsState()
@@ -74,7 +76,9 @@ fun RecentChatScreen(startChat : (RecentChats) -> Unit){
                 navigationIconContentColor = White
             ),
             navigationIcon = {
-                IconButton(onClick = { }) {
+                IconButton(onClick = {
+                    activity?.finish()
+                }) {
                     Icon(
                         painter = painterResource(id = R.drawable.browseback),
                         contentDescription = null,

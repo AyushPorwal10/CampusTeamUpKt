@@ -1,5 +1,6 @@
 package com.example.campus_teamup.roleprofile.screens
 
+import android.app.Activity
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -52,7 +53,7 @@ fun ViewUserProfiles(
     Log.d("FCM","All three composable screen is $receiverId <-")
     val context = LocalContext.current
     var isClicked by remember { mutableStateOf(false) }
-
+    val activity = LocalContext.current as? Activity
     var selectedLayout by remember {
         mutableStateOf("collegeDetails")
     }
@@ -65,7 +66,9 @@ fun ViewUserProfiles(
             containerColor = BackGroundColor, navigationIconContentColor = White
         ),
             navigationIcon = {
-                IconButton(onClick = { }) {
+                IconButton(onClick = {
+                    activity?.finish()
+                }) {
                     Icon(
                         painter = painterResource(id = R.drawable.browseback),
                         contentDescription = null,

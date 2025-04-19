@@ -153,7 +153,7 @@ fun ProfileFields(
             ignoreCase = true
         ) -> R.drawable.gfg
 
-        else -> R.drawable.coding  // Fallback icon if none of the above match
+        else -> R.drawable.coding
     }
 
     Row(

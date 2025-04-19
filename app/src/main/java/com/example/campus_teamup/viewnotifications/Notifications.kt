@@ -1,5 +1,6 @@
 package com.example.campus_teamup.viewnotifications
 
+import android.app.Activity
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -26,6 +27,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -44,6 +46,7 @@ fun NotificationsScreen(viewNotificationViewModel: ViewNotificationViewModel, cu
     val bgColor = BackGroundColor
     val textColor = White
 
+    val activity = LocalContext.current as? Activity
     val isConnected = rememberNetworkStatus()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -62,7 +65,7 @@ fun NotificationsScreen(viewNotificationViewModel: ViewNotificationViewModel, cu
                 ),
                 navigationIcon = {
                     IconButton(onClick = {
-
+                        activity?.finish()
                     }) {
                         Icon(painter = painterResource(id = R.drawable.browseback), contentDescription =null , tint = textColor )
                     }

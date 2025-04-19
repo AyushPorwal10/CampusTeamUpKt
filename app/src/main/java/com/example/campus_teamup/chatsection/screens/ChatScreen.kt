@@ -1,5 +1,6 @@
 package com.example.campus_teamup.chatsection.screens
 
+import android.app.Activity
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -65,7 +66,7 @@ fun ChatScreen(senderName: String? ,chatRoomId : String? ,  currentUserId : Stri
 
     val chatHistory = chatViewModel.chatHistory.collectAsState()
     val chatHistoryState = rememberLazyListState()
-
+    val activity = LocalContext.current as? Activity
     LaunchedEffect(chatHistory.value){
         chatViewModel.fetchChatHistory(chatRoomId!!)
     }
@@ -83,7 +84,9 @@ fun ChatScreen(senderName: String? ,chatRoomId : String? ,  currentUserId : Stri
             containerColor = BackGroundColor, navigationIconContentColor = White
         ),
             navigationIcon = {
-                IconButton(onClick = { }) {
+                IconButton(onClick = {
+                    activity?.finish()
+                }) {
                     Icon(
                         painter = painterResource(id = R.drawable.browseback),
                         contentDescription = null,

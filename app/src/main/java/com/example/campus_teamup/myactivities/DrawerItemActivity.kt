@@ -69,7 +69,6 @@ class DrawerItemActivity : ComponentActivity() {
             NavHost(navController, startDestination = startDestination) {
                 composable("notifications") {
                     viewNotificationViewModel.fetchCombinedNotifications(currentUserData.value?.phoneNumber)
-
                     NotificationsScreen(viewNotificationViewModel ,currentUserData.value)
                 }
                 composable("recentchats") {
@@ -130,5 +129,10 @@ class DrawerItemActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("NavigationTesting","Drawer destroyed")
     }
 }
