@@ -226,6 +226,7 @@ fun PostVacancy(createPostViewModel : CreatePostViewModel) {
                                         hackathonName.value  =""
                                         roleDescription.value = ""
                                         skills.value = ""
+                                        roleLookingFor.value = ""
                                         roleDescription.value = ""
                                         ToastHelper.showToast(context , "Vacancy Posted Successfully")
                                     })

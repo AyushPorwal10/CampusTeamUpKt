@@ -1,6 +1,9 @@
 package com.example.campus_teamup.userprofile.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ChainStyle
@@ -66,7 +70,7 @@ fun CodingProfiles(
                 top.linkTo(parent.top, margin = 20.dp)
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
-                bottom.linkTo(addProfileBtnRef.top, margin = 16.dp)
+//                bottom.linkTo(addProfileBtnRef.top, margin = 16.dp)
             },
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
@@ -88,7 +92,7 @@ fun CodingProfiles(
         if (isLoading.value) {
             ProgressIndicator.showProgressBar(
                 modifier = Modifier.constrainAs(progressBarRef) {
-                    top.linkTo(parent.top, margin = 50.dp)
+                    top.linkTo(profilesListRef.bottom, margin = 50.dp)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 },
@@ -114,10 +118,11 @@ fun CodingProfiles(
                     isEditing.value = !isEditing.value
                     if (!isEditing.value) {
 
-                        if (CheckEmptyFields.checkCodingProfiles(codingProfiles.toList())) {
+                        if (CheckEmptyFields.isCodingProfileUrlAreValid(codingProfiles.toList())) {
                             userProfileViewModel.saveCodingProfiles(codingProfiles.toList())
                         } else {
                             ToastHelper.showToast(context, "Please Enter Valid URL")
+                            isEditing.value = true
                         }
                     }
                 },
@@ -167,12 +172,13 @@ fun ProfileFields(
             readOnly = !isEditing.value,
             modifier = Modifier
                 .background(BackGroundColor)
-                .fillMaxWidth(0.8f),
+                .fillMaxWidth(0.8f)
+            ,
             shape = TextFieldStyle.defaultShape,
             placeholder = {
                 Text(
-                    "Enter URL (Leetcode, Github, etc.)",
-                    maxLines = 1,
+                    stringResource(id = R.string.coding_profile_url),
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             },

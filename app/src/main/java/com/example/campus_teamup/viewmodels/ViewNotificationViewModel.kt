@@ -28,6 +28,10 @@ class ViewNotificationViewModel @Inject constructor(
     private val _teamInviteList = MutableStateFlow<List<NotificationItems.TeamInviteNotification>>(
         emptyList()
     )
+
+    private val _isChatRoomCreating = MutableStateFlow<Boolean>(false)
+    val isChatRoomCreating : StateFlow<Boolean> get() = _isChatRoomCreating.asStateFlow()
+
     val teamInviteList: StateFlow<List<NotificationItems.TeamInviteNotification>> get() = _teamInviteList.asStateFlow()
 
 
@@ -37,10 +41,10 @@ class ViewNotificationViewModel @Inject constructor(
     val combineNotificationList: StateFlow<List<NotificationItems>> get() = _combineNotificationList.asStateFlow()
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun createChatRoom(index: Int, currentUserId: String?,currentUserName : String?, phoneNumber: String?) {
+    fun createChatRoom(index: Int, currentUserId: String?,currentUserName : String?, phoneNumber: String? , onError : () -> Unit ) {
         viewModelScope.launch {
             Log.d("ChatRoom","Index of combined list is $index")
-
+            _isChatRoomCreating.value = true
 
             val teamInviteNotificationAtSpecificIndex = combineNotificationList.value[index]
 
@@ -70,11 +74,17 @@ class ViewNotificationViewModel @Inject constructor(
                         onSuccess = {
                             Log.d("ChatRoomId", "Chat room is created $chatRoomId <-")
                             _isChatRoomCreated.value = true
+
+                            _isChatRoomCreating.value = false
+
                             // if receiver accepts request than remove this from list of notifications
+
                             denyTeamRequest(index, currentUserId ,phoneNumber)
                         },
                         onFailure = {
                             _isChatRoomCreated.value = false
+                            _isChatRoomCreating.value = false
+                            onError()
                         })
                 }
             }
@@ -86,10 +96,12 @@ class ViewNotificationViewModel @Inject constructor(
 
     // this will when a single user see vacancy and apply for team
     @RequiresApi(Build.VERSION_CODES.O)
-    fun userRequestCreateChatRoom(index: Int, currentUserId: String?,currentUserName: String? ,  phoneNumber: String?) {
+    fun userRequestCreateChatRoom(index: Int, currentUserId: String?,currentUserName: String? ,  phoneNumber: String? , onError : () -> Unit ) {
         viewModelScope.launch {
             // receiver means the person who accepts invites
             Log.d("ChatRoomId","Going to creat chat room id for user request  ")
+
+            _isChatRoomCreating.value = true
             val memberInviteNotification = combineNotificationList.value[index]
 
             if(memberInviteNotification is NotificationItems.MemberInviteNotification){
@@ -112,11 +124,14 @@ class ViewNotificationViewModel @Inject constructor(
                         onSuccess = {
                             Log.d("ChatRoomId", "Chat room is created $chatRoomId <-")
                             _isChatRoomCreated.value = true
+                            _isChatRoomCreating.value = false
                             // if receiver accepts request than remove this from list of notifications
                             denyUserRequest(index, currentUserId, phoneNumber)
                         },
                         onFailure = {
                             _isChatRoomCreated.value = false
+                            _isChatRoomCreating.value = false
+                            onError()
                         })
                 }
             }

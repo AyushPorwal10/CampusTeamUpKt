@@ -1,9 +1,12 @@
 package com.example.campus_teamup.project.screens
 
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +26,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -31,6 +36,8 @@ import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.campus_teamup.R
+import com.example.campus_teamup.helper.CheckEmptyFields
+import com.example.campus_teamup.helper.ToastHelper
 import com.example.campus_teamup.mydataclass.ProjectDetails
 import com.example.campus_teamup.myrepository.HomeScreenRepository
 import com.example.campus_teamup.ui.theme.BluePrimary
@@ -45,6 +52,8 @@ fun SingleProject(projectDetails: ProjectDetails, onSaveProjectClicked : (String
     var isExpanded by remember {
         mutableStateOf(false)
     }
+    val context = LocalContext.current
+
     Log.d("FetchingProjects","Single project showing ${projectDetails.projectId}")
     Box(
         modifier = Modifier
@@ -64,6 +73,8 @@ fun SingleProject(projectDetails: ProjectDetails, onSaveProjectClicked : (String
             Text(text = "Team : ${projectDetails.teamName}",
                 color = White,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false,
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .constrainAs(teamName) {
@@ -123,7 +134,7 @@ fun SingleProject(projectDetails: ProjectDetails, onSaveProjectClicked : (String
             if (isExpanded) {
                 Text(
                     text = "GitHub URL : ${projectDetails.githubUrl}",
-                    color = White,
+                    color = Color.Blue,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     softWrap = false,
@@ -134,17 +145,15 @@ fun SingleProject(projectDetails: ProjectDetails, onSaveProjectClicked : (String
                             start.linkTo(parent.start)
                         }
                         .animateContentSize()
-                )
-
-                Text(
-                    text = stringResource(R.string.interested_in_project),
-                    color = BluePrimary,
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.constrainAs(viewTeamDetails) {
-                        top.linkTo(projectUrl.bottom, margin = 10.dp)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }
+                        .clickable {
+                            if(CheckEmptyFields.isValidHttpsUrl(projectDetails.githubUrl)){
+                                val browseLink = Intent(Intent.ACTION_VIEW , Uri.parse(projectDetails.githubUrl))
+                                context.startActivity(browseLink)
+                            }
+                            else {
+                                ToastHelper.showToast(context , "Invalid url.")
+                            }
+                        }
                 )
             }
 
@@ -154,7 +163,7 @@ fun SingleProject(projectDetails: ProjectDetails, onSaveProjectClicked : (String
                     .background(LightTextColor)
                     .constrainAs(divider) {
                         top.linkTo(
-                            if (isExpanded) viewTeamDetails.bottom else problemDescription.bottom,
+                            if (isExpanded) projectUrl.bottom else problemDescription.bottom,
                             margin = 6.dp
                         )
                     })
@@ -165,7 +174,7 @@ fun SingleProject(projectDetails: ProjectDetails, onSaveProjectClicked : (String
                 modifier = Modifier.constrainAs(viewMoreOrLess) {
 
                     top.linkTo(
-                        if (isExpanded) viewTeamDetails.bottom else problemDescription.bottom,
+                        if (isExpanded) projectUrl.bottom else divider.bottom,
                         margin = 6.dp
                     )
                     start.linkTo(parent.start)

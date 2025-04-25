@@ -60,7 +60,7 @@ fun ViewUserProfiles(
     Scaffold(topBar = {
         TopAppBar(title = {
             Text(
-                text = stringResource(id = R.string.app_name), color = White
+                text = stringResource(id = R.string.user_profile), color = White
             )
         }, colors = TopAppBarDefaults.topAppBarColors(
             containerColor = BackGroundColor, navigationIconContentColor = White
@@ -151,7 +151,7 @@ fun ViewUserProfiles(
 
                 "codingProfiles" -> ViewCodingProfiles(
                     modifier = Modifier
-                        .padding(20.dp)
+                        .padding(10.dp)
                         .fillMaxSize()
                         .constrainAs(codingProfileArea) {
                             start.linkTo(parent.start)

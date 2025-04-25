@@ -1,33 +1,43 @@
 package com.example.campus_teamup.helper
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.snapshots.SnapshotStateList
 
 object CheckEmptyFields {
 
-    fun checkEmail(
-        email: String
-    ): String {
 
-        return if (email.isEmpty())
-            "Empty Email"
-        else if (!isValidEmail(email))
-            return "Invalid Email Format"
-        else
-            ""
+    fun isValidHttpsUrl(url: String?): Boolean {
+        if (url.isNullOrBlank()) return false
+        return try {
+            val uri = Uri.parse(url)
+            uri.scheme == "https" && !uri.host.isNullOrEmpty()
+        } catch (e: Exception) {
+            false
+        }
     }
 
-    fun checkName(name: String): String {
-        if (name.isEmpty())
-            return "Empty Name"
-        return ""
-    }
 
     fun isValidEmail(email: String): Boolean {
         val emailRegex = Regex("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}")
 
         return emailRegex.matches(email)
     }
+
+    fun isCodingProfileUrlAreValid(listOfProfiles: List<String>): Boolean {
+
+        for (url in listOfProfiles) {
+            if (url.trim().isEmpty() || url.isBlank()) return false
+            try {
+                val uri = Uri.parse(url)
+                if (uri.scheme != "https" || uri.host.isNullOrEmpty()) return false
+            } catch (e: Exception) {
+                return false
+            }
+        }
+        return true
+    }
+
 
     fun checkCodingProfiles(listOfProfiles: List<String>): Boolean {
         listOfProfiles.forEach { profile ->

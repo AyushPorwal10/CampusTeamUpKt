@@ -35,7 +35,7 @@ fun ShowSavedProjects(
 
         item {
             if(savedProjectList.value.isEmpty()){
-                Box( contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.fillMaxSize() ,  contentAlignment = Alignment.Center) {
                     LoadAnimation(
                         modifier = Modifier.size(200.dp),
                         animation = R.raw.noresult,

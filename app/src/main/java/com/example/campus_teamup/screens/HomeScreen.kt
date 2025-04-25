@@ -403,7 +403,7 @@ fun HomeScreen(
             }
             else {
                 Box(modifier = Modifier.padding(paddingValues).fillMaxSize().background(BackGroundColor) , contentAlignment = Alignment.Center){
-                        LoadAnimation(modifier = Modifier.size(200.dp) , animation = R.raw.otp, playAnimation = true)
+                        LoadAnimation(modifier = Modifier.size(200.dp) , animation = R.raw.nonetwork, playAnimation = true)
                 }
             }
 

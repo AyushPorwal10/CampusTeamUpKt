@@ -44,8 +44,8 @@
     <string name="hackathon_name">*Hackathon Name</string>
     <string name="describe_role">Role description</string>
     <string name="problem_statement">*Problem Statement</string>
-    <string name="project_github_url">Project Github URL</string>
-    <string name="hackathon_personal_project">Hackathon or Personal Project</string>
+    <string name="project_github_url">https://github.com/your_name</string>
+    <string name="hackathon_personal_project">*Hackathon or Personal Project</string>
     <string name="interested_in_project">Interested in Project ? Let\'s Collaborate !</string>
     <string name="view_less">View less</string>
     <string name="view_more">View more</string>
@@ -65,4 +65,9 @@
     <string name="enter_phone_number">Phone Number</string>
     <string name="request_accepted">Request Accepted</string>
     <string name="your_posts">Your Posts</string>
+    <string name="your_profile">Your Profile</string>
+    <string name="vacancy_details">Vacancy Details</string>
+    <string name="user_profile">User Profile</string>
+    <string name="github_url">Github Url</string>
+    <string name="coding_profile_url">https://leetcode.com/your_name</string>
 </resources>

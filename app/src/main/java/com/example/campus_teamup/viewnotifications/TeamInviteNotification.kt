@@ -1,5 +1,6 @@
 package com.example.campus_teamup.viewnotifications
 
+import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -22,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -36,9 +39,12 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.campus_teamup.R
+import com.example.campus_teamup.helper.ProgressIndicator
 import com.example.campus_teamup.helper.RejectTeamInviteDialog
 import com.example.campus_teamup.helper.TimeAndDate
+import com.example.campus_teamup.helper.ToastHelper
 import com.example.campus_teamup.myactivities.UserData
+import com.example.campus_teamup.myactivities.ViewUserProfile
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.BorderColor
 import com.example.campus_teamup.ui.theme.LightTextColor
@@ -55,6 +61,9 @@ fun TeamInviteNotification(
     viewNotificationViewModel: ViewNotificationViewModel,
     currentUserData: UserData?
 ) {
+    val context  = LocalContext.current
+
+    val isChatRoomCreating = viewNotificationViewModel.isChatRoomCreating.collectAsState()
 
     Log.d("UserData","In TeamInviteNotification UserId from datastore is ${currentUserData?.userId} ")
 
@@ -79,7 +88,7 @@ fun TeamInviteNotification(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier
             .padding(8.dp)
-            .border(1.dp , BackGroundColor , RoundedCornerShape(12.dp))
+            .border(1.dp, BackGroundColor, RoundedCornerShape(12.dp))
             .fillMaxWidth()
     ) {
         Column(
@@ -103,17 +112,26 @@ fun TeamInviteNotification(
                 ) {
 
                     // This is when user accept to do communication with sender chat option is open for them
-                    IconButton(
-                        onClick = {
-                            viewNotificationViewModel.createChatRoom(index,currentUserData?.userId ,currentUserData?.userName , currentUserData?.phoneNumber)
-                        },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = Color(0xFFDFFFE1),
-                            contentColor = Color(0xFF2E7D32)
-                        )
-                    ) {
-                        Icon(Icons.Default.Check, contentDescription = "Accept")
+
+                    if(isChatRoomCreating.value){
+                        ProgressIndicator.showProgressBar(modifier = Modifier, canShow = isChatRoomCreating.value)
                     }
+                    else {
+                        IconButton(
+                            onClick = {
+                                viewNotificationViewModel.createChatRoom(index,currentUserData?.userId ,currentUserData?.userName , currentUserData?.phoneNumber , onError = {
+                                    ToastHelper.showToast(context , "Something went wrong ! \n Please try again later.")
+                                })
+                            },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = Color(0xFFDFFFE1),
+                                contentColor = Color(0xFF2E7D32)
+                            )
+                        ) {
+                            Icon(Icons.Default.Check, contentDescription = "Accept")
+                        }
+                    }
+
                     // click on deny means user is not interested in team and not want to be a part of team
                     IconButton(
                         onClick = {
@@ -128,7 +146,6 @@ fun TeamInviteNotification(
                     }
                 }
             }
-
             Row(horizontalArrangement = Arrangement.SpaceBetween , modifier = Modifier.fillMaxWidth()){
                 TextButton(
                     onClick = {
@@ -139,7 +156,10 @@ fun TeamInviteNotification(
 
                 TextButton(
                     onClick = {
-
+                        val intent = Intent(context , ViewUserProfile::class.java)
+                        intent.putExtra("userId",teamInviteNotification.senderId)
+                        intent.putExtra("phone_number" , teamInviteNotification.senderPhoneNumber)
+                        context.startActivity(intent)
                     },
                 ) {
                     Text("View More" , color = LightTextColor)

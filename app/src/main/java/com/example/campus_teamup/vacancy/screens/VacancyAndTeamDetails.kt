@@ -61,7 +61,7 @@ fun VacancyAndTeamDetails(
     Scaffold(topBar = {
         TopAppBar(title = {
             Text(
-                text = stringResource(id = R.string.app_name), color = White
+                text = stringResource(id = R.string.vacancy_details), color = White
             )
         }, colors = TopAppBarDefaults.topAppBarColors(
             containerColor = BackGroundColor, navigationIconContentColor = White

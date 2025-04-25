@@ -120,8 +120,12 @@ fun PostProject(createPostViewModel: CreatePostViewModel) {
             modifier = Modifier.fillMaxWidth(0.9f),
             colors = TextFieldStyle.myTextFieldColor(),
             shape = TextFieldStyle.defaultShape,
+            placeholder = {
+                          Text(text = stringResource(id = R.string.project_github_url))
+            },
             label = {
-                Text(text = stringResource(id = R.string.project_github_url))
+
+                Text(text = stringResource(id = R.string.github_url))
             },
             leadingIcon = {
                 Icon(
@@ -147,19 +151,26 @@ fun PostProject(createPostViewModel: CreatePostViewModel) {
                                 problemStatement.value
                             )
 
+
                         if (allRequiredField) {
 
-                            createPostViewModel.postProject(
-                                LocalDate.now().toString(),
-                                teamName.value,
-                                hackathonOrPersonal.value,
-                                problemStatement.value,
-                                githubUrl.value,
-                                0
-                            )
+                            if(CheckEmptyFields.isValidHttpsUrl(githubUrl.value)){
+                                createPostViewModel.postProject(
+                                    LocalDate.now().toString(),
+                                    teamName.value,
+                                    hackathonOrPersonal.value,
+                                    problemStatement.value,
+                                    githubUrl.value,
+                                    0
+                                )
+                            }
+                            else {
+                                ToastHelper.showToast(context , "Please enter valid github link.")
+                            }
+
                         }
                         else{
-                            ToastHelper.showToast(context , "All * marked fields are required")
+                            ToastHelper.showToast(context , "All fields are required.")
                         }
 
                     },

@@ -25,6 +25,8 @@ class ViewUserProfile : ComponentActivity() {
         val userId = intent.getStringExtra("userId")
         val receiverPhoneNumber = intent.getStringExtra("phone_number") // person who posted this role
 
+
+
         Log.d("FCM","Received UserId $userId <-")
         setContent{
             ViewUserProfiles(viewProfileViewModel ,notificationViewModel ,  userId , receiverPhoneNumber)

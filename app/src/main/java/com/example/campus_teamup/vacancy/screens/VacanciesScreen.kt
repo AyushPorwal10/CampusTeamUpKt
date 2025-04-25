@@ -175,7 +175,8 @@ fun ShowListOfVacancies(
 
         LazyColumn(
             modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+
         ) {
             items(vacancies) { vacancy ->
                 ShimmerEffect(modifier = modifier, isLoading = isVacancyLoading.value) {
@@ -207,15 +208,5 @@ fun ShowListOfVacancies(
                     }
                 }
             }
-
-                item {
-
-                        OutlinedButton(onClick = {
-                            homeScreenViewModel.observeVacancyInRealTime()
-                        }) {
-                            Text(text = "Refresh", color = White)
-                        }
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
     }
 }

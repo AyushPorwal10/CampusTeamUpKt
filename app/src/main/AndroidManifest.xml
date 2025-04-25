@@ -29,9 +29,6 @@
         </service>
 
         <activity
-            android:name=".myactivities.Chat"
-            android:exported="false" />
-        <activity
             android:name=".myactivities.ViewVacancy"
             android:exported="false" />
         <activity

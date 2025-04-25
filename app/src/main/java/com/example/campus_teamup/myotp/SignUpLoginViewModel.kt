@@ -44,6 +44,7 @@ class SignUpLoginViewModel @Inject constructor(
     val isVerificationInProgress: StateFlow<Boolean> get() = _isVerificationInProgress.asStateFlow()
 
 
+
     private val _message = MutableStateFlow("")
     val message: StateFlow<String> = _message
 
@@ -71,9 +72,8 @@ class SignUpLoginViewModel @Inject constructor(
         }
     }
 
+
     fun startVerification(phoneNumber: String, activity: Activity) {
-
-
         viewModelScope.launch {
             _isVerificationInProgress.value = true
             signUpLoginRepo.startPhoneNumberVerification(

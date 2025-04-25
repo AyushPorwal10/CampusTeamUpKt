@@ -17,11 +17,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +45,7 @@ import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.Dimensions
 import com.example.campus_teamup.helper.LoadAnimation
 import com.example.campus_teamup.helper.ProgressIndicator
+import com.example.campus_teamup.helper.rememberNetworkStatus
 import com.example.campus_teamup.mydataclass.RecentChats
 import com.example.campus_teamup.ui.theme.BackGroundColor
 import com.example.campus_teamup.ui.theme.BorderColor
@@ -60,6 +64,8 @@ fun RecentChatScreen(startChat : (RecentChats) -> Unit){
     recentChatViewModel.fetchRecentChats()
     val userAllChats = recentChatViewModel.userAllChats.collectAsState()
     val areChatsLoading = recentChatViewModel.areChatsLoading.collectAsState()
+    val isConnected = rememberNetworkStatus()
+    val snackbarHostState = remember { SnackbarHostState() }
 
 
 
@@ -88,30 +94,57 @@ fun RecentChatScreen(startChat : (RecentChats) -> Unit){
             }
         )
     }) {paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .background(BackGroundColor),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            items(userAllChats.value) { singleRecentChat ->
-                SingleRecentChat(singleRecentChat , onClick = {
-                    startChat(singleRecentChat)
-                })
-            }
-            item {
 
-                if(userAllChats.value.isEmpty()) {
-                    Box( contentAlignment = Alignment.Center) {
-                        LoadAnimation(
-                            modifier = Modifier.size(200.dp),
-                            animation = R.raw.noresult,
-                            playAnimation = true
-                        )
+
+        LaunchedEffect(isConnected) {
+            if (!isConnected) {
+                snackbarHostState.showSnackbar(
+                    message = "No Internet Connection",
+                    actionLabel = "OK"
+                )
+            }
+        }
+
+        if(isConnected){
+            LazyColumn(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+                    .background(BackGroundColor),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                items(userAllChats.value) { singleRecentChat ->
+                    SingleRecentChat(singleRecentChat , onClick = {
+                        startChat(singleRecentChat)
+                    })
+                }
+                item {
+                    if(userAllChats.value.isEmpty()) {
+                        Box( contentAlignment = Alignment.Center) {
+                            LoadAnimation(
+                                modifier = Modifier.size(200.dp),
+                                animation = R.raw.noresult,
+                                playAnimation = true
+                            )
+                        }
                     }
                 }
             }
         }
+        else {
+            Box(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+                    .background(BackGroundColor), contentAlignment = Alignment.Center
+            ) {
+                LoadAnimation(
+                    modifier = Modifier.size(200.dp),
+                    animation = R.raw.nonetwork,
+                    playAnimation = true
+                )
+            }
+        }
+
     }
 }

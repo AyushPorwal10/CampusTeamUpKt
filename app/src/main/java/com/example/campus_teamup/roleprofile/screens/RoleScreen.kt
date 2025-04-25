@@ -204,14 +204,7 @@ fun ShowListOfRoles(
                 }
             }
         }
-            item {
-                    OutlinedButton(onClick = {
-                        homeScreenViewModel.observeRolesInRealTime()
-                    }) {
-                        Text(text = "Refresh", color = White)
-                    }
-                Spacer(modifier = Modifier.height(20.dp))
-            }
+
     }
 
 }

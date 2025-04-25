@@ -67,14 +67,13 @@ fun OtpVerificationScreen(
 
     val isOtpVerifying = signUpLoginViewModel.isOptVerifying.collectAsState()
 
-    // Start countdown
-    LaunchedEffect(timeLeft) {
-
-        while (timeLeft > 0) {
-            delay(1000L)
-            timeLeft--
-        }
-    }
+//    LaunchedEffect(timeLeft) {
+//
+//        while (timeLeft > 0) {
+//            delay(1000L)
+//            timeLeft--
+//        }
+//    }
 
 
     Column(
@@ -179,29 +178,29 @@ fun OtpVerificationScreen(
 
 
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Resend OTP in 00:${timeLeft.toString().padStart(2, '0')}",
-                fontSize = 10.sp,
-                color = LightTextColor
-            )
-
-            if (timeLeft == 0) {
-                TextButton(
-                    onClick = {
-                        timeLeft = 60
-                    }
-                ) {
-                    Text("Resend OTP", color = White)
-                }
-            }
-        }
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(horizontal = 16.dp),
+//            horizontalArrangement = Arrangement.SpaceBetween,
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            Text(
+//                text = "Resend OTP in 00:${timeLeft.toString().padStart(2, '0')}",
+//                fontSize = 10.sp,
+//                color = LightTextColor
+//            )
+//
+//            if (timeLeft == 0) {
+//                TextButton(
+//                    onClick = {
+//                        timeLeft = 60
+//                    }
+//                ) {
+//                    Text("Resend OTP", color = White)
+//                }
+//            }
+//        }
 
 
     }

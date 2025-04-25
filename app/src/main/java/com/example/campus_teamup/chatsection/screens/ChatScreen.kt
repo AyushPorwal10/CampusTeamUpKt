@@ -44,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.TimeAndDate
@@ -121,12 +122,16 @@ fun ChatScreen(senderName: String? ,chatRoomId : String? ,  currentUserId : Stri
                     .constrainAs(chatHistoryArea) {
                         top.linkTo(divider.bottom)
                         bottom.linkTo(typeAndSendMessage.top, margin = 8.dp)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        height = Dimension.fillToConstraints
                     }
-                    .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)){
+                    , horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)){
                 items(chatHistory.value){messageDetails->
                     ShowChats(messageDetails = messageDetails, currentUserId = currentUserId)
                 }
             }
+
             LaunchedEffect(chatHistory.value.size){
                 if(chatHistory.value.isNotEmpty()){
                     chatHistoryState.animateScrollToItem(chatHistory.value.size-1)
@@ -140,11 +145,10 @@ fun ChatScreen(senderName: String? ,chatRoomId : String? ,  currentUserId : Stri
                 }
                 .padding(6.dp)) {
 
-                TextField(
+                OutlinedTextField(
                     modifier = Modifier
                         .fillMaxWidth(0.9f)
-                        .padding(4.dp)
-                        .border(1.dp, BorderColor, RoundedCornerShape(22.dp)),
+                        .padding(4.dp),
                     value = messageText, onValueChange = { text ->
                         messageText = text
                     },
@@ -172,8 +176,6 @@ fun ChatScreen(senderName: String? ,chatRoomId : String? ,  currentUserId : Stri
                         Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = null , tint = White)
                     }
                 }
-
-
             }
         }
     }

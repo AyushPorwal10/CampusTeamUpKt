@@ -20,7 +20,6 @@ object TextFieldStyle {
 
 
         cursorColor = White,
-
         unfocusedPlaceholderColor = LightTextColor,
         focusedPlaceholderColor = LightTextColor,
 

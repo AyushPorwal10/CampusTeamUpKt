@@ -63,7 +63,7 @@ fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
         TopAppBar(
             title = {
                 Text(
-                    text = stringResource(id = R.string.app_name),
+                    text = stringResource(id = R.string.your_profile),
                     color = White
                 )
             },
@@ -203,7 +203,7 @@ fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
             }
             else {
                 Box(modifier = Modifier.padding(paddingValues).fillMaxSize().background(BackGroundColor) , contentAlignment = Alignment.Center){
-                    LoadAnimation(modifier = Modifier.size(200.dp) , animation = R.raw.otp, playAnimation = true)
+                    LoadAnimation(modifier = Modifier.size(200.dp) , animation = R.raw.nonetwork, playAnimation = true)
                 }
             }
 

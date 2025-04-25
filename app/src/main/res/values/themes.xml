@@ -5,5 +5,7 @@
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:statusBarColor">@color/appBgColor</item>
         <item name="android:navigationBarColor">@color/appBgColor</item>
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+
     </style>
 </resources>

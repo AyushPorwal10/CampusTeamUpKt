@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
@@ -74,108 +75,3 @@ import com.example.campus_teamup.ui.theme.LightTextColor
 import com.example.campus_teamup.ui.theme.White
 import com.example.campus_teamup.viewmodels.ViewNotificationViewModel
 import com.example.campus_teamup.viewnotifications.NotificationItems
-
-
-
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun TeamInviteNotificationTesting(
-    teamInviteNotification: NotificationItems.TeamInviteNotification,
-    index: Int,
-    viewNotificationViewModel: ViewNotificationViewModel,
-    currentUserData: UserData?
-) {
-
-    Log.d("UserData","In TeamInviteNotification UserId from datastore is ${currentUserData?.userId} ")
-
-    Log.d("UserNotification", "Sender name is ${teamInviteNotification.senderName} <-")
-    Log.d("UserNotification", "Sender id is ${teamInviteNotification.senderId} <-")
-
-    var rejectTeamInviteDialog by remember {
-        mutableStateOf(false)
-    }
-
-    if (rejectTeamInviteDialog) {
-        RejectTeamInviteDialog(onCancel = {
-            rejectTeamInviteDialog = false
-        }) {
-            viewNotificationViewModel.denyTeamRequest(index , currentUserData?.userId, currentUserData?.phoneNumber)
-        }
-    }
-
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = BorderColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        modifier = Modifier
-            .padding(8.dp)
-            .border(1.dp , BackGroundColor , RoundedCornerShape(12.dp))
-            .fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(12.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "${teamInviteNotification.senderName} " + stringResource(id = R.string.invite_message),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f),
-                    color = White
-                )
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-
-                    // This is when user accept to do communication with sender chat option is open for them
-                    IconButton(
-                        onClick = {
-                            viewNotificationViewModel.createChatRoom(index,currentUserData?.userId ,currentUserData?.userName , currentUserData?.phoneNumber)
-                        },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = Color(0xFFDFFFE1),
-                            contentColor = Color(0xFF2E7D32)
-                        )
-                    ) {
-                        Icon(Icons.Default.Check, contentDescription = "Accept")
-                    }
-                    // click on deny means user is not interested in team and not want to be a part of team
-                    IconButton(
-                        onClick = {
-                            rejectTeamInviteDialog = !rejectTeamInviteDialog
-                        },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = Color(0xFFFFE1E1),
-                            contentColor = Color(0xFFC62828)
-                        )
-                    ) {
-                        Icon(Icons.Default.Close, contentDescription = "Reject")
-                    }
-                }
-            }
-
-            Row(horizontalArrangement = Arrangement.SpaceBetween , modifier = Modifier.fillMaxWidth()){
-                TextButton(
-                    onClick = {
-                    },
-                ) {
-                    Text("Sent : ${TimeAndDate.getTimeAgoFromDate(teamInviteNotification.time)}" , color = LightTextColor)
-                }
-
-                TextButton(
-                    onClick = {
-
-                    },
-                ) {
-                    Text("View More" , color = LightTextColor)
-                }
-            }
-        }
-    }
-}

@@ -57,7 +57,7 @@ fun NotificationsScreen(viewNotificationViewModel: ViewNotificationViewModel, cu
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text(text = stringResource(id = R.string.app_name)) },
+            TopAppBar(title = { Text(text = stringResource(id = R.string.notifications)) },
                 colors = topAppBarColors(
                     containerColor = bgColor,
                     titleContentColor = textColor,
@@ -85,50 +85,56 @@ fun NotificationsScreen(viewNotificationViewModel: ViewNotificationViewModel, cu
             }
 
 
-
-
-                if(combinedNotificationList.value.isEmpty()) {
-                    Box( modifier = Modifier.fillMaxSize() , contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(bgColor)
+                    .padding(paddingValues)
+            ) {
+                if (combinedNotificationList.value.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
                         LoadAnimation(
                             modifier = Modifier.size(200.dp),
-                            animation = R.raw.noresult,
+                            animation = R.raw.nonotification,
+                            playAnimation = true
+                        )
+                    }
+                } else if (isConnected) {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        itemsIndexed(combinedNotificationList.value) { index, item ->
+                            when (item) {
+                                is NotificationItems.TeamInviteNotification -> {
+                                    Log.d("ShowNotification", "Showing TeamInviteNotification")
+                                    TeamInviteNotification(item, index, viewNotificationViewModel, currentUserData)
+                                }
+
+                                is NotificationItems.MemberInviteNotification -> {
+                                    Log.d("ShowNotification", "Showing MemberInviteNotification")
+                                    TeamJointNotification(item, index, viewNotificationViewModel, currentUserData)
+                                }
+                            }
+                        }
+                    }
+                }
+                else {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        LoadAnimation(
+                            modifier = Modifier.size(200.dp),
+                            animation = R.raw.nonetwork,
                             playAnimation = true
                         )
                     }
                 }
-
-
-            if(isConnected){
-                LazyColumn(
-                    modifier = Modifier
-                        .padding(paddingValues)
-                        .fillMaxSize()
-                        .background(bgColor)
-                    ,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ){
-                    itemsIndexed(combinedNotificationList.value) { index, item ->
-
-                        when(item){
-                            is NotificationItems.TeamInviteNotification -> {
-                                Log.d("ShowNotification","Showing TeamInviteNotification")
-                                TeamInviteNotification(item, index , viewNotificationViewModel , currentUserData)
-                            }
-                            is NotificationItems.MemberInviteNotification -> {
-                                Log.d("ShowNotification","Showing MemberInviteNotification")
-                                TeamJointNotification(item ,index , viewNotificationViewModel , currentUserData)
-                            }
-                        }
-
-                    }
-                }
             }
-            else {
-                Box(modifier = Modifier.padding(paddingValues).fillMaxSize().background(BackGroundColor) , contentAlignment = Alignment.Center){
-                    LoadAnimation(modifier = Modifier.size(200.dp) , animation = R.raw.otp, playAnimation = true)
-                }
-            }
-
         })
 }

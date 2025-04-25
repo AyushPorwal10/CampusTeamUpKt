@@ -98,15 +98,6 @@ fun ProjectsScreen(homeScreenViewModel: HomeScreenViewModel , saveProject : (Pro
                     }
                 }
             }
-
-            item {
-                OutlinedButton(onClick = {
-                    homeScreenViewModel.fetchProjects()
-                }) {
-                    Text(text = "Refresh", color = White)
-                }
-                Spacer(modifier = Modifier.height(20.dp))
-            }
         }
     }
 

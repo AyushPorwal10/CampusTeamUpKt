@@ -98,7 +98,10 @@ fun YourPost(yourPostViewModel: YourPostViewModel) {
                     .fillMaxSize()
             ) {
 
+
                 val (divider, postedRoles, postedVacancy, postedProjects, postedItemsArea) = createRefs()
+
+
 
                 HorizontalDivider(modifier = Modifier
                     .fillMaxWidth()
@@ -107,62 +110,68 @@ fun YourPost(yourPostViewModel: YourPostViewModel) {
 
                 // SAVED ROLES , SAVED VACANCY , SAVED PROJECTS
 
-                OutlinedButton(onClick = {
-                    navController.navigate("postedRoles"){
-                        popUpTo(navController.graph.startDestinationId) { inclusive = false }
-                        launchSingleTop = true
+                if (isConnected) {
+                    OutlinedButton(onClick = {
+                        navController.navigate("postedRoles") {
+                            popUpTo(navController.graph.startDestinationId) {
+                                inclusive = false
+                            }
+                            launchSingleTop = true
+                        }
+                    }, colors = ButtonDefaults.buttonColors(
+                        containerColor = if (currentDestination == "postedRoles") White else BackGroundColor
+                    ), modifier = Modifier.constrainAs(postedRoles) {
+                        top.linkTo(divider.bottom, margin = 6.dp)
+                    }) {
+                        Text(
+                            text = stringResource(id = R.string.roles),
+                            color = if (currentDestination == "postedRoles") Black else White
+                        )
                     }
-                }, colors = ButtonDefaults.buttonColors(
-                    containerColor = if (currentDestination == "postedRoles") White else BackGroundColor
-                ), modifier = Modifier.constrainAs(postedRoles) {
-                    top.linkTo(divider.bottom, margin = 6.dp)
-                }) {
-                    Text(
-                        text = stringResource(id = R.string.roles),
-                        color = if (currentDestination == "postedRoles") Black else White
-                    )
-                }
-                OutlinedButton(onClick = {
-                    navController.navigate("postedVacancy"){
-                        popUpTo(navController.graph.startDestinationId) { inclusive = false }
-                        launchSingleTop = true
+                    OutlinedButton(onClick = {
+                        navController.navigate("postedVacancy") {
+                            popUpTo(navController.graph.startDestinationId) {
+                                inclusive = false
+                            }
+                            launchSingleTop = true
+                        }
+                    }, colors = ButtonDefaults.buttonColors(
+                        containerColor = if (currentDestination == "postedVacancy") White else BackGroundColor
+                    ), modifier = Modifier.constrainAs(postedVacancy) {
+                        top.linkTo(divider.bottom, margin = 6.dp)
+                    }) {
+                        Text(
+                            text = stringResource(id = R.string.vacancies),
+                            color = if (currentDestination == "postedVacancy") Black else White
+                        )
                     }
-                }, colors = ButtonDefaults.buttonColors(
-                    containerColor = if (currentDestination == "postedVacancy") White else BackGroundColor
-                ), modifier = Modifier.constrainAs(postedVacancy) {
-                    top.linkTo(divider.bottom, margin = 6.dp)
-                }) {
-                    Text(
-                        text = stringResource(id = R.string.vacancies),
-                        color = if (currentDestination == "postedVacancy") Black else White
-                    )
-                }
-                OutlinedButton(onClick = {
-                    navController.navigate("postedProjects"){
-                        popUpTo(navController.graph.startDestinationId) { inclusive = false }
-                        launchSingleTop = true
+                    OutlinedButton(onClick = {
+                        navController.navigate("postedProjects") {
+                            popUpTo(navController.graph.startDestinationId) {
+                                inclusive = false
+                            }
+                            launchSingleTop = true
+                        }
+                    }, colors = ButtonDefaults.buttonColors(
+                        containerColor = if (currentDestination == "postedProjects") White else BackGroundColor
+                    ), modifier = Modifier.constrainAs(postedProjects) {
+                        top.linkTo(divider.bottom, margin = 6.dp)
+                    }) {
+                        Text(
+                            text = stringResource(id = R.string.projects),
+                            color = if (currentDestination == "postedProjects") Black else White
+                        )
                     }
-                }, colors = ButtonDefaults.buttonColors(
-                    containerColor = if (currentDestination == "postedProjects") White else BackGroundColor
-                ), modifier = Modifier.constrainAs(postedProjects) {
-                    top.linkTo(divider.bottom, margin = 6.dp)
-                }) {
-                    Text(
-                        text = stringResource(id = R.string.projects),
-                        color = if (currentDestination == "postedProjects") Black else White
+                    createHorizontalChain(
+                        postedRoles,
+                        postedVacancy,
+                        postedProjects,
+                        chainStyle = ChainStyle.Spread
                     )
-                }
-                createHorizontalChain(
-                    postedRoles,
-                    postedVacancy,
-                    postedProjects,
-                    chainStyle = ChainStyle.Spread
-                )
 
 
 
 
-                if(isConnected){
                     ConstraintLayout(modifier = Modifier
                         .constrainAs(postedItemsArea) {
                             top.linkTo(postedProjects.bottom, margin = 16.dp)
@@ -182,13 +191,18 @@ fun YourPost(yourPostViewModel: YourPostViewModel) {
                             }
                         }
                     }
-                }
-                else {
-                    Box(modifier = Modifier
-                        .padding(paddingValues)
-                        .fillMaxSize()
-                        .background(BackGroundColor) , contentAlignment = Alignment.Center){
-                        LoadAnimation(modifier = Modifier.size(200.dp) , animation = R.raw.otp, playAnimation = true)
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .padding(paddingValues)
+                            .fillMaxSize()
+                            .background(BackGroundColor), contentAlignment = Alignment.Center
+                    ) {
+                        LoadAnimation(
+                            modifier = Modifier.size(200.dp),
+                            animation = R.raw.nonetwork,
+                            playAnimation = true
+                        )
                     }
                 }
 

@@ -121,6 +121,10 @@ fun ShowSavedItems(currentUserData: UserData?, savedItemsViewModel: SavedItemsVi
 
                 // SAVED ROLES , SAVED VACANCY , SAVED PROJECTS
 
+
+                if (isConnected) {
+
+
                 OutlinedButton(onClick = {
                     navController.navigate("savedRoles") {
                         popUpTo(navController.graph.startDestinationId) { inclusive = false }
@@ -176,7 +180,7 @@ fun ShowSavedItems(currentUserData: UserData?, savedItemsViewModel: SavedItemsVi
 
 
 
-                if (isConnected) {
+
                     ConstraintLayout(modifier = Modifier
                         .constrainAs(savedItemsArea) {
                             top.linkTo(savedProjects.bottom, margin = 16.dp)
@@ -228,7 +232,7 @@ fun ShowSavedItems(currentUserData: UserData?, savedItemsViewModel: SavedItemsVi
                     ) {
                         LoadAnimation(
                             modifier = Modifier.size(200.dp),
-                            animation = R.raw.otp,
+                            animation = R.raw.nonetwork,
                             playAnimation = true
                         )
                     }
