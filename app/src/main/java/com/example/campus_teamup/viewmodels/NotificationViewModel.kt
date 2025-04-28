@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import javax.inject.Inject
@@ -128,24 +129,49 @@ fun sendNotification(title: String, body: String, receiverId: String, phoneNumbe
 
 
     fun checkIfAlreadyRequestSent(receiverId: String ){
+//        viewModelScope.launch {
+//            notificationRepository.checkIfAlreadyRequestSent(senderId.value  , onComplete = {
+//                _listOfUserId.value = it
+//                Log.d("Request","list of request sent is ${it.size} <-")
+//                // if request is already sent than no need to send request again
+//                if(_listOfUserId.value.contains(receiverId)){
+//                    Log.d("Request","Receiver id present means request is already sent")
+//                    _isRequestAlreadySent.value = true
+//                }
+//            })
+//        }
+//        viewModelScope.launch {
+//            userManager.userData.collectLatest {
+//                Log.d("ChatRoomId","Chat Room is created = ${_isChatRoomAlreadyCreated.value}")
+//                Log.d("ChatRoomId","${it.userId} <- sender $receiverId <- receiver")
+//                _isChatRoomAlreadyCreated.value = notificationRepository.checkIfChatRoomAlreadyCreated(it.userId , receiverId)
+//                Log.d("ChatRoomId","Chat Room is created result in check  = ${_isChatRoomAlreadyCreated.value}")
+//            }
+//        }
+
         viewModelScope.launch {
-            notificationRepository.checkIfAlreadyRequestSent(senderId.value  , onComplete = {
-                _listOfUserId.value = it
-                Log.d("Request","list of request sent is ${it.size} <-")
-                // if request is already sent than no need to send request again
-                if(_listOfUserId.value.contains(receiverId)){
-                    Log.d("Request","Receiver id present means request is already sent")
-                    _isRequestAlreadySent.value = true
+            userManager.userData
+                .mapLatest { userData ->
+                    val listOfSentRequests = notificationRepository.checkIfAlreadyRequestSent(senderId.value)
+                    val isChatRoomCreated = notificationRepository.checkIfChatRoomAlreadyCreated(userData.userId, receiverId)
+                    Pair(listOfSentRequests, isChatRoomCreated)
                 }
-            })
+                .collectLatest { (listOfSentRequests, chatRoomCreated) ->
+                    _listOfUserId.value = listOfSentRequests
+                    Log.d("Request", "list of request sent is ${listOfSentRequests.size} <-")
+
+                    if (listOfSentRequests.contains(receiverId)) {
+                        Log.d("Request", "Receiver id present means request is already sent")
+                        _isRequestAlreadySent.value = true
+                    } else {
+                        _isRequestAlreadySent.value = false
+                    }
+
+                    _isChatRoomAlreadyCreated.value = chatRoomCreated
+                    Log.d("ChatRoomId", "Chat Room is created result in check = $chatRoomCreated")
+                }
         }
 
-        viewModelScope.launch {
-            userManager.userData.collectLatest {
-                _isChatRoomAlreadyCreated.value = notificationRepository.checkIfChatRoomAlreadyCreated(it.userId , receiverId)
-
-            }
-        }
     }
 
 

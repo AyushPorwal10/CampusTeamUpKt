@@ -156,7 +156,7 @@ fun ViewUserProfiles(
                         .constrainAs(codingProfileArea) {
                             start.linkTo(parent.start)
                             end.linkTo(parent.end)
-                            top.linkTo(collegeDetailsBtn.bottom, margin = 20.dp)
+                            top.linkTo(collegeDetailsBtn.bottom, margin = 15.dp)
                         },
                     viewProfileViewModel
                 )

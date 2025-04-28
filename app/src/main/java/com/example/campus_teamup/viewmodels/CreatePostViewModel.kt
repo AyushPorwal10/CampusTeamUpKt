@@ -34,8 +34,7 @@ class CreatePostViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow<Boolean>(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    var _isPosted = MutableStateFlow<Boolean>(false)
-    var isPosted: StateFlow<Boolean> = _isPosted
+
 
 
     suspend fun fetchDataFromDataStore() {
@@ -71,7 +70,6 @@ class CreatePostViewModel @Inject constructor(
                     }
                 )
             }
-            _isPosted.value = true
             _isLoading.value = false
         }
     }
@@ -140,7 +138,8 @@ class CreatePostViewModel @Inject constructor(
         hackathonOrPersonal: String,
         problemStatement: String,
         githubUrl: String,
-        projectLikes: Int
+        projectLikes: Int,
+        onProjectPosted : () -> Unit ,
     ) {
 
 
@@ -160,7 +159,7 @@ class CreatePostViewModel @Inject constructor(
 
 
             _isLoading.value = false
-            _isPosted.value = true
+            onProjectPosted ()
         }
     }
 }

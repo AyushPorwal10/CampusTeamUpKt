@@ -54,15 +54,8 @@ fun PostProject(createPostViewModel: CreatePostViewModel) {
     }
     
     val isLoading = createPostViewModel.isLoading.collectAsState()
-    val isProjectPosted = createPostViewModel.isPosted.collectAsState()
 
-    if(isProjectPosted.value){
-        teamName.value = ""
-        hackathonOrPersonal.value = ""
-        problemStatement.value = ""
-        githubUrl.value = ""
-        ToastHelper.showToast(context , "Project Posted Successfully")
-    }
+
 
     
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -161,7 +154,14 @@ fun PostProject(createPostViewModel: CreatePostViewModel) {
                                     hackathonOrPersonal.value,
                                     problemStatement.value,
                                     githubUrl.value,
-                                    0
+                                    0,
+                                    onProjectPosted = {
+                                        teamName.value = ""
+                                        hackathonOrPersonal.value = ""
+                                        problemStatement.value = ""
+                                        githubUrl.value = ""
+                                        ToastHelper.showToast(context , "Project Posted Successfully")
+                                    }
                                 )
                             }
                             else {

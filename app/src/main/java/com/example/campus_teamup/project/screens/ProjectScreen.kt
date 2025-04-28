@@ -57,25 +57,11 @@ fun ProjectsScreen(homeScreenViewModel: HomeScreenViewModel , saveProject : (Pro
         .fillMaxSize()){
 
 
-        LaunchedEffect(projectListState){
-            snapshotFlow{projectListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index}
-                .collectLatest {lastVisibleProject->
-                    if(lastVisibleProject != null && lastVisibleProject >= projects.value.size-1){
-                        // this will fetch new projects
-                        homeScreenViewModel.fetchProjects()
-                    }
-
-                }
-        }
-
-
-
         LazyColumn(state = projectListState , horizontalAlignment = Alignment.CenterHorizontally){
             items(projects.value){project->
                 ShimmerEffect(modifier = Modifier.padding(4.dp), isLoading = isLoading , contentAfterLoading = {
 
                     // this means user saved this and no need to show this project again
-
                     if(!listOfSavedProjects.value.contains(project.projectId)){
                         Log.d("ProjectId","Showing Project")
                         SingleProject(project , onSaveProjectClicked = {projectId->

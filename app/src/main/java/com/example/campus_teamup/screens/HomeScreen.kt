@@ -319,13 +319,16 @@ fun HomeScreen(
                 )
             },
             bottomBar = {
-                HorizontalDivider(modifier = Modifier.width(2.dp))
-                BottomAppBar(
-                    scrollBehavior = bottomAppBarScrollBehavior,
-                    containerColor = bgColor,
-                ) {
-                    HandlingBottomAppBar(selected, navController, Modifier.weight(1f))
+                if(isConnected){
+                    HorizontalDivider(modifier = Modifier.width(2.dp))
+                    BottomAppBar(
+                        scrollBehavior = bottomAppBarScrollBehavior,
+                        containerColor = bgColor,
+                    ) {
+                        HandlingBottomAppBar(selected, navController, Modifier.weight(1f))
+                    }
                 }
+
             }
         ) { paddingValues ->
 

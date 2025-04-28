@@ -87,30 +87,36 @@ class NotificationRepository @Inject constructor(
 
         firebaseFirestore.collection("request_send_by").document(senderId).set(data).await()
     }
+    suspend fun checkIfAlreadyRequestSent(senderId: String) : List<String> {
+        return try {
+            val document = firebaseFirestore
+                .collection("request_send_by")
+                .document(senderId)
+                .get()
+                .await()
 
-    suspend fun checkIfAlreadyRequestSent(senderId: String, onComplete: (List<String>) -> Unit) {
-
-        val document =
-            firebaseFirestore.collection("request_send_by").document(senderId).get().await()
-
-        // listOfUser that person sent request
-
-        if (document.get("role_request_send_to") != null) {
-            val listOfUsers = document.get("role_request_send_to") as List<String> ?: emptyList()
-            onComplete(listOfUsers)
-        } else
-            onComplete(emptyList())
-
+            if (document.exists()) {
+                val listOfUsers = document.get("role_request_send_to") as? List<String>
+                listOfUsers ?: emptyList()
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            Log.d("Request", "Error checking if request already sent: $e")
+            emptyList()
+        }
     }
 
 
     suspend fun checkIfChatRoomAlreadyCreated(currentUserId: String , userWhoPostedRole : String ) : Boolean{
 
         val chatRoomId = ChatRoomId.getChatRoomId(currentUserId , userWhoPostedRole)
-        val documentRef = firebaseFirestore.collection("chat_rooms").document(chatRoomId)
+        Log.d("ChatRoomId","Chat room id is $chatRoomId")
 
+        val documentRef = firebaseFirestore.collection("chat_rooms").document(chatRoomId)
         return try{
             val document = documentRef.get().await()
+            Log.d("ChatRoomId","${document.exists()}")
             document.exists()
         }
         catch (e : Exception){

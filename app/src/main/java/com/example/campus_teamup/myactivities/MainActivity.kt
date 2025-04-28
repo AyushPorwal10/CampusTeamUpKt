@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import com.example.campus_teamup.helper.rememberNetworkStatus
 import com.example.campus_teamup.screens.HomeScreen
 import com.example.campus_teamup.ui.theme.BackGroundColor
 
@@ -32,8 +33,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("Post", "MainActivity Created")
-
-
         val cacheDirSize = File(this@MainActivity.cacheDir.path).walk().sumOf { it.length() }
         Log.d("CacheDebug", "App cache size: ${cacheDirSize / (1024 * 1024)} MB")
 

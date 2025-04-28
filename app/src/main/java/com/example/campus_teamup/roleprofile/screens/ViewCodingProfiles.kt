@@ -118,8 +118,7 @@ fun CodingProfileCard(
 
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
+            .fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = BorderColor
         ),
