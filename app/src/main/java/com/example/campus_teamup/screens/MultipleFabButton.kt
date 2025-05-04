@@ -193,7 +193,7 @@ fun MinFab(
 
         Canvas(
             modifier = Modifier
-                .size(32.dp)
+                .size(20.dp)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = LocalIndication.current,

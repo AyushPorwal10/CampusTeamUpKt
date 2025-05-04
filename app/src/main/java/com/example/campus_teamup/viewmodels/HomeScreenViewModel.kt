@@ -15,16 +15,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -67,10 +63,7 @@ class HomeScreenViewModel @Inject constructor(
 
     // vacancy
     private val _vacancyStateFlow = MutableStateFlow<List<VacancyDetails>>(emptyList())
-    val vacancyStateFlow: StateFlow<List<VacancyDetails>> get() = _vacancyStateFlow // find why we use get here
-
-    private var lastVisibleVacancy: DocumentSnapshot? = null
-    private var lastVacancyPostedOn: String = ""
+    val vacancyStateFlow: StateFlow<List<VacancyDetails>> get() = _vacancyStateFlow .asStateFlow()
 
     private val _isVacancyRefreshing = MutableStateFlow<Boolean>(false)
     val isVacancyRefreshing: StateFlow<Boolean> = _isVacancyRefreshing
@@ -88,7 +81,8 @@ class HomeScreenViewModel @Inject constructor(
 
     private var lastProject: DocumentSnapshot? = null
     private var lastFetchedUserPhoneNumber: String? = null
-
+    private var lastVisibleVacancy: DocumentSnapshot? = null
+    private var lastVacancyPostedOn: String = ""
 
     private val _listOfSavedPost = MutableStateFlow<List<String>>(emptyList())
     val listOfSavedPost: StateFlow<List<String>> get() = _listOfSavedPost.asStateFlow()
@@ -105,56 +99,55 @@ class HomeScreenViewModel @Inject constructor(
 
     init {
         fetchProjects()
+        observeUserData()
+    }
 
-        _isProjectLoading.value = true
-
+    private fun observeUserData(){
         viewModelScope.launch {
-
             userData.collectLatest { data ->
-                val newPhoneNumber = data?.phoneNumber
-                Log.d(
-                    "HomeScreen",
-                    "User data is phone ${data?.phoneNumber}  userId is ${data?.userId} userName ${data?.userName}"
-                )
-                if (newPhoneNumber != null && newPhoneNumber != lastFetchedUserPhoneNumber) {
-
-                    launch {
-                        homeScreenRepository.fetchCurrentUserSavedPost(data.phoneNumber).catch {
-                            Log.d("SavedList", "Error fetching saved list ${it}")
-                        }.collect {
-                            _listOfSavedPost.value = it
-                            Log.d("SavedList", " fetched  saved list viewmodel")
-                        }
-                    }
-
-                    launch {
-                        homeScreenRepository.fetchCurrentUserSavedRole(data.phoneNumber).catch {
-                            Log.d("FetchedRole", "Error fetching saved list ${it}")
-                        }.collect {
-                            _listOfSavedRoles.value = it
-
-                            Log.d("FetchedRole", " fetched  saved list viewmodel")
-                        }
-                    }
-                    launch {
-                        homeScreenRepository.fetchCurrentUserSavedVacancy(data.phoneNumber).catch {
-                            Log.d("FetchedVacancy", "Error fetching saved list $it")
-                        }.collect {
-                            _listOfSavedVacancy.value = it
-
-                            Log.d("FetchedVacancy", " fetched  saved list viewmodel")
-                        }
-                    }
-
+                val phone = data?.phoneNumber
+                if (phone != null && phone != lastFetchedUserPhoneNumber) {
+                    lastFetchedUserPhoneNumber = phone
+                    Log.d("HomeScreenVM", "User: ${data.userId} (${data.phoneNumber}) ${data.userName}")
+                    fetchSavedData(phone)
                 }
             }
         }
     }
 
-
-    fun fetchProjects() {
+    private fun fetchSavedData(phoneNumber: String) {
         viewModelScope.launch {
-            Log.d("Project", "Going to fetch project lastProject is $lastProject")
+            launch {
+                homeScreenRepository.fetchCurrentUserSavedPost(phoneNumber).catch {
+                    Log.d("SavedList", "Error fetching saved list ${it}")
+                }.collect {
+                    _listOfSavedPost.value = it
+                    Log.d("SavedList", " fetched  saved list viewmodel")
+                }
+            }
+
+            launch {
+                homeScreenRepository.fetchCurrentUserSavedRole(phoneNumber).catch {
+                    Log.d("FetchedRole", "Error fetching saved list ${it}")
+                }.collect {
+                    _listOfSavedRoles.value = it
+
+                    Log.d("FetchedRole", " fetched  saved list viewmodel")
+                }
+            }
+            launch {
+                homeScreenRepository.fetchCurrentUserSavedVacancy(phoneNumber).catch {
+                    Log.d("FetchedVacancy", "Error fetching saved list $it")
+                }.collect {
+                    _listOfSavedVacancy.value = it
+
+                    Log.d("FetchedVacancy", " fetched  saved list viewmodel")
+                }
+            }
+        }
+    }
+    private fun fetchProjects() {
+        viewModelScope.launch {
             _isProjectLoading.value = true
             val initialProject = homeScreenRepository.fetchProjects(lastProject)
 

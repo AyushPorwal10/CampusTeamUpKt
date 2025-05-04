@@ -14,6 +14,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.AppLaunchChecker
 import com.example.campus_teamup.R
 import com.example.campus_teamup.helper.CheckEmptyFields
 import com.example.campus_teamup.helper.ProgressIndicator
@@ -38,7 +40,16 @@ import java.time.LocalDate
 fun PostProject(createPostViewModel: CreatePostViewModel) {
 
     val context = LocalContext.current
-
+    
+    
+    LaunchedEffect(Unit){
+        createPostViewModel.errorMessage.collect{error->
+            error?.let {
+                ToastHelper.showToast(context ,error)
+                createPostViewModel.clearError()
+            }
+        }
+    }
     val teamName = remember {
         mutableStateOf("")
     }

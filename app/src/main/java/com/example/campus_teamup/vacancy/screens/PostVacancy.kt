@@ -21,6 +21,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,6 +66,17 @@ fun PostVacancy(createPostViewModel : CreatePostViewModel) {
 
     var selectedTeamLogo by remember { mutableStateOf<String>("") }
 
+
+    LaunchedEffect(Unit){
+        createPostViewModel.errorMessage.collect{error->
+            error?.let {
+                ToastHelper.showToast(context ,error)
+                createPostViewModel.clearError()
+            }
+        }
+    }
+    
+    
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->

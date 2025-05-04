@@ -3,6 +3,7 @@ package com.example.campus_teamup.screens
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.widget.Button
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,6 +34,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberDrawerState
@@ -57,6 +59,7 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
@@ -89,13 +92,10 @@ import kotlinx.coroutines.launch
 @Composable
 
 fun HomeScreen(
-    context: Context = LocalContext.current,
     homeScreenViewModel: HomeScreenViewModel,
     searchRoleVacancy: SearchRoleVacancy,
     userId: String?
 ) {
-
-
     val isConnected = rememberNetworkStatus()
 
 
@@ -343,6 +343,8 @@ fun HomeScreen(
             }
 
 
+
+
             if(isConnected){
                 NavHost(
                     navController = navController,
@@ -405,7 +407,10 @@ fun HomeScreen(
                 }
             }
             else {
-                Box(modifier = Modifier.padding(paddingValues).fillMaxSize().background(BackGroundColor) , contentAlignment = Alignment.Center){
+                Box(modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+                    .background(BackGroundColor) , contentAlignment = Alignment.Center){
                         LoadAnimation(modifier = Modifier.size(200.dp) , animation = R.raw.nonetwork, playAnimation = true)
                 }
             }

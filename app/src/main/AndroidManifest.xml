@@ -16,6 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CAMPUS_TEAMUP"
         tools:targetApi="31">
+
+
+
         <activity
             android:name=".myotp.SignUpLogin"
             android:exported="false" />

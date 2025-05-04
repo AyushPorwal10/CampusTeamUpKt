@@ -55,6 +55,17 @@ fun PostRole(createPostViewModel: CreatePostViewModel) {
 
     val isLoading = createPostViewModel.isLoading.collectAsState()
 
+
+    LaunchedEffect(Unit){
+        createPostViewModel.errorMessage.collect{error->
+            error?.let {
+                ToastHelper.showToast(context ,error)
+                createPostViewModel.clearError()
+            }
+        }
+    }
+
+
     ConstraintLayout {
         val (noteForRole, divider, progressBar, enterRole, postRoleBtn) = createRefs()
 

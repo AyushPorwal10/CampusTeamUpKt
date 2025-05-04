@@ -27,6 +27,11 @@ class CreatePostViewModel @Inject constructor(
     private val createPostRepository: CreatePostRepository
 ) : ViewModel() {
 
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
+
+
     private lateinit var userId: String
     private lateinit var userName: String
     private lateinit var phoneNumber: String
@@ -36,6 +41,25 @@ class CreatePostViewModel @Inject constructor(
 
 
 
+    private fun launchWithLoading(block : suspend  () -> Unit){
+        viewModelScope.launch {
+            _isLoading.value = true;
+            try{
+                block()
+            }
+            catch (e : Exception){
+                Log.e("CreatePostViewModel", "Error: ${e.message}", e)
+                _errorMessage.value = "An unexpected error occurred"
+            }
+            finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun clearError() {
+        _errorMessage.value = null
+    }
 
     suspend fun fetchDataFromDataStore() {
 
@@ -51,37 +75,31 @@ class CreatePostViewModel @Inject constructor(
 
     fun postRole(role: String, datePosted: String, canPostRole: (Boolean) -> Unit) {
 
-        viewModelScope.launch {
-            _isLoading.value = true
-            withContext(Dispatchers.IO) {
-                val snapshot = createPostRepository.fetchImageUrlFromUserDetails(phoneNumber)
-                var userImageUrl = snapshot.toObject(CollegeDetails::class.java)
-
-                createPostRepository.postRole(
-                    collegeName,
-                    phoneNumber,
-                    userId,
-                    userName,
-                    userImageUrl?.userImageUrl ?: "",
-                    role,
-                    datePosted, canPostRole = {
-                        _isLoading.value = false
-                        canPostRole(it)
-                    }
-                )
-            }
-            _isLoading.value = false
+        launchWithLoading {
+            val snapshot = createPostRepository.fetchImageUrlFromUserDetails(phoneNumber)
+            var userImageUrl = snapshot.toObject(CollegeDetails::class.java)
+            createPostRepository.postRole(
+                collegeName,
+                phoneNumber,
+                userId,
+                userName,
+                userImageUrl?.userImageUrl ?: "",
+                role,
+                datePosted, canPostRole = {
+                    _isLoading.value = false
+                    canPostRole(it)
+                }
+            )
         }
+
     }
 
     fun uploadTeamLogo(teamLogoUri: String, onResult: (Boolean, String?) -> Unit) {
-        viewModelScope.launch {
-            _isLoading.value = true
+        launchWithLoading{
             createPostRepository.uploadTeamLogo(
                 phoneNumber,
                 teamLogoUri,
                 canPostVacancy = { canPost, url ->
-                    _isLoading.value = false
                     onResult(canPost, url)
                 })
         }
@@ -99,9 +117,8 @@ class CreatePostViewModel @Inject constructor(
         onVacancyPosted: () -> Unit
     ) {
 
-        viewModelScope.launch {
+        launchWithLoading {
 
-            _isLoading.value = true
             Log.d("Vacancy", "Going to post vacancy")
 
 
@@ -120,15 +137,6 @@ class CreatePostViewModel @Inject constructor(
                         phoneNumber
                     )
                 )
-
-            _isLoading.value = false
-
-            onVacancyPosted()
-//            _isPosted.value = true
-//
-//            delay(2000)
-//            _isPosted.value = false
-
         }
     }
 
@@ -143,8 +151,7 @@ class CreatePostViewModel @Inject constructor(
     ) {
 
 
-        viewModelScope.launch {
-            _isLoading.value = true
+        launchWithLoading {
 
             createPostRepository.addProject(
                 phoneNumber,
@@ -156,9 +163,6 @@ class CreatePostViewModel @Inject constructor(
                 githubUrl,
                 projectLikes
             )
-
-
-            _isLoading.value = false
             onProjectPosted ()
         }
     }

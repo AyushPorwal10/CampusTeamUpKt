@@ -67,6 +67,15 @@ fun LoginWithOtp(
             navController.navigate("otpverification/${"login"}/${phoneNumber.value}")
         }
     }
+
+
+    if(!isConnected){
+        ToastHelper.showToast(context , "No network connection.")
+    }
+
+
+
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -108,7 +117,6 @@ fun LoginWithOtp(
 
             )
 
-
             // mobile number
 
             LoginPhoneNumberInputField(modifier = Modifier
@@ -131,7 +139,7 @@ fun LoginWithOtp(
                     }, canShow = isPhoneVerificationInProgress.value
                 )
             }
-            else if(phoneNumber.value.length == 10) {
+            else if(phoneNumber.value.length == 10 ) {
                 SendOtp(modifier = Modifier
                     .constrainAs(loginButton) {
                         start.linkTo(parent.start)
@@ -160,20 +168,9 @@ fun LoginWithOtp(
                                 })
 
                         }
-                    })
+                    } , isConnected)
 
             }
-
-
-                LaunchedEffect(isConnected) {
-                    if (!isConnected) {
-                        snackbarHostState.showSnackbar(
-                            message = "No Internet Connection",
-                            actionLabel = "OK"
-                        )
-                    }
-                }
-
 
 
 
@@ -198,12 +195,13 @@ fun NewAccountSignUpButton(modifier: Modifier, onClick: () -> Unit) {
 
 
 @Composable
-fun SendOtp(modifier: Modifier, signInWithPhoneNumber: () -> Unit) {
+fun SendOtp(modifier: Modifier, signInWithPhoneNumber: () -> Unit ,isConnect : Boolean) {
 
     OutlinedButton(
         onClick = {
             signInWithPhoneNumber()
         },
+        enabled = isConnect,
         colors = ButtonDefaults.buttonColors(
             containerColor = BackGroundColor,
             contentColor = White
