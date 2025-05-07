@@ -140,11 +140,6 @@ fun RolesScreen(
                 }
             )
 
-            TextButton(onClick = {
-                throw RuntimeException("Test Crash")
-            }) {
-                Text("Crash app")
-            }
 
             // Showing list of roles
             ShowListOfRoles(

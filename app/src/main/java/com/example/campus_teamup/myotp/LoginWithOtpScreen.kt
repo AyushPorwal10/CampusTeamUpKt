@@ -48,7 +48,6 @@ fun LoginWithOtp(
     context: Activity,
     navController: NavHostController,
 ) {
-
     var phoneNumber = remember { mutableStateOf("") }
 
     val isConnected = rememberNetworkStatus()
@@ -62,19 +61,21 @@ fun LoginWithOtp(
         signUpLoginViewModel.isVerificationInProgress.collectAsState()
 
 
+    LaunchedEffect(Unit){
+        signUpLoginViewModel.errorMessage.collect{error->
+            error?.let {
+                ToastHelper.showToast(context ,error)
+                signUpLoginViewModel.resetErrorMessage()
+            }
+        }
+    }
+
+
     LaunchedEffect(isPhoneVerificationSuccess.value) {
         if (isPhoneVerificationSuccess.value) {
             navController.navigate("otpverification/${"login"}/${phoneNumber.value}")
         }
     }
-
-
-    if(!isConnected){
-        ToastHelper.showToast(context , "No network connection.")
-    }
-
-
-
 
     Box(
         modifier = Modifier

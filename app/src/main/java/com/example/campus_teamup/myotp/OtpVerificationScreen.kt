@@ -67,13 +67,15 @@ fun OtpVerificationScreen(
 
     val isOtpVerifying = signUpLoginViewModel.isOptVerifying.collectAsState()
 
-//    LaunchedEffect(timeLeft) {
-//
-//        while (timeLeft > 0) {
-//            delay(1000L)
-//            timeLeft--
-//        }
-//    }
+    LaunchedEffect(Unit){
+        signUpLoginViewModel.errorMessage.collect{error->
+            error?.let {
+                ToastHelper.showToast(context ,error)
+                signUpLoginViewModel.resetErrorMessage()
+            }
+        }
+    }
+
 
 
     Column(

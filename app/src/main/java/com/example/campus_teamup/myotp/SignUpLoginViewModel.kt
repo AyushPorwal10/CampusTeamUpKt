@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.campus_teamup.myactivities.UserData
 import com.example.campus_teamup.myactivities.UserManager
 import com.google.firebase.FirebaseException
@@ -44,6 +45,9 @@ class SignUpLoginViewModel @Inject constructor(
     val isVerificationInProgress: StateFlow<Boolean> get() = _isVerificationInProgress.asStateFlow()
 
 
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
+
 
     private val _message = MutableStateFlow("")
     val message: StateFlow<String> = _message
@@ -73,8 +77,27 @@ class SignUpLoginViewModel @Inject constructor(
     }
 
 
-    fun startVerification(phoneNumber: String, activity: Activity) {
+    fun startOperation(block : suspend () -> Unit ){
         viewModelScope.launch {
+            try{
+                block()
+            }
+            catch (e : Exception){
+                _isPhoneVerificationSuccess.value = false
+                _isOtpSent.value = false
+                _isPhoneVerificationSuccess.value = false
+                _isOtpVerifying.value = false
+
+                _errorMessage.value = "An unexpected error occurred"
+            }
+        }
+    }
+
+    fun resetErrorMessage(){
+        _errorMessage.value = null
+    }
+    fun startVerification(phoneNumber: String, activity: Activity) {
+        startOperation {
             _isVerificationInProgress.value = true
             signUpLoginRepo.startPhoneNumberVerification(
                 "+91$phoneNumber",
@@ -95,27 +118,31 @@ class SignUpLoginViewModel @Inject constructor(
     }
 
     fun verifyOtpAndSignIn(code: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
-        val vid = _verificationId.value
-        if (vid.isNotEmpty()) {
-            _isOtpVerifying.value = true
-            val credential = signUpLoginRepo.verifyOTP(vid, code)
-            signUpLoginRepo.signInWithPhoneAuthCredential(credential,
-                onSuccess = {
-                    Log.d(tag, "OTP verified")
-                    _isOtpVerifying.value = false
-                    onSuccess()
-                },
-                onError = {
-                    _isOtpVerifying.value = false
 
-                    Log.d(tag, "OTP not verified $it")
-                    onError(it)
-                }
-            )
-        } else {
-            Log.d(tag, "Invalid verification Id ")
-            _message.value = "Invalid verification ID"
+        startOperation {
+            val vid = _verificationId.value
+            if (vid.isNotEmpty()) {
+                _isOtpVerifying.value = true
+                val credential = signUpLoginRepo.verifyOTP(vid, code)
+                signUpLoginRepo.signInWithPhoneAuthCredential(credential,
+                    onSuccess = {
+                        Log.d(tag, "OTP verified")
+                        _isOtpVerifying.value = false
+                        onSuccess()
+                    },
+                    onError = {
+                        _isOtpVerifying.value = false
+
+                        Log.d(tag, "OTP not verified $it")
+                        onError(it)
+                    }
+                )
+            } else {
+                Log.d(tag, "Invalid verification Id ")
+                _message.value = "Invalid verification ID"
+            }
         }
+
     }
 
 
@@ -124,7 +151,7 @@ class SignUpLoginViewModel @Inject constructor(
         phoneNumber: String,
         isEmailOrPhoneNumberRegistered: (Boolean) -> Unit
     ) {
-        viewModelScope.launch {
+        startOperation{
             _isVerificationInProgress.value = true
             val isRegistered = signUpLoginRepo.isEmailOrPhoneNumberRegistered(email, phoneNumber)
             Log.d("OneTimePass","Is Registered == $isRegistered")
@@ -140,7 +167,7 @@ class SignUpLoginViewModel @Inject constructor(
         collegeName: String,
         phoneNumber: String
     ) {
-        viewModelScope.launch {
+        startOperation {
             Log.d(
                 tag,
                 "Saving user data email is $email \n name is $name , collegeName is $collegeName"
@@ -160,7 +187,7 @@ class SignUpLoginViewModel @Inject constructor(
 
     // when user do sign up save data to data store
     fun saveUserDataToDatabase(phoneNumber: String , onDataSaved : () -> Unit ) {
-        viewModelScope.launch {
+        startOperation {
             userManager.userData.collectLatest {
                 Log.d(
                     tag,
@@ -175,7 +202,7 @@ class SignUpLoginViewModel @Inject constructor(
 
     // when user login
      fun fetchDataFromDatabase(phoneNumber: String , onUserDataSaved : () -> Unit ){
-        viewModelScope.launch {
+        startOperation {
             Log.d(tag , "Fetching data from firebase with $phoneNumber")
             signUpLoginRepo.fetchDataFromDatabase(phoneNumber , onUserDataFetched = {document ->
 
