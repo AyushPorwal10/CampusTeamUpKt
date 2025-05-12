@@ -11,15 +11,15 @@ plugins {
 }
 
 android {
-    namespace = "com.example.campus_teamup"
+    namespace = "com.example.new_campus_teamup"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.campus_teamup"
+        applicationId = "com.example.new_campus_teamup"
         minSdk = 24
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.2"
+        versionCode = 4
+        versionName = "1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

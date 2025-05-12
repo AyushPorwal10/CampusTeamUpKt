@@ -1,21 +1,62 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+-keep class com.example.new_campus_teamup.mydataclass.** {
+    <init>();
+    *;
+}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+-keep class com.example.new_campus_teamup.myrepository.** { *; }
+-keep class com.example.new_campus_teamup.viewmodels.** { *; }
+
+-keep class com.example.new_campus_teamup.notification.** { *; }
+
+-keep class dagger.** { *; }
+-keep interface dagger.** { *; }
+-keep class javax.inject.** { *; }
+-keep class dagger.hilt.** { *; }
+
+
+-keep class com.example.new_campus_teamup.modules.** { *; }
+
+
+
+-keep class com.google.firebase.** { *; }
+
+-keep class retrofit2.** { *; }
+-keep class com.google.gson.** { *; }
+
+
+
+
+                           #SOLUTION BY GITHUB
+
+ # Keep Kotlin metadata (required for Kotlin reflection/coroutines)
+ -keep class kotlin.Metadata { *; }
+
+ # Keep Continuation class used in suspend functions
+ -keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
+
+ # Retrofit - keep API interfaces with annotations
+ -if interface * { @retrofit2.http.* <methods>; }
+ -keep interface <1>
+
+ # Retrofit response type
+ -keep class retrofit2.Response { *; }
+
+ # Gson (used by Retrofit converter or manually)
+ -keep class com.google.gson.** { *; }
+ -keepattributes Signature
+ -keepattributes *Annotation*
+ -keep class com.example.new_campus_teamup.model.** { *; }
+ -keep class com.example.new_campus_teamup.notification.FcmMessage { *; }
+
+ # Firebase Firestore - keep Firestore models
+ -keep class com.google.firebase.firestore.** { *; }
+ -keepattributes Signature
+ -keepattributes *Annotation*
+
+ # Keep your FCM service & models
+ -keep class com.example.new_campus_teamup.notification.FCMApiService { *; }
+ -keep class com.example.new_campus_teamup.notification.FcmMessage { *; }
+
+
