@@ -118,7 +118,8 @@ class UserProfileViewModel @Inject constructor(
         userImageUrl: String,
         year: String,
         branch: String,
-        course: String
+        course: String,
+        onSuccess: () -> Unit
     ) {
         Log.d("CollegeDetails", userImageUrl)
 
@@ -137,11 +138,10 @@ class UserProfileViewModel @Inject constructor(
                 userImageUrl
             )
 
-            withContext(Dispatchers.IO) {
-                userProfileRepo.saveCollegeDetails(userId , phoneNumber, newCollegeDetails)
-            }
+           userProfileRepo.saveCollegeDetails(userId , phoneNumber, newCollegeDetails)
 
             _collegeDetails.value = newCollegeDetails
+           onSuccess()
            // _isLoading.value = false
 
         }
@@ -175,16 +175,21 @@ class UserProfileViewModel @Inject constructor(
 
     // coding profiles
 
-    fun saveCodingProfiles(listOfCodingProfiles: List<String>) {
+    fun saveCodingProfiles(listOfCodingProfiles: List<String> , onSuccess : () -> Unit , onError : () -> Unit  ) {
         startOperation {
-            Log.d("CodingProfiles", "$userId saving profiles")
-            //_isLoading.value = true
-
-            withContext(Dispatchers.IO) {
-                userProfileRepo.saveCodingProfiles(phoneNumber, listOfCodingProfiles)
+            try {
+                Log.d("CodingProfiles", "$userId saving profiles")
+                userProfileRepo.saveCodingProfiles(phoneNumber, listOfCodingProfiles)  // suspend call
+                onSuccess() // called only after suspend function completes successfully
+            } catch (e: Exception) {
+                Log.e("CodingProfiles", "Failed to save profiles: ${e.message}")
+                onError()
             }
-           // _isLoading.value = false
+
+
         }
+
+
 
 
     }
@@ -220,9 +225,10 @@ class UserProfileViewModel @Inject constructor(
 
     }
 
-     fun saveSkills(listOfSkills: List<String>) {
+     fun saveSkills(listOfSkills: List<String> , onSuccess: () -> Unit) {
         startOperation {
             userProfileRepo.saveSkills(phoneNumber, listOfSkills)
+            onSuccess()
         }
     }
 

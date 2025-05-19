@@ -126,7 +126,9 @@ fun SkillSection(
                     showProgressBar.value = true
                     coroutineScope.launch {
                         withContext(Dispatchers.IO){
-                            userProfileViewModel.saveSkills(listOfSkills)
+                            userProfileViewModel.saveSkills(listOfSkills , onSuccess = {
+                                ToastHelper.showToast(context , "Updated Successfully")
+                            })
                         }
                         showProgressBar.value =false
                     }

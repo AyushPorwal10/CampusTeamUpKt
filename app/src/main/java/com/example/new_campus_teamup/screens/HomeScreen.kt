@@ -105,7 +105,7 @@ fun HomeScreen(
     val userData = homeScreenViewModel.userData.collectAsState()
     val userProfileImage = homeScreenViewModel.userImage.collectAsState()
 
-    val bottomAppBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
+        // val bottomAppBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -279,7 +279,7 @@ fun HomeScreen(
         }
     ) {
         Scaffold(
-            modifier = Modifier.nestedScroll(bottomAppBarScrollBehavior.nestedScrollConnection),
+           // modifier = Modifier.nestedScroll(bottomAppBarScrollBehavior.nestedScrollConnection),
             snackbarHost = {
                 SnackbarHost(hostState = snackbarHostState)
             },
@@ -318,7 +318,7 @@ fun HomeScreen(
                 if(isConnected){
                     HorizontalDivider(modifier = Modifier.width(2.dp))
                     BottomAppBar(
-                        scrollBehavior = bottomAppBarScrollBehavior,
+                        //scrollBehavior = bottomAppBarScrollBehavior,
                         containerColor = bgColor,
                     ) {
                         HandlingBottomAppBar(selected, navController, Modifier.weight(1f))

@@ -240,8 +240,9 @@ fun CollegeDetails(
                                             selectedGraduationYear,
                                             selectedBranch,
                                             selectedCourse
-                                        )
-
+                                        , onSuccess = {
+                                                ToastHelper.showToast(context , "Updated Successfully")
+                                            })
 
                                     Log.d("CollegeDetails", "Done with saving college details")
                                 })

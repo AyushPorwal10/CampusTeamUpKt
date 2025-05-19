@@ -115,7 +115,12 @@ fun CodingProfiles(
                     if (!isEditing.value) {
 
                         if (CheckEmptyFields.isCodingProfileUrlAreValid(codingProfiles.toList())) {
-                            userProfileViewModel.saveCodingProfiles(codingProfiles.toList())
+                            userProfileViewModel.saveCodingProfiles(codingProfiles.toList() , onSuccess = {
+                                ToastHelper.showToast(context , "Updated Successfully")
+                            }, onError = {
+                                ToastHelper.showToast(context , "Something went wrong")
+                            })
+
                         } else {
                             ToastHelper.showToast(context, "Please Enter Valid URL")
                             isEditing.value = true
