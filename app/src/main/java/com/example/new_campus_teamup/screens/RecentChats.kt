@@ -30,7 +30,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.LoadAnimation
 import com.example.new_campus_teamup.helper.ToastHelper
-import com.example.new_campus_teamup.helper.rememberNetworkStatus
 import com.example.new_campus_teamup.mydataclass.RecentChats
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
 import com.example.new_campus_teamup.ui.theme.White
@@ -46,7 +45,7 @@ fun RecentChatScreen(startChat : (RecentChats) -> Unit){
     recentChatViewModel.fetchRecentChats()
     val userAllChats = recentChatViewModel.userAllChats.collectAsState()
     val areChatsLoading = recentChatViewModel.areChatsLoading.collectAsState()
-    val isConnected = rememberNetworkStatus()
+
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
@@ -87,16 +86,9 @@ fun RecentChatScreen(startChat : (RecentChats) -> Unit){
     }) {paddingValues ->
 
 
-        LaunchedEffect(isConnected) {
-            if (!isConnected) {
-                snackbarHostState.showSnackbar(
-                    message = "No Internet Connection",
-                    actionLabel = "OK"
-                )
-            }
-        }
 
-        if(isConnected){
+
+
             LazyColumn(
                 modifier = Modifier
                     .padding(paddingValues)
@@ -121,21 +113,5 @@ fun RecentChatScreen(startChat : (RecentChats) -> Unit){
                     }
                 }
             }
-        }
-        else {
-            Box(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .background(BackGroundColor), contentAlignment = Alignment.Center
-            ) {
-                LoadAnimation(
-                    modifier = Modifier.size(200.dp),
-                    animation = R.raw.nonetwork,
-                    playAnimation = true
-                )
-            }
-        }
-
     }
 }

@@ -50,7 +50,6 @@ class NotificationRepository @Inject constructor(
         fcmMessage: FcmMessage,
         listOfPeopleUserSentRequest: List<String>,
         receiverId: String,
-        phoneNumber: String,
     ) {
         val batch = firebaseFirestore.batch()
 
@@ -72,7 +71,7 @@ class NotificationRepository @Inject constructor(
                 }
 
                 launch {
-                    val notificationDoc = firebaseFirestore.collection("all_user_id").document(phoneNumber)
+                    val notificationDoc = firebaseFirestore.collection("all_user_id").document(receiverId)
                         .collection("team_invites").document()
 
                     val notificationData = mapOf(
@@ -81,7 +80,7 @@ class NotificationRepository @Inject constructor(
                         "senderId" to fcmMessage.message.data["senderId"],
                         "senderName" to fcmMessage.message.data["senderName"],
                         "time" to fcmMessage.message.data["time"],
-                        "senderPhoneNumber" to fcmMessage.message.data["phoneNumber"]
+                        "senderPhoneNumber" to "123456"
                     )
 
                     batch.set(notificationDoc, notificationData)

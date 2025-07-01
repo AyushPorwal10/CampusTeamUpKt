@@ -64,13 +64,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.new_campus_teamup.R
+import com.example.new_campus_teamup.email_pass_login.LoginSignUp
 import com.example.new_campus_teamup.helper.HandleLogoutDialog
 import com.example.new_campus_teamup.helper.LoadAnimation
 import com.example.new_campus_teamup.helper.ToastHelper
-import com.example.new_campus_teamup.helper.rememberNetworkStatus
 import com.example.new_campus_teamup.myactivities.DrawerItemActivity
 import com.example.new_campus_teamup.myactivities.UserProfile
-import com.example.new_campus_teamup.myotp.SignUpLogin
 import com.example.new_campus_teamup.mysealedClass.BottomNavScreens
 import com.example.new_campus_teamup.project.screens.ProjectsScreen
 import com.example.new_campus_teamup.roleprofile.screens.RolesScreen
@@ -92,7 +91,7 @@ fun HomeScreen(
     searchRoleVacancy: SearchRoleVacancy,
     userId: String?
 ) {
-    val isConnected = rememberNetworkStatus()
+
 
 
     Log.d("Saving", "currentUserId in homescreen is $userId <-")
@@ -315,7 +314,7 @@ fun HomeScreen(
                 )
             },
             bottomBar = {
-                if(isConnected){
+               // if(isConnected){
                     HorizontalDivider(modifier = Modifier.width(2.dp))
                     BottomAppBar(
                         //scrollBehavior = bottomAppBarScrollBehavior,
@@ -323,25 +322,13 @@ fun HomeScreen(
                     ) {
                         HandlingBottomAppBar(selected, navController, Modifier.weight(1f))
                     }
-                }
+               // }
 
             }
         ) { paddingValues ->
 
 
-            LaunchedEffect(isConnected) {
-                if (!isConnected) {
-                    snackbarHostState.showSnackbar(
-                        message = "No Internet Connection",
-                        actionLabel = "OK"
-                    )
-                }
-            }
 
-
-
-
-            if(isConnected){
                 NavHost(
                     navController = navController,
                     startDestination = BottomNavScreens.Roles.screen,
@@ -401,17 +388,6 @@ fun HomeScreen(
                         )
                     }
                 }
-            }
-            else {
-                Box(modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .background(BackGroundColor) , contentAlignment = Alignment.Center){
-                        LoadAnimation(modifier = Modifier.size(200.dp) , animation = R.raw.nonetwork, playAnimation = true)
-                }
-            }
-
-
         }
     }
 }
@@ -569,7 +545,7 @@ fun LogOutButton(homeScreenViewModel: HomeScreenViewModel) {
             onConfirm = {
                 showDialog = false
                 homeScreenViewModel.logoutUser(onLogoutSuccess = {
-                    val navigateToLogin = Intent(context, SignUpLogin::class.java)
+                    val navigateToLogin = Intent(context, LoginSignUp::class.java)
                     navigateToLogin.flags =
                         Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     context.startActivity(navigateToLogin)

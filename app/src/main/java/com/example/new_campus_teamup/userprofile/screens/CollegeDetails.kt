@@ -173,7 +173,7 @@ fun CollegeDetails(
                         painterResource(id = R.drawable.college), contentDescription = "",
                         modifier = Modifier.size(22.dp), tint = White
                     )
-                }, modifier = Modifier.fillMaxWidth(0.85f)
+                }, modifier = Modifier.fillMaxWidth(0.75f)
             )
 
 

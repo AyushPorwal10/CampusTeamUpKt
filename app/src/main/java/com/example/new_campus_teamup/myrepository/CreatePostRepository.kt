@@ -20,7 +20,6 @@ class CreatePostRepository @Inject constructor(
 
     suspend fun postRole(
         collegeName : String ,
-        phoneNumber : String ,
         userId: String,
         userName: String,
         userImage: String,
@@ -31,14 +30,14 @@ class CreatePostRepository @Inject constructor(
 
         // checking if total role posted is less than 3
 
-        if(!canPost("roles_posted" , phoneNumber , 3))
+        if(!canPost("roles_posted" , userId , 3))
             return canPostRole(false)
 
         val generatedRoleId = firebaseFirestore.collection("all_roles").document().id
         Log.d("SavedRoles", "Normal id i am getting is $generatedRoleId")
 
         val roleDetails = RoleDetails(
-            phoneNumber,
+            "123456",
             collegeName,
             generatedRoleId,
             userId,
@@ -50,7 +49,7 @@ class CreatePostRepository @Inject constructor(
 
 
 
-        firebaseFirestore.collection("all_user_id").document(phoneNumber).collection("roles_posted")
+        firebaseFirestore.collection("all_user_id").document(userId).collection("roles_posted")
             .document(generatedRoleId).set(roleDetails).await()
 
         firebaseFirestore.collection("all_roles").document(generatedRoleId).set(roleDetails).await()
@@ -61,22 +60,22 @@ class CreatePostRepository @Inject constructor(
         Log.d("PostRole", "Role posted successfully")
     }
 
-    suspend fun fetchImageUrlFromUserDetails(phoneNumber: String): DocumentSnapshot {
-        return firebaseFirestore.collection("all_user_id").document(phoneNumber)
+    suspend fun fetchImageUrlFromUserDetails(userId: String): DocumentSnapshot {
+        return firebaseFirestore.collection("all_user_id").document(userId)
             .collection("all_user_details").document("college_details").get().await()
     }
 
 
-    suspend fun uploadTeamLogo(phoneNumber: String, teamLogoUri: String , canPostVacancy : (Boolean , String?) -> Unit ){
+    suspend fun uploadTeamLogo(userId: String, teamLogoUri: String , canPostVacancy : (Boolean , String?) -> Unit ){
          try {
-            if(!canPost("vacancy_posted", phoneNumber, 4)){
+            if(!canPost("vacancy_posted", userId, 4)){
                 canPostVacancy(false , "")
                 return
             }
 
 
 
-            val imageRef = storageReference.child("team_logo/$phoneNumber/teamLogo.jpg")
+            val imageRef = storageReference.child("team_logo/$userId/teamLogo.jpg")
             Log.d("Vacancy", "Image uri is ${teamLogoUri.toUri()}")
 
             imageRef.putFile(teamLogoUri.toUri()).await()
@@ -91,7 +90,7 @@ class CreatePostRepository @Inject constructor(
     }
 
 
-    fun postTeamVacancy(phoneNumber: String, vacancyDetails: VacancyDetails) {
+    fun postTeamVacancy(userId: String, vacancyDetails: VacancyDetails) {
         firebaseFirestore.runTransaction { transaction ->
 
             val vacancyId = firebaseFirestore.collection("all_vacancy").document().id
@@ -101,7 +100,7 @@ class CreatePostRepository @Inject constructor(
 
             Log.d("SavingVacancy", "Vacancy details updated with id ${vacancyDetails.vacancyId} <-")
 
-            val toUserDetails = firebaseFirestore.collection("all_user_id").document(phoneNumber)
+            val toUserDetails = firebaseFirestore.collection("all_user_id").document(userId)
                 .collection("vacancy_posted")
                 .document(vacancyId)
 
@@ -114,7 +113,6 @@ class CreatePostRepository @Inject constructor(
 
 
     fun addProject(
-        phoneNumber: String,
         userId: String,
         postedOn: String,
         teamName: String,
@@ -147,7 +145,7 @@ class CreatePostRepository @Inject constructor(
         val addProject =
             firebaseFirestore.collection("all_projects").document(projectReferenceId.id)
 
-        val updateProjectPostedList = firebaseFirestore.collection("all_user_id").document(phoneNumber).collection("project_posted").document(projectReferenceId.id)
+        val updateProjectPostedList = firebaseFirestore.collection("all_user_id").document(userId).collection("project_posted").document(projectReferenceId.id)
 
         batch.set(updateProjectPostedList , projectDetails)
 
@@ -157,9 +155,9 @@ class CreatePostRepository @Inject constructor(
 
     }
 
-    suspend fun canPost(subCollection : String , phoneNumber: String , limit : Int) : Boolean{
+    suspend fun canPost(subCollection : String , userId: String , limit : Int) : Boolean{
         val snapshot =
-            firebaseFirestore.collection("all_user_id").document(phoneNumber).collection(subCollection)
+            firebaseFirestore.collection("all_user_id").document(userId).collection(subCollection)
                 .get()
                 .await()  // suspend function — this is KEY to linear flow
 
@@ -168,5 +166,4 @@ class CreatePostRepository @Inject constructor(
         return count < limit
 
     }
-
 }

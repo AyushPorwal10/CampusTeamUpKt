@@ -35,7 +35,7 @@ class ViewNotificationRepository @Inject constructor(
 
     fun denyTeamRequest(
         requestToRemove: String,
-        receiverId: String,
+        receiverId: String,   // currentUser id
         senderId: String,
         phoneNumber: String
     ) {
@@ -45,7 +45,7 @@ class ViewNotificationRepository @Inject constructor(
 
         // this will remove the notification from current user
         val deleteOperation =
-            firebaseFirestore.collection("all_user_id").document(phoneNumber)
+            firebaseFirestore.collection("all_user_id").document(receiverId)
                 .collection("team_invites")
                 .document(requestToRemove)
 
@@ -71,7 +71,7 @@ class ViewNotificationRepository @Inject constructor(
     // this is when a user denies the request who want to join current user team
     fun denyUserRequest(
         requestToRemove: String,
-        receiverId: String,
+        receiverId: String, // currentUser id
         senderId: String,
         phoneNumber: String
     ) {
@@ -79,7 +79,7 @@ class ViewNotificationRepository @Inject constructor(
 
         val runBath = firebaseFirestore.batch()
         // this operation will remove the notification that receiver receives because receiver decides to deny it
-        val removeNotification = firebaseFirestore.collection("all_user_id").document(phoneNumber)
+        val removeNotification = firebaseFirestore.collection("all_user_id").document(receiverId)
             .collection("member_invites")
             .document(requestToRemove)
 
@@ -119,7 +119,7 @@ class ViewNotificationRepository @Inject constructor(
 
         Log.d(
             "VacancyRequest",
-            "Current user phone number is $currentUserPhoneNumber \n senderphone number is $senderPhoneNumber"
+            "Current user id is $receiverId \n sender id is $senderId"
         )
 
         coroutineScope {
@@ -131,7 +131,7 @@ class ViewNotificationRepository @Inject constructor(
                 val chatRoomRef = firebaseFirestore.collection("chat_rooms").document(chatRoomId)
                     .collection("chats").document()
                 val userChatsRefSender =
-                    firebaseFirestore.collection("all_user_id").document(senderPhoneNumber)
+                    firebaseFirestore.collection("all_user_id").document(senderId)
                         .collection("chats").document(chatRoomId)
 
                 val batch = firebaseFirestore.batch()
@@ -139,15 +139,10 @@ class ViewNotificationRepository @Inject constructor(
                 // Add to chat_rooms
                 batch.set(chatRoomRef, LastMessage("", "", chatRoomId))
 
-                // Add initial chat message
-//                batch.set(
-//                    chatRoomRef.collection("chats").document(),
-//                    SendMessage("welcome_message", TimeAndDate.getCurrentTime(), "start_chat")
-//                )
 
                 // Add to receiver's chats
                 val userChatsRefReceiver =
-                    firebaseFirestore.collection("all_user_id").document(currentUserPhoneNumber)
+                    firebaseFirestore.collection("all_user_id").document(receiverId)
                         .collection("chats").document(chatRoomId)
 
                 // Add to sender's chats
@@ -185,9 +180,6 @@ class ViewNotificationRepository @Inject constructor(
                 Log.e("VacancyRequest", "Failed to create chat room: ${e.message}")
                 onFailure(false)
             }
-
-
-
         }
 
     }
@@ -207,7 +199,7 @@ class ViewNotificationRepository @Inject constructor(
                 "senderId" to "" , // this does not make sense because i just want to show that your request is accepted
                 "senderName" to currentUserName,
                 "time" to TimeAndDate.getCurrentTime(),
-                "phoneNumber" to "" // also no need to send this
+                "phoneNumber" to "123456" // also no need to send this
             )
         )
         val fcmMessage = FcmMessage(message)
@@ -233,11 +225,11 @@ class ViewNotificationRepository @Inject constructor(
         }
     }
 
-    suspend fun fetchCombinedNotifications(phoneNumber: String): Flow<List<NotificationItems>> {
+     fun fetchCombinedNotifications(userId: String): Flow<List<NotificationItems>> {
 
-        val teamInviteNotificationList = fetchTeamInviteNotifications(phoneNumber)
+        val teamInviteNotificationList = fetchTeamInviteNotifications(userId)
         Log.d("ShowNotification", "TeamInvite list size is $teamInviteNotificationList")
-        val memberInvitedNotificationList = fetchMemberInviteNotifications(phoneNumber)
+        val memberInvitedNotificationList = fetchMemberInviteNotifications(userId)
 
         return combine(
             teamInviteNotificationList,
@@ -255,12 +247,12 @@ class ViewNotificationRepository @Inject constructor(
 
 
     // this is when a user wants to join other team
-    private fun fetchMemberInviteNotifications(phoneNumber: String): Flow<List<NotificationItems.MemberInviteNotification>> =
+    private fun fetchMemberInviteNotifications(userId: String): Flow<List<NotificationItems.MemberInviteNotification>> =
         callbackFlow {
 
 
             val collectionReference =
-                firebaseFirestore.collection("all_user_id").document(phoneNumber)
+                firebaseFirestore.collection("all_user_id").document(userId)
                     .collection("member_invites")
 
 
@@ -289,11 +281,11 @@ class ViewNotificationRepository @Inject constructor(
 
 
     // this are invites from team leader or member because this member founds interest in user profile so they request
-    suspend fun fetchTeamInviteNotifications(phoneNumber: String): Flow<List<NotificationItems.TeamInviteNotification>> =
+    private fun fetchTeamInviteNotifications(userId: String): Flow<List<NotificationItems.TeamInviteNotification>> =
         callbackFlow {
-            Log.d("ShowNotification", "Team invite fetching for phone number $phoneNumber")
+            Log.d("ShowNotification", "Team invite fetching for userId $userId")
             val teamInviteCollection =
-                firebaseFirestore.collection("all_user_id").document(phoneNumber)
+                firebaseFirestore.collection("all_user_id").document(userId)
                     .collection("team_invites")
 
             val listener = teamInviteCollection.addSnapshotListener { snapshot, error ->

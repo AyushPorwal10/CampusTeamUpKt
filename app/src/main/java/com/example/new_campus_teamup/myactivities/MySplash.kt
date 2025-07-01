@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -29,7 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.new_campus_teamup.R
-import com.example.new_campus_teamup.myotp.SignUpLogin
+import com.example.new_campus_teamup.email_pass_login.LoginSignUp
 import com.example.new_campus_teamup.screens.OnboardingScreen
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
 import com.example.new_campus_teamup.ui.theme.White
@@ -55,13 +56,15 @@ class MySplash  : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("AppCheck","Splash Class onCreate")
+
         setContent {
             val context = LocalContext.current
 
             SplashScreen(auth , context) {
                 setContent {
                     OnboardingScreen{
-                        startActivity(Intent(this, SignUpLogin::class.java))
+                        startActivity(Intent(this, LoginSignUp::class.java))
                         finish()
                     }
                 }

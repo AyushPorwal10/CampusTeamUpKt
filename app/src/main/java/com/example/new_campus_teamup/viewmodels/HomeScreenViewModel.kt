@@ -3,6 +3,7 @@ package com.example.new_campus_teamup.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
 import com.example.new_campus_teamup.myactivities.UserData
 import com.example.new_campus_teamup.myactivities.UserManager
 import com.example.new_campus_teamup.mydataclass.ProjectDetails
@@ -13,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,10 +23,12 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,6 +36,7 @@ class HomeScreenViewModel @Inject constructor(
     private val homeScreenRepository: HomeScreenRepository,
     private val userManager: UserManager,
     private val firebaseAuth: FirebaseAuth,
+    private val networkMonitor: CheckNetworkConnectivity
 ) : ViewModel() {
 
     private val _userData = MutableStateFlow<UserData?>(null)
@@ -81,7 +86,7 @@ class HomeScreenViewModel @Inject constructor(
     val isProjectLoading: StateFlow<Boolean> = _isProjectLoading
 
     private var lastProject: DocumentSnapshot? = null
-    private var lastFetchedUserPhoneNumber: String? = null
+    private var lastFetchedUserId: String? = null
     private var lastVisibleVacancy: DocumentSnapshot? = null
     private var lastVacancyPostedOn: String = ""
 
@@ -107,12 +112,18 @@ class HomeScreenViewModel @Inject constructor(
 
     fun startOperation(block : suspend () -> Unit  ){
         viewModelScope.launch {
-            try{
-                block()
+
+            if (!networkMonitor.isConnectedNow()) {
+                _errorMessage.value = "No internet connection. Please retry later."
+                return@launch
             }
-            catch (e : Exception){
-                Log.d("ErrorDetected","Error detected ${e.message}")
-                _errorMessage.value = "An unexpected error occurred"
+            try {
+                block()
+            } catch (toe: TimeoutCancellationException) {
+                _errorMessage.value = "Request timed out. Check your connection."
+            } catch (e: Exception) {
+                Log.e("HomeScreenVM", "Unexpected error", e)
+                _errorMessage.value = "Something went wrong. Please try again."
             }
         }
     }
@@ -123,21 +134,21 @@ class HomeScreenViewModel @Inject constructor(
 
     private fun observeUserData(){
         startOperation{
-            userData.collectLatest { data ->
-                val phone = data?.phoneNumber
-                if (phone != null && phone != lastFetchedUserPhoneNumber) {
-                    lastFetchedUserPhoneNumber = phone
+            userData.filterNotNull().collectLatest { data ->
+                val userId  = data.userId
+                if (userId != lastFetchedUserId) {
+                    lastFetchedUserId = userId
                     Log.d("HomeScreenVM", "User: ${data.userId} (${data.phoneNumber}) ${data.userName}")
-                    fetchSavedData(phone)
+                    fetchSavedData(userId)
                 }
             }
         }
     }
 
-    private fun fetchSavedData(phoneNumber: String) {
+    private fun fetchSavedData(userId: String) {
         viewModelScope.launch {
             launch {
-                homeScreenRepository.fetchCurrentUserSavedPost(phoneNumber).catch {
+                homeScreenRepository.fetchCurrentUserSavedPost(userId).catch {
                     Log.d("SavedList", "Error fetching saved list ${it}")
                 }.collect {
                     _listOfSavedPost.value = it
@@ -146,7 +157,7 @@ class HomeScreenViewModel @Inject constructor(
             }
 
             launch {
-                homeScreenRepository.fetchCurrentUserSavedRole(phoneNumber).catch {
+                homeScreenRepository.fetchCurrentUserSavedRole(userId).catch {
                     Log.d("FetchedRole", "Error fetching saved list ${it}")
                 }.collect {
                     _listOfSavedRoles.value = it
@@ -155,7 +166,7 @@ class HomeScreenViewModel @Inject constructor(
                 }
             }
             launch {
-                homeScreenRepository.fetchCurrentUserSavedVacancy(phoneNumber).catch {
+                homeScreenRepository.fetchCurrentUserSavedVacancy(userId).catch {
                     Log.d("FetchedVacancy", "Error fetching saved list $it")
                 }.collect {
                     _listOfSavedVacancy.value = it
@@ -193,12 +204,9 @@ class HomeScreenViewModel @Inject constructor(
     ) {
 
         startOperation {
-            userData.collectLatest { data ->
-                val newPhoneNumber = data?.phoneNumber
-                Log.d("ProjectSaved", "ViewModel current user id is $newPhoneNumber <-")
-                if (newPhoneNumber != null) {
+            userData.filterNotNull().collectLatest { data ->
                     homeScreenRepository.saveProject(
-                        newPhoneNumber,
+                        data.userId,
                         projectDetails,
                         onProjectSaved = {
                             Log.d("ProjectSaved", "ViewModel Role saved ")
@@ -207,7 +215,6 @@ class HomeScreenViewModel @Inject constructor(
                         onError = {
                             onError(it)
                         })
-                }
             }
         }
     }
@@ -216,21 +223,16 @@ class HomeScreenViewModel @Inject constructor(
     fun saveRole(roleDetails: RoleDetails, onRoleSaved: () -> Unit, onError: (Exception) -> Unit) {
 
         startOperation{
-            userData.collectLatest { data ->
-                val newPhoneNumber = data?.phoneNumber
-                Log.d("SaveRole", "Viewmodle current user id is $newPhoneNumber <-")
-                if (newPhoneNumber != null) {
-                    homeScreenRepository.saveRole(newPhoneNumber, roleDetails, onRoleSaved = {
+            userData.filterNotNull().collectLatest { data ->
+
+                    homeScreenRepository.saveRole( data.userId , roleDetails, onRoleSaved = {
                         Log.d("SaveRole", "Viewmodel Role saved ")
                         onRoleSaved()
                     }, onError = {
                         Log.d("SaveRole","Error saving role")
                         onError(it)
                     })
-                }
-                else {
-                    Log.d("SaveRole","Something is wrong here")
-                }
+
             }
         }
     }
@@ -243,12 +245,10 @@ class HomeScreenViewModel @Inject constructor(
     ) {
 
         startOperation {
-            userData.collectLatest { data ->
-                val newPhoneNumber = data?.phoneNumber
-                Log.d("VacancySaved", "ViewModle current user id is $newPhoneNumber <-")
-                if (newPhoneNumber != null) {
+            userData.filterNotNull().collectLatest { data ->
+
                     homeScreenRepository.saveVacancy(
-                        newPhoneNumber,
+                        data.userId,
                         vacancyDetails,
                         onVacancySaved = {
                             Log.d("Vacancy", "ViewModel vacancy saved ")
@@ -257,10 +257,7 @@ class HomeScreenViewModel @Inject constructor(
                         onError = {
                             onError(it)
                         })
-                }
-                else {
-                    Log.d("Vacancy", "SOmething is wrong here")
-                }
+
             }
         }
     }

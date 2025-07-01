@@ -70,4 +70,7 @@
     <string name="user_profile">User Profile</string>
     <string name="github_url">Github Url</string>
     <string name="coding_profile_url">https://leetcode.com/your_name</string>
+    <string name="required">Required</string>
+    <string name="change_password">Change Password</string>
+    <string name="email_sent_message">Password reset email has been\nsent. Please check your email.</string>
 </resources>

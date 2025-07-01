@@ -103,7 +103,6 @@ fun MultipleFabButton(
                 MinFab(item = it,
                     onMinFabItemClick = {minFabItem ->
                         when(minFabItem.identifier){
-
                             Identifier.Role.name ->{
                                 val intent = Intent(context , CreatePost::class.java)
                                 intent.putExtra("status","Role")
@@ -123,8 +122,6 @@ fun MultipleFabButton(
                         }
                     },
                     alpha = alpha,
-                    textShadow = textShadow,
-                    fabScale = fabScale
                 )
                 Spacer(modifier = Modifier.size(10.dp))
             }
@@ -158,8 +155,6 @@ fun MultipleFabButton(
 fun MinFab(
     item: MinFabItem,
     alpha : Float,
-    textShadow: Dp,
-    fabScale : Float,
     shadowLabel : Boolean = true,
     onMinFabItemClick: (MinFabItem) -> Unit
 ) {
@@ -175,7 +170,9 @@ fun MinFab(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = White,
-                modifier = Modifier.
+                modifier = Modifier.clickable {
+                    onMinFabItemClick(item)
+                }.
                 clip(RoundedCornerShape(22.dp))
                     .alpha(
                         animateFloatAsState(

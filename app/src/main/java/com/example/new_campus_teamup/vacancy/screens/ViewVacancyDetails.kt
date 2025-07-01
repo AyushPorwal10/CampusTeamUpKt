@@ -36,7 +36,6 @@ import com.example.new_campus_teamup.helper.Dimensions
 import com.example.new_campus_teamup.helper.ShowRequestDialog
 import com.example.new_campus_teamup.helper.TimeAndDate
 import com.example.new_campus_teamup.helper.ToastHelper
-import com.example.new_campus_teamup.helper.rememberNetworkStatus
 import com.example.new_campus_teamup.myactivities.UserData
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
 import com.example.new_campus_teamup.ui.theme.BluePrimary
@@ -57,7 +56,7 @@ fun ViewVacancyDetails(
     val context = LocalContext.current
 
 
-    val isConnected = rememberNetworkStatus()
+
     val snackbarHostState = remember { SnackbarHostState() }
 
 
@@ -72,14 +71,7 @@ fun ViewVacancyDetails(
     val isRequestAlreadySent = viewVacancyViewModel.isRequestSent.collectAsState()
 
 
-    LaunchedEffect(isConnected) {
-        if (!isConnected) {
-            snackbarHostState.showSnackbar(
-                message = "No Internet Connection",
-                actionLabel = "OK"
-            )
-        }
-    }
+
 
     Box(
         modifier = modifier
@@ -187,7 +179,7 @@ fun ViewVacancyDetails(
 
 
 
-            if(isConnected){
+
                 if (currentUserData.value?.userId != vacancy.postedBy) {
                     OutlinedButton(onClick = {
                         showRequestDialog.value = true
@@ -225,16 +217,12 @@ fun ViewVacancyDetails(
                                         showRequestDialog.value = false
                                         ToastHelper.showToast(context, "Sorry Something went wrong !")
                                     }, vacancy.postedBy,
-                                    vacancy.phoneNumber
+                                    vacancy.postedBy
                                 )
                             }
                         }
                     }
                 }
-            }
-
-
-
         }
 
 

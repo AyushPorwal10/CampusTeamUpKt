@@ -21,6 +21,9 @@ import com.example.new_campus_teamup.viewmodels.SearchRoleVacancy
 import com.example.new_campus_teamup.viewmodels.UserDataSharedViewModel
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.google.firebase.FirebaseApp
+import com.google.firebase.appcheck.FirebaseAppCheck
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -34,24 +37,30 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
+
+
         checkGooglePlayServices()
         setupComposeContent()
     }
 
 
     private fun checkGooglePlayServices(): Boolean {
+        Log.e("GooglePlayServices", "Checking Google Play Services")
         val googleApiAvailability = GoogleApiAvailability.getInstance()
         val resultCode = googleApiAvailability.isGooglePlayServicesAvailable(this)
 
         return if (resultCode != ConnectionResult.SUCCESS) {
             if (googleApiAvailability.isUserResolvableError(resultCode)) {
+                Log.e("GooglePlayServices", "Google Play Services are available on this device.")
                 googleApiAvailability.getErrorDialog(this, resultCode, 2404)?.show()
             } else {
-                Log.e("FCM", "Google Play Services not available on this device.")
+                Log.e("GooglePlayServices", "Google Play Services not available on this device.")
                 finish()
             }
             false
         } else {
+            Log.e("GooglePlayServices", "Else part is executed")
             true
         }
     }

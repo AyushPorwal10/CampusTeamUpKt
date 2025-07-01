@@ -44,6 +44,7 @@ class DrawerItemActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
 
+
             val currentUserData = userDataSharedViewModel.userData.collectAsState()
 
             Log.d("UserData","In Drawer Activity UserId from datastore is ${currentUserData.value?.userId} ")
@@ -68,7 +69,7 @@ class DrawerItemActivity : ComponentActivity() {
 
             NavHost(navController, startDestination = startDestination) {
                 composable("notifications") {
-                    viewNotificationViewModel.fetchCombinedNotifications(currentUserData.value?.phoneNumber)
+                    viewNotificationViewModel.fetchCombinedNotifications(currentUserData.value?.userId)
                     NotificationsScreen(viewNotificationViewModel ,currentUserData.value)
                 }
                 composable("recentchats") {
@@ -94,9 +95,9 @@ class DrawerItemActivity : ComponentActivity() {
 
 
                 composable("savedItems"){
-                    savedItemsViewModel.fetchSavedProjects(currentUserData.value?.phoneNumber)
-                    savedItemsViewModel.fetchSavedRoles(currentUserData.value?.phoneNumber)
-                    savedItemsViewModel.fetchSavedVacancy(currentUserData.value?.phoneNumber)
+                    savedItemsViewModel.fetchSavedProjects(currentUserData.value?.userId)
+                    savedItemsViewModel.fetchSavedRoles(currentUserData.value?.userId)
+                    savedItemsViewModel.fetchSavedVacancy(currentUserData.value?.userId)
                     ShowSavedItems(currentUserData.value , savedItemsViewModel)
                 }
 

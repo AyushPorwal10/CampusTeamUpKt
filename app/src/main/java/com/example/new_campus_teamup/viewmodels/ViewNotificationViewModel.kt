@@ -6,19 +6,23 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.new_campus_teamup.helper.ChatRoomId
+import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
 import com.example.new_campus_teamup.myrepository.ViewNotificationRepository
 import com.example.new_campus_teamup.viewnotifications.NotificationItems
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
 
 @HiltViewModel
 class ViewNotificationViewModel @Inject constructor(
     private val viewNotificationRepository: ViewNotificationRepository,
+    private val networkMonitor: CheckNetworkConnectivity
 ) : ViewModel() {
 
 
@@ -48,11 +52,17 @@ class ViewNotificationViewModel @Inject constructor(
 
     private fun startOperation(block : suspend  () -> Unit){
         viewModelScope.launch {
-            try{
-                block()
+            if (!networkMonitor.isConnectedNow()) {
+                _errorMessage.value = "No internet connection. Please retry later."
+                return@launch
             }
-            catch (e : Exception){
-                _errorMessage.value = "An unexpected error occurred"
+            try {
+                 block()
+            } catch (toe: TimeoutCancellationException) {
+                _errorMessage.value = "Request timed out. Check your connection."
+            } catch (e: Exception) {
+                Log.e("HomeScreenVM", "Unexpected error", e)
+                _errorMessage.value = "Something went wrong. Please try again."
             }
         }
     }
@@ -222,13 +232,13 @@ class ViewNotificationViewModel @Inject constructor(
 
 
 
-    fun fetchCombinedNotifications(phoneNumber: String?) {
+    fun fetchCombinedNotifications(userId: String?) {
 
-        if (phoneNumber != null) {
+        if (userId != null) {
             Log.d("ShowNotification", "viewmodel current user id is NOT null")
 
             startOperation {
-                viewNotificationRepository.fetchCombinedNotifications(phoneNumber)
+                viewNotificationRepository.fetchCombinedNotifications(userId)
                     .collect { allNotification ->
                         Log.d(
                             "ShowNotification",

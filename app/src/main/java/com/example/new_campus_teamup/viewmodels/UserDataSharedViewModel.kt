@@ -21,36 +21,46 @@ import javax.inject.Inject
 class UserDataSharedViewModel @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
     private val userDataSharedRepository: UserDataSharedRepository
-) : ViewModel(){
+) : ViewModel() {
 
-    val userData : StateFlow<UserData?> = userDataSharedRepository.fetchUserDataFromDataStore()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000),null)
+    val userData: StateFlow<UserData?> = userDataSharedRepository.fetchUserDataFromDataStore()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    private val _isFeedbackSending  = MutableStateFlow<Boolean>(false)
-    val isFeedbackSending : StateFlow<Boolean> get() = _isFeedbackSending.asStateFlow()
+    private val _isFeedbackSending = MutableStateFlow<Boolean>(false)
+    val isFeedbackSending: StateFlow<Boolean> get() = _isFeedbackSending.asStateFlow()
 
     private val _isFeedbackSent = MutableStateFlow<Boolean>(false)
-    val isFeedbackSent : StateFlow<Boolean>get() = _isFeedbackSent.asStateFlow()
+    val isFeedbackSent: StateFlow<Boolean> get() = _isFeedbackSent.asStateFlow()
 
 
-    fun sendFeedback(feedbackData: FeedbackData , onError : () -> Unit){
+    fun sendFeedback(feedbackData: FeedbackData, onError: () -> Unit) {
         viewModelScope.launch {
-            _isFeedbackSending.value  = true
-        userData.value?.userId?.let {
-            Log.d("Feedback","Going to send feedback for user id $it")
-            userDataSharedRepository.sendFeedback(firebaseFirestore , it ,feedbackData , onFeedbackSent = {
-                Log.d("Feedback","Feedback sent for user id $it")
-                _isFeedbackSending.value = false
-                _isFeedbackSent.value = true
-            }, onError = {
-                _isFeedbackSending.value = false
-                onError()
-            })
-        }
+            try {
+                _isFeedbackSending.value = true
+                userData.value?.userId?.let {
+                    Log.d("Feedback", "Going to send feedback for user id $it")
+                    userDataSharedRepository.sendFeedback(
+                        firebaseFirestore,
+                        it,
+                        feedbackData,
+                        onFeedbackSent = {
+                            Log.d("Feedback", "Feedback sent for user id $it")
+                            _isFeedbackSending.value = false
+                            _isFeedbackSent.value = true
+                        },
+                        onError = {
+                            _isFeedbackSending.value = false
+                            onError()
+                        })
+                }
+            } catch (e: Exception) {
+
+            }
+
         }
     }
 
-    fun updateFeedbackSentStatus(){
+    fun updateFeedbackSentStatus() {
         _isFeedbackSent.value = false
     }
 }

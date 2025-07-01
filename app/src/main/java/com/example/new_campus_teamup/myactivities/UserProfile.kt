@@ -8,7 +8,6 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import com.example.new_campus_teamup.helper.ToastHelper
-import com.example.new_campus_teamup.helper.rememberNetworkStatus
 import com.example.new_campus_teamup.mydataclass.CollegeDetails
 import com.example.new_campus_teamup.userprofile.screens.UserProfiles
 import com.example.new_campus_teamup.viewmodels.UserProfileViewModel
@@ -25,18 +24,15 @@ class UserProfile : ComponentActivity() {
         setContent{
             val context = LocalContext.current
 
-            val isConnected = rememberNetworkStatus()
 
-            if(isConnected){
-                LaunchedEffect(Unit){
-                    Log.d("UserProfile","Going to fetch user data from datastore")
+
+                LaunchedEffect(Unit) {
+                    Log.d("UserProfile", "Going to fetch user data from datastore")
                     userProfileViewModel.fetchDataFromDataStore()
 
                     userProfileViewModel.fetchCollegeDetails()
-                    Log.d("CollegeDetails","Fetched for first time")
-
+                    Log.d("CollegeDetails", "Fetched for first time")
                 }
-            }
             UserProfiles(userProfileViewModel)
 
             LaunchedEffect(Unit){

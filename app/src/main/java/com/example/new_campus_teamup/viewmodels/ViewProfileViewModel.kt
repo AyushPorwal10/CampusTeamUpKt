@@ -3,18 +3,22 @@ package com.example.new_campus_teamup.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
 import com.example.new_campus_teamup.mydataclass.CollegeDetails
 import com.example.new_campus_teamup.myrepository.ViewProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
 @HiltViewModel
 class ViewProfileViewModel @Inject constructor(
-private val viewProfileRepository: ViewProfileRepository
+private val viewProfileRepository: ViewProfileRepository,
+private val networkMonitor: CheckNetworkConnectivity
 ) : ViewModel(){
 
 
@@ -32,11 +36,17 @@ private val viewProfileRepository: ViewProfileRepository
 
     private fun startOperation(block : suspend  () -> Unit){
         viewModelScope.launch {
-            try{
-                block()
+            if (!networkMonitor.isConnectedNow()) {
+                _errorMessage.value = "No internet connection. Please retry later."
+                return@launch
             }
-            catch (e : Exception){
-                _errorMessage.value = "An unexpected error occurred"
+            try {
+                block()
+            } catch (toe: TimeoutCancellationException) {
+                _errorMessage.value = "Request timed out. Check your connection."
+            } catch (e: Exception) {
+                Log.e("HomeScreenVM", "Unexpected error", e)
+                _errorMessage.value = "Something went wrong. Please try again."
             }
         }
     }
@@ -45,35 +55,29 @@ private val viewProfileRepository: ViewProfileRepository
         _errorMessage.value = null
     }
 
-    fun fetchCollegeDetails(userId: String, receiverPhoneNumber: String?){
+    fun fetchCollegeDetails(userId: String){
         startOperation{
-            if (receiverPhoneNumber != null) {
-                viewProfileRepository.fetchCollegeDetails(userId, receiverPhoneNumber).collect{details->
+                viewProfileRepository.fetchCollegeDetails(userId).collect{details->
                     _collegeDetails.value = details
-                }
             }
         }
     }
 
-    fun fetchCodingProfileDetails(userId: String, receiverPhoneNumber: String?){
+    fun fetchCodingProfileDetails(userId: String){
         startOperation {
             Log.d("Coding","User id is $userId")
             Log.d("Coding","Going to fetch coding profiles viewmodel")
-            if (receiverPhoneNumber != null) {
-                viewProfileRepository.fetchCodingProfilesDetails(userId, receiverPhoneNumber).collect{details->
+                viewProfileRepository.fetchCodingProfilesDetails(userId).collect{details->
                     Log.d("Coding","${details.size} updating stateflow")
                     _codingProfilesDetails.value = details
-                }
             }
         }
     }
 
-    fun fetchSkills(userId: String, receiverPhoneNumber: String?){
+    fun fetchSkills(userId: String){
         startOperation {
-            if (receiverPhoneNumber != null) {
-                viewProfileRepository.fetchSkills(userId, receiverPhoneNumber).collect{listOfSkills->
+                viewProfileRepository.fetchSkills(userId).collect{listOfSkills->
                     _skills.value = listOfSkills
-                }
             }
         }
     }

@@ -41,7 +41,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.LoadAnimation
 import com.example.new_campus_teamup.helper.ToastHelper
-import com.example.new_campus_teamup.helper.rememberNetworkStatus
 import com.example.new_campus_teamup.myactivities.UserData
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
 import com.example.new_campus_teamup.ui.theme.Black
@@ -61,7 +60,7 @@ fun ShowSavedItems(
     val bgColor = BackGroundColor
     val textColor = White
     val activity = LocalContext.current as? Activity
-    val isConnected = rememberNetworkStatus()
+
     val snackbarHostState = remember { SnackbarHostState() }
 
     val savedProjectList = savedItemsViewModel.showProjectList.collectAsState()
@@ -71,14 +70,7 @@ fun ShowSavedItems(
     val navController = rememberNavController()
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
-    LaunchedEffect(isConnected) {
-        if (!isConnected) {
-            snackbarHostState.showSnackbar(
-                message = "No Internet Connection",
-                actionLabel = "OK"
-            )
-        }
-    }
+
 
     LaunchedEffect(Unit){
         savedItemsViewModel.errorMessage.collect{error->
@@ -110,22 +102,10 @@ fun ShowSavedItems(
             )
         },
         content = { paddingValues ->
-            if (!isConnected) {
-                Box(
-                    modifier = Modifier
-                        .padding(paddingValues)
-                        .fillMaxSize()
-                        .background(BackGroundColor),
-                    contentAlignment = Alignment.Center
-                ) {
-                    LoadAnimation(
-                        modifier = Modifier.size(200.dp),
-                        animation = R.raw.nonetwork,
-                        playAnimation = true
-                    )
-                }
-                return@Scaffold
-            }
+
+
+
+
 
             Column(
                 modifier = Modifier
@@ -209,7 +189,7 @@ fun ShowSavedItems(
                                 onRoleUnsave = { roleId ->
                                     savedItemsViewModel.unSaveRole(
                                         roleId,
-                                        currentUserData?.phoneNumber
+                                        currentUserData?.userId
                                     )
                                 }
                             )
@@ -220,7 +200,7 @@ fun ShowSavedItems(
                                 onVacancyUnsave = { vacancyId ->
                                     savedItemsViewModel.unSaveVacancy(
                                         vacancyId,
-                                        currentUserData?.phoneNumber
+                                        currentUserData?.userId
                                     )
                                 }
                             )
@@ -231,7 +211,7 @@ fun ShowSavedItems(
                                 onProjectUnsave = {
                                     savedItemsViewModel.unSaveProject(
                                         it,
-                                        currentUserData?.phoneNumber
+                                        currentUserData?.userId
                                     )
                                 }
                             )

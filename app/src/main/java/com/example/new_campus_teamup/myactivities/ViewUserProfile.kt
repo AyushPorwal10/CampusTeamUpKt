@@ -62,8 +62,8 @@ class ViewUserProfile : ComponentActivity() {
         notificationViewModel.fetchSenderId()
 
         notificationViewModel.checkIfAlreadyRequestSent(userId!!)
-        viewProfileViewModel.fetchCollegeDetails(userId , receiverPhoneNumber)
-        viewProfileViewModel.fetchCodingProfileDetails(userId , receiverPhoneNumber )
-        viewProfileViewModel.fetchSkills(userId, receiverPhoneNumber)
+        viewProfileViewModel.fetchCollegeDetails(userId )
+        viewProfileViewModel.fetchCodingProfileDetails(userId  )
+        viewProfileViewModel.fetchSkills(userId)
     }
 }

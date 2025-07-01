@@ -36,7 +36,6 @@ import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.LoadAnimation
-import com.example.new_campus_teamup.helper.rememberNetworkStatus
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
 import com.example.new_campus_teamup.ui.theme.Black
 import com.example.new_campus_teamup.ui.theme.BorderColor
@@ -56,7 +55,7 @@ fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
         mutableStateOf("collegeDetails")
     }
 
-    val isConnected = rememberNetworkStatus()
+
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(topBar = {
@@ -85,15 +84,6 @@ fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
         )
     }) { paddingValues ->
 
-
-        LaunchedEffect(isConnected) {
-            if (!isConnected) {
-                snackbarHostState.showSnackbar(
-                    message = "No Internet Connection",
-                    actionLabel = "OK"
-                )
-            }
-        }
 
         ConstraintLayout(
             modifier = Modifier
@@ -161,7 +151,7 @@ fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
 
 
 
-            if(isConnected){
+
                 when (selectedLayout) {
                     "collegeDetails" -> CollegeDetails(
                         userProfileViewModel,
@@ -200,14 +190,6 @@ fun UserProfiles(userProfileViewModel: UserProfileViewModel) {
                                 }
                         )
                 }
-            }
-            else {
-                Box(modifier = Modifier.padding(paddingValues).fillMaxSize().background(BackGroundColor) , contentAlignment = Alignment.Center){
-                    LoadAnimation(modifier = Modifier.size(200.dp) , animation = R.raw.nonetwork, playAnimation = true)
-                }
-            }
-
-
 
 
         }

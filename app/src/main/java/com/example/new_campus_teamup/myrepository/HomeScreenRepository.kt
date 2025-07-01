@@ -21,7 +21,7 @@ class HomeScreenRepository @Inject constructor(
     private val userManager: UserManager
 ) {
 
-    suspend fun getUserImageUrl(currentUserId: String) : Flow<String> = callbackFlow {
+     fun getUserImageUrl(currentUserId: String) : Flow<String> = callbackFlow {
 
         val documentReference = firebaseFirestore.collection("user_images").document(currentUserId)
 
@@ -171,13 +171,13 @@ class HomeScreenRepository @Inject constructor(
     }
 
     suspend fun saveProject(
-        phoneNumber: String,
+        currentUserId : String ,
         projectDetails: ProjectDetails,
         onProjectSaved: () -> Unit,
         onError: (Exception) -> Unit
     ) {
         savedItem(
-            phoneNumber,
+            currentUserId,
             "project_saved",
             projectDetails.projectId,
             projectDetails,
@@ -191,24 +191,24 @@ class HomeScreenRepository @Inject constructor(
     }
 
     suspend fun saveRole(
-        phoneNumber: String,
+        currentUserId: String,
         roleDetails: RoleDetails,
         onRoleSaved: () -> Unit,
         onError: (Exception) -> Unit
     ) {
-        savedItem(phoneNumber, "saved_roles", roleDetails.roleId, roleDetails, "SaveRole", {
+        savedItem(currentUserId, "saved_roles", roleDetails.roleId, roleDetails, "SaveRole", {
             onRoleSaved()
         }, {
             onError(it)
         })
     }
     suspend fun saveVacancy(
-        phoneNumber: String,
+        currentUserId: String,
         vacancyDetails: VacancyDetails,
         onVacancySaved: () -> Unit,
         onError: (Exception) -> Unit
     ) {
-        savedItem(phoneNumber, "saved_vacancy", vacancyDetails.vacancyId, vacancyDetails, "SavingVacancies", {
+        savedItem(currentUserId, "saved_vacancy", vacancyDetails.vacancyId, vacancyDetails, "SavingVacancies", {
             onVacancySaved()
         }, {
             onError(it)
@@ -217,7 +217,7 @@ class HomeScreenRepository @Inject constructor(
 
 
     private suspend inline fun <T : Any> savedItem(
-        phoneNumber: String,
+        userId: String,
         collection: String,
         itemId: String,
         item: T,
@@ -227,7 +227,7 @@ class HomeScreenRepository @Inject constructor(
     ) {
 
         try {
-            firebaseFirestore.collection("all_user_id").document(phoneNumber)
+            firebaseFirestore.collection("all_user_id").document(userId)
                 .collection(collection).document(itemId)
                 .set(item).await()
             Log.d(logTag, "Items saved success")
@@ -239,25 +239,25 @@ class HomeScreenRepository @Inject constructor(
     }
 
 
-    fun fetchCurrentUserSavedPost(phoneNumber: String): Flow<List<String>> =
-        fetchSavedItems(phoneNumber, "project_saved", "Saving")
+    fun fetchCurrentUserSavedPost(userId: String): Flow<List<String>> =
+        fetchSavedItems(userId, "project_saved", "Saving")
 
-    fun fetchCurrentUserSavedRole(phoneNumber: String): Flow<List<String>> =
-        fetchSavedItems(phoneNumber, "saved_roles", "FetchedRole")
+    fun fetchCurrentUserSavedRole(userId: String): Flow<List<String>> =
+        fetchSavedItems(userId, "saved_roles", "FetchedRole")
 
-    fun fetchCurrentUserSavedVacancy(phoneNumber: String): Flow<List<String>> =
-        fetchSavedItems(phoneNumber, "saved_vacancy", "FetchedVacancy")
+    fun fetchCurrentUserSavedVacancy(userId: String): Flow<List<String>> =
+        fetchSavedItems(userId, "saved_vacancy", "FetchedVacancy")
 
 
     // this can be projects , roles , vacancies
     private fun fetchSavedItems(
-        phoneNumber: String,
+        userId: String,
         subCollection: String,
         logTag: String
     ): Flow<List<String>> = callbackFlow {
 
         val collectionReference =
-            firebaseFirestore.collection("all_user_id").document(phoneNumber)
+            firebaseFirestore.collection("all_user_id").document(userId)
                 .collection(subCollection)
         val listener = collectionReference.addSnapshotListener { snapshot, error ->
             if (error != null) {

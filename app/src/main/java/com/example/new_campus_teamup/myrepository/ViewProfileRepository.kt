@@ -11,10 +11,10 @@ import javax.inject.Inject
 class ViewProfileRepository @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore
 ) {
-    fun fetchCollegeDetails(userId: String, receiverPhoneNumber: String): Flow<CollegeDetails> = callbackFlow {
+    fun fetchCollegeDetails(userId: String): Flow<CollegeDetails> = callbackFlow {
 
         val documentReference = firebaseFirestore.collection("all_user_id")
-            .document(receiverPhoneNumber).collection("all_user_details").document("college_details")
+            .document(userId).collection("all_user_details").document("college_details")
 
         val realTimeListener = documentReference.addSnapshotListener { snapshot, error ->
             if (error != null) {
@@ -28,10 +28,10 @@ class ViewProfileRepository @Inject constructor(
         awaitClose { realTimeListener.remove() }
     }
 
-    fun fetchCodingProfilesDetails(userId: String, receiverPhoneNumber: String): Flow<List<String>> = callbackFlow {
+    fun fetchCodingProfilesDetails(userId: String): Flow<List<String>> = callbackFlow {
 
         val documentReference = firebaseFirestore.collection("all_user_id")
-            .document(receiverPhoneNumber).collection("all_user_details").document("coding_profiles")
+            .document(userId).collection("all_user_details").document("coding_profiles")
 
         val realTimeListener = documentReference.addSnapshotListener { snapshot, error ->
             if (error != null) {
@@ -46,9 +46,9 @@ class ViewProfileRepository @Inject constructor(
         awaitClose { realTimeListener.remove() }
     }
 
-    fun fetchSkills(userId: String, receiverPhoneNumber: String) : Flow<List<String>> = callbackFlow{
+    fun fetchSkills(userId: String) : Flow<List<String>> = callbackFlow{
         val documentReference  = firebaseFirestore.collection("all_user_id")
-            .document(receiverPhoneNumber).collection("all_user_details").document("user_skills")
+            .document(userId).collection("all_user_details").document("user_skills")
 
         val realTimeListener = documentReference.addSnapshotListener{snapshot , error->
             if(error != null){

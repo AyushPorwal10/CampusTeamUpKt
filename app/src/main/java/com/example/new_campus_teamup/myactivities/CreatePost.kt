@@ -22,9 +22,6 @@ class CreatePost : ComponentActivity() {
         setContent {
             val screenToOpen = intent.getStringExtra("status")
 
-            LaunchedEffect(Unit){
-                createPostViewModel.fetchDataFromDataStore()
-            }
             CreatePostScreen(screenToOpen!! , createPostViewModel)
         }
     }

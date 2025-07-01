@@ -13,6 +13,7 @@ dependencyResolutionManagement {
     }
 }
 
+
 rootProject.name = "CAMPUS_TEAMUP"
 include(":app")
  

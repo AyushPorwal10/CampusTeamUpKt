@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
 import com.example.new_campus_teamup.helper.TimeAndDate
 import com.example.new_campus_teamup.myactivities.UserManager
 import com.example.new_campus_teamup.myinterface.RequestSendingState
@@ -13,6 +14,7 @@ import com.example.new_campus_teamup.notification.FcmMessage
 import com.example.new_campus_teamup.notification.Message
 import com.example.new_campus_teamup.notification.Notification
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,13 +22,15 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import retrofit2.HttpException
 import javax.inject.Inject
 
 @HiltViewModel
 class NotificationViewModel @Inject constructor(
     private val notificationRepository: NotificationRepository,
-    private val userManager: UserManager
+    private val userManager: UserManager,
+    private val networkMonitor: CheckNetworkConnectivity
 ) : ViewModel() , RequestSendingState{
 
 
@@ -65,11 +69,17 @@ class NotificationViewModel @Inject constructor(
 
     private fun startOperation(block : suspend  () -> Unit){
         viewModelScope.launch {
-            try{
-                block()
+            if (!networkMonitor.isConnectedNow()) {
+                _errorMessage.value = "No internet connection. Please retry later."
+                return@launch
             }
-            catch (e : Exception){
-                _errorMessage.value = "An unexpected error occurred"
+            try {
+               block()
+            } catch (toe: TimeoutCancellationException) {
+                _errorMessage.value = "Request timed out. Check your connection."
+            } catch (e: Exception) {
+                Log.e("HomeScreenVM", "Unexpected error", e)
+                _errorMessage.value = "Something went wrong. Please try again."
             }
         }
     }
@@ -104,7 +114,7 @@ class NotificationViewModel @Inject constructor(
         }
     }
 @RequiresApi(Build.VERSION_CODES.O)
-fun sendNotification(title: String, body: String, receiverId: String, phoneNumber: String) {
+fun sendNotification(title: String, body: String, receiverId: String) {
     startOperation {
         try {
             Log.d("NotificationViewModelRequest","${_isRequestSending.value}")
@@ -127,13 +137,13 @@ fun sendNotification(title: String, body: String, receiverId: String, phoneNumbe
                     "senderId" to senderId.value,
                     "senderName" to senderName.value,
                     "time" to TimeAndDate.getCurrentTime(),
-                    "phoneNumber" to senderPhoneNumber.value
+                    "phoneNumber" to "123456"
                 )
             )
             val fcmMessage = FcmMessage(message)
 
             Log.d("FCM", "Sending notification")
-            notificationRepository.sendNotification(fcmMessage, _listOfUserId.value, receiverId, phoneNumber)
+            notificationRepository.sendNotification(fcmMessage, _listOfUserId.value, receiverId)
             _isRequestSending.value = false
             Log.d("NotificationViewModelRequest"," Just after function ${_isRequestSending.value}")
         }

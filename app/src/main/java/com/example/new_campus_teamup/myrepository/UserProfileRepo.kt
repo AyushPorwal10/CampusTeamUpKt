@@ -20,13 +20,12 @@ class UserProfileRepo @Inject constructor(
 ) {
     // college Details
 
-    suspend fun saveCollegeDetails(userId: String,phoneNumber : String ,  collegeDetails: CollegeDetails) {
+    suspend fun saveCollegeDetails(userId: String,  collegeDetails: CollegeDetails) {
         Log.d("CollegeDetails", "Saving CollegeDetails data")
         Log.d("Parallel","Going to start D1")
-         val deferred1 = firebaseFirestore.collection("all_user_id").document(phoneNumber).collection("all_user_details")
+         val deferred1 = firebaseFirestore.collection("all_user_id").document(userId).collection("all_user_details")
             .document("college_details").set(collegeDetails)
         Log.d("Parallel","Going to start D2")
-        // saving image at another place also to fetch easily in other section
 
         val deferred2 = firebaseFirestore.collection("user_images").document(userId)
             .set(mapOf("user_image" to collegeDetails.userImageUrl))
@@ -57,8 +56,8 @@ class UserProfileRepo @Inject constructor(
         awaitClose{realTimeImageFetching.remove()}
     }
 
-    suspend fun fetchCollegeDetails(userId: String , phoneNumber: String ): DocumentSnapshot {
-        return firebaseFirestore.collection("all_user_id").document(phoneNumber)
+    suspend fun fetchCollegeDetails(userId: String): DocumentSnapshot {
+        return firebaseFirestore.collection("all_user_id").document(userId)
             .collection("all_user_details").document("college_details").get().await()
 
 
@@ -66,8 +65,8 @@ class UserProfileRepo @Inject constructor(
 
     // coding profiles
 
-    suspend fun saveCodingProfiles(phoneNumber: String, listOfCodingProfiles: List<String>) {
-        firebaseFirestore.collection("all_user_id").document(phoneNumber)
+    suspend fun saveCodingProfiles(userId: String, listOfCodingProfiles: List<String>) {
+        firebaseFirestore.collection("all_user_id").document(userId)
             .collection("all_user_details").document("coding_profiles")
             .set(mapOf("profilelist" to listOfCodingProfiles)).await()
     }
@@ -89,9 +88,9 @@ class UserProfileRepo @Inject constructor(
 
     }
 
-    suspend fun fetchCodingProfiles(phoneNumber : String) : Flow<List<String>> = callbackFlow {
+     fun fetchCodingProfiles(userId : String) : Flow<List<String>> = callbackFlow {
 
-        val documentRef =  firebaseFirestore.collection("all_user_id").document(phoneNumber)
+        val documentRef =  firebaseFirestore.collection("all_user_id").document(userId)
             .collection("all_user_details").document("coding_profiles")
 
 
@@ -111,14 +110,14 @@ class UserProfileRepo @Inject constructor(
         awaitClose{codingProfilesListener.remove()}
     }
 
-    suspend fun saveSkills(phoneNumber: String, listOfSkills: List<String>) {
-        firebaseFirestore.collection("all_user_id").document(phoneNumber)
+    suspend fun saveSkills(userId: String, listOfSkills: List<String>) {
+        firebaseFirestore.collection("all_user_id").document(userId)
             .collection("all_user_details").document("user_skills")
             .set(mapOf("skillList" to listOfSkills)).await()
     }
 
-    suspend fun fetchSkills(phoneNumber: String): DocumentSnapshot {
-        return firebaseFirestore.collection("all_user_id").document(phoneNumber)
+    suspend fun fetchSkills(userId: String): DocumentSnapshot {
+        return firebaseFirestore.collection("all_user_id").document(userId)
             .collection("all_user_details").document("user_skills").get().await()
     }
 }

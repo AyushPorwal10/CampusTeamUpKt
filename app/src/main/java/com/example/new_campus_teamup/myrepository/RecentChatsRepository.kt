@@ -13,10 +13,10 @@ class RecentChatsRepository @Inject constructor(
 ) {
 
 
-    suspend fun fetchRecentChats(phoneNumber: String): Flow<List<RecentChats>> = callbackFlow {
+     fun fetchRecentChats(currentUserId: String): Flow<List<RecentChats>> = callbackFlow {
 
         val chatCollectionReference =
-            firebaseFirestore.collection("all_user_id").document(phoneNumber).collection("chats")
+            firebaseFirestore.collection("all_user_id").document(currentUserId).collection("chats")
 
        val query =  chatCollectionReference.orderBy("lastMessageSentAt",Query.Direction.DESCENDING)
 

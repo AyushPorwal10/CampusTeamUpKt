@@ -23,6 +23,7 @@ import com.example.new_campus_teamup.ui.theme.BackGroundColor
 @Composable
 fun ShowPostedProjects(yourPostViewModel: YourPostViewModel ) {
 
+
     val vacancyList = yourPostViewModel.postedProjects.collectAsState()
     val context = LocalContext.current
     LazyColumn(

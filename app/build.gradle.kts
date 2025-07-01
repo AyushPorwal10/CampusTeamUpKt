@@ -18,8 +18,8 @@ android {
         applicationId = "com.example.new_campus_teamup"
         minSdk = 24
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.4"
+        versionCode = 9
+        versionName = "1.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -38,11 +38,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_18
-        targetCompatibility = JavaVersion.VERSION_18
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "18"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -74,10 +74,17 @@ dependencies {
     implementation("com.google.firebase:firebase-storage:21.0.1")
     implementation("com.google.firebase:firebase-messaging:24.1.0")
     implementation("com.google.firebase:firebase-crashlytics:19.4.3")
+    implementation("androidx.activity:activity:1.10.1")
     testImplementation("junit:junit:4.13.2")
 
 
     debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.14")
+
+
+
+    // play integrity
+        implementation("com.google.android.play:integrity:1.4.0")
+
 
     // splash screen
     implementation("androidx.core:core-splashscreen:1.0.1")
@@ -127,6 +134,8 @@ dependencies {
     implementation ("com.google.code.gson:gson:2.10.1")
 
 
+
+    implementation ("com.google.firebase:firebase-appcheck-debug:18.0.0") // For development purpose only
 
     // lottie animation
     implementation("com.airbnb.android:lottie-compose:4.0.0")

@@ -1,6 +1,7 @@
 package com.example.new_campus_teamup
 
 import android.app.Application
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import coil.ImageLoader
 import coil.ImageLoaderFactory
@@ -10,6 +11,10 @@ import coil.imageLoader
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import coil.util.DebugLogger
+import com.google.firebase.BuildConfig
+import com.google.firebase.FirebaseApp
+import com.google.firebase.appcheck.FirebaseAppCheck
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
@@ -17,6 +22,20 @@ class MyApplication : Application() ,ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
+
+        Log.d("AppCheck","Application Class onCreate")
+
+
+        FirebaseApp.initializeApp(this)
+
+        // 👇 Debug-only App Check
+        FirebaseAppCheck.getInstance().installAppCheckProviderFactory(
+            DebugAppCheckProviderFactory.getInstance()
+        )
+
+        if (BuildConfig.DEBUG) {
+            Log.d("AppCheck", "Debug build detected. App Check using Debug provider.")
+        }
 
         // only night mode
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)

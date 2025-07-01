@@ -3,6 +3,7 @@ package com.example.new_campus_teamup.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
 import com.example.new_campus_teamup.mydataclass.RoleDetails
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
 import com.example.new_campus_teamup.myrepository.SearchRoleVacancyRepository
@@ -17,7 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchRoleVacancy @Inject constructor(
-    private val searchRoleVacancyRepository: SearchRoleVacancyRepository
+    private val searchRoleVacancyRepository: SearchRoleVacancyRepository,
+    private val networkMonitor: CheckNetworkConnectivity
 ) : ViewModel() {
 
     private val _searchRoleText = MutableStateFlow("")
@@ -42,6 +44,7 @@ class SearchRoleVacancy @Inject constructor(
         observeRoleSearchQuery()
         observeVacancySearchQuery()
     }
+
 
     private fun observeRoleSearchQuery() {
         viewModelScope.launch {

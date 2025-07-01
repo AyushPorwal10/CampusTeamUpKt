@@ -32,7 +32,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.LoadAnimation
-import com.example.new_campus_teamup.helper.rememberNetworkStatus
 import com.example.new_campus_teamup.myactivities.UserData
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
 import com.example.new_campus_teamup.ui.theme.White
@@ -46,7 +45,6 @@ fun NotificationsScreen(viewNotificationViewModel: ViewNotificationViewModel, cu
     val textColor = White
 
     val activity = LocalContext.current as? Activity
-    val isConnected = rememberNetworkStatus()
     val snackbarHostState = remember { SnackbarHostState() }
 
     Log.d("UserData","Notification Screen UserId from datastore is ${currentUserData?.userId} ")
@@ -74,14 +72,7 @@ fun NotificationsScreen(viewNotificationViewModel: ViewNotificationViewModel, cu
         }
      , content= {paddingValues ->
 
-            LaunchedEffect(isConnected) {
-                if (!isConnected) {
-                    snackbarHostState.showSnackbar(
-                        message = "No Internet Connection",
-                        actionLabel = "OK"
-                    )
-                }
-            }
+
 
 
             Box(
@@ -101,7 +92,7 @@ fun NotificationsScreen(viewNotificationViewModel: ViewNotificationViewModel, cu
                             playAnimation = true
                         )
                     }
-                } else if (isConnected) {
+                } else  {
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -120,18 +111,6 @@ fun NotificationsScreen(viewNotificationViewModel: ViewNotificationViewModel, cu
                                 }
                             }
                         }
-                    }
-                }
-                else {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        LoadAnimation(
-                            modifier = Modifier.size(200.dp),
-                            animation = R.raw.nonetwork,
-                            playAnimation = true
-                        )
                     }
                 }
             }

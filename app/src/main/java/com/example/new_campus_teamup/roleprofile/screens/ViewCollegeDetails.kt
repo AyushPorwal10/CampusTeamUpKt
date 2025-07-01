@@ -34,7 +34,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.AsyncImage
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.ShowRequestDialog
-import com.example.new_campus_teamup.helper.rememberNetworkStatus
 import com.example.new_campus_teamup.myThemes.TextFieldStyle
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
 import com.example.new_campus_teamup.viewmodels.ViewProfileViewModel
@@ -53,7 +52,6 @@ fun ViewCollegeDetails(
 
 
 
-    val isConnected = rememberNetworkStatus()
     val snackbarHostState = remember { SnackbarHostState() }
 
 
@@ -76,21 +74,14 @@ fun ViewCollegeDetails(
             onConfirm = {
                 notificationViewModel.fetchReceiverFCMToken(receiverId!! , onFcmFetched = { // first fetch fcm
 
-                    notificationViewModel.sendNotification("New Request","Team is interested in your profile", receiverId ,receiverPhoneNumber!!)  // send notification
+                    notificationViewModel.sendNotification("New Request","Team is interested in your profile", receiverId)  // send notification
                         showRequestDialog = false
                 })
             },
         )
     }
 
-    LaunchedEffect(isConnected) {
-        if (!isConnected) {
-            snackbarHostState.showSnackbar(
-                message = "No Internet Connection",
-                actionLabel = "OK"
-            )
-        }
-    }
+
     ConstraintLayout(modifier = modifier.fillMaxSize()) {
 
         val (userImage, courseBranchYear) = createRefs()
@@ -139,7 +130,7 @@ fun ViewCollegeDetails(
             // ON click of this notification will be sent to user who posted role
 
 
-            if(isConnected){
+
                 if(senderId.value == receiverId)
                     Text(text = "" , color = White , style = MaterialTheme.typography.titleMedium)
                 else if(isRequestAlreadySent || isChatRoomAlreadyCreated.value){
@@ -153,7 +144,7 @@ fun ViewCollegeDetails(
                         Text(text = "Send Request")
                     }
                 }
-            }
+
 
 
         }

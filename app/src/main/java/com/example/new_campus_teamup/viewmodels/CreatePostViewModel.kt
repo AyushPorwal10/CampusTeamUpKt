@@ -3,21 +3,25 @@ package com.example.new_campus_teamup.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
 import com.example.new_campus_teamup.myactivities.UserManager
 import com.example.new_campus_teamup.mydataclass.CollegeDetails
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
 import com.example.new_campus_teamup.myrepository.CreatePostRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
 @HiltViewModel
 class CreatePostViewModel @Inject constructor(
     private val userManager: UserManager,
-    private val createPostRepository: CreatePostRepository
+    private val createPostRepository: CreatePostRepository,
+    private val networkMonitor: CheckNetworkConnectivity
 ) : ViewModel() {
 
 
@@ -35,25 +39,33 @@ class CreatePostViewModel @Inject constructor(
 
     private fun launchWithLoading(block : suspend  () -> Unit){
         viewModelScope.launch {
-            _isLoading.value = true;
-            try{
+            _isLoading.value = true
+            if (!networkMonitor.isConnectedNow()) {
+                _errorMessage.value = "No internet connection. Please retry later."
+                return@launch
+            }
+            try {
                 block()
-            }
-            catch (e : Exception){
-                Log.e("CreatePostViewModel", "Error: ${e.message}", e)
-                _errorMessage.value = "An unexpected error occurred"
-            }
-            finally {
+            } catch (toe: TimeoutCancellationException) {
+                _errorMessage.value = "Request timed out. Check your connection."
+            } catch (e: Exception) {
+                Log.e("HomeScreenVM", "Unexpected error", e)
+                _errorMessage.value = "Something went wrong. Please try again."
+            } finally {
                 _isLoading.value = false
             }
         }
     }
-
+    init {
+        launchWithLoading {
+            fetchDataFromDataStore()
+        }
+    }
     fun clearError() {
         _errorMessage.value = null
     }
 
-    suspend fun fetchDataFromDataStore() {
+    private suspend fun fetchDataFromDataStore() {
 
         Log.d("PostRole", "Fetching of data from datastore started")
         val userData = userManager.userData.first()
@@ -68,11 +80,10 @@ class CreatePostViewModel @Inject constructor(
     fun postRole(role: String, datePosted: String, canPostRole: (Boolean) -> Unit) {
 
         launchWithLoading {
-            val snapshot = createPostRepository.fetchImageUrlFromUserDetails(phoneNumber)
+            val snapshot = createPostRepository.fetchImageUrlFromUserDetails(userId)
             var userImageUrl = snapshot.toObject(CollegeDetails::class.java)
             createPostRepository.postRole(
                 collegeName,
-                phoneNumber,
                 userId,
                 userName,
                 userImageUrl?.userImageUrl ?: "",
@@ -89,7 +100,7 @@ class CreatePostViewModel @Inject constructor(
     fun uploadTeamLogo(teamLogoUri: String, onResult: (Boolean, String?) -> Unit) {
         launchWithLoading{
             createPostRepository.uploadTeamLogo(
-                phoneNumber,
+                userId,
                 teamLogoUri,
                 canPostVacancy = { canPost, url ->
                     onResult(canPost, url)
@@ -115,7 +126,7 @@ class CreatePostViewModel @Inject constructor(
 
 
                 createPostRepository.postTeamVacancy(
-                    phoneNumber, VacancyDetails(
+                    userId, VacancyDetails(
                         "",   // this will be generated in repo class
                         userId,
                         postedOn,
@@ -126,7 +137,7 @@ class CreatePostViewModel @Inject constructor(
                         roleLookingFor,
                         skill,
                         roleDescription,
-                        phoneNumber
+                        "123456"
                     )
                 )
             onVacancyPosted()
@@ -147,7 +158,6 @@ class CreatePostViewModel @Inject constructor(
         launchWithLoading {
 
             createPostRepository.addProject(
-                phoneNumber,
                 userId,
                 postedOn,
                 teamName,

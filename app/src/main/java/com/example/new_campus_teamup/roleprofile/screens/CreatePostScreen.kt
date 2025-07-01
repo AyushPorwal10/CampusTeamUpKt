@@ -29,7 +29,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.LoadAnimation
-import com.example.new_campus_teamup.helper.rememberNetworkStatus
 import com.example.new_campus_teamup.project.screens.PostProject
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
 import com.example.new_campus_teamup.ui.theme.White
@@ -41,7 +40,7 @@ import com.example.new_campus_teamup.viewmodels.CreatePostViewModel
 @Composable
 fun CreatePostScreen(screenToOpen : String , createPostViewModel: CreatePostViewModel) {
 
-    val isConnected = rememberNetworkStatus()
+
     val snackbarHostState = remember { SnackbarHostState() }
 
     val activity = LocalContext.current as? Activity
@@ -71,14 +70,6 @@ fun CreatePostScreen(screenToOpen : String , createPostViewModel: CreatePostView
         )
     }) { paddingValues ->
 
-        LaunchedEffect(isConnected) {
-            if (!isConnected) {
-                snackbarHostState.showSnackbar(
-                    message = "No Internet Connection",
-                    actionLabel = "OK"
-                )
-            }
-        }
 
 
         Box(
@@ -90,16 +81,13 @@ fun CreatePostScreen(screenToOpen : String , createPostViewModel: CreatePostView
             contentAlignment = Alignment.TopCenter
         ) {
 
-            if(isConnected){
+
                 when(screenToOpen){
                     "Role" -> PostRole(createPostViewModel)
                     "Vacancy" -> PostVacancy(createPostViewModel)
                     "Project" -> PostProject(createPostViewModel)
                 }
-            }
-            else {
-                LoadAnimation(modifier = Modifier.size(200.dp) , animation = R.raw.nonetwork, playAnimation = true)
-            }
+
 
         }
     }
