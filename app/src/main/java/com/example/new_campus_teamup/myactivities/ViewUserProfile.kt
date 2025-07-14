@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.LaunchedEffect
@@ -27,14 +28,15 @@ class ViewUserProfile : ComponentActivity() {
         // this is receiver
         val userId = intent.getStringExtra("userId")
         val receiverPhoneNumber = intent.getStringExtra("phone_number") // person who posted this role
-
+        val receiverName = intent.getStringExtra("userName")
 
 
         Log.d("FCM","Received UserId $userId <-")
         setContent{
+            enableEdgeToEdge()
             val context = LocalContext.current
 
-            ViewUserProfiles(viewProfileViewModel ,notificationViewModel ,  userId , receiverPhoneNumber)
+            ViewUserProfiles(viewProfileViewModel ,notificationViewModel ,  userId , receiverPhoneNumber, receiverName)
 
 
             LaunchedEffect(Unit){

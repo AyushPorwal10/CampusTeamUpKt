@@ -4,15 +4,15 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
-import com.example.new_campus_teamup.mydataclass.CollegeDetails
+import com.example.new_campus_teamup.mydataclass.EducationDetails
 import com.example.new_campus_teamup.myrepository.ViewProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,8 +22,8 @@ private val networkMonitor: CheckNetworkConnectivity
 ) : ViewModel(){
 
 
-    private val _collegeDetails = MutableStateFlow<CollegeDetails?>(null)
-    val collegeDetails : StateFlow<CollegeDetails?> get()  = _collegeDetails.asStateFlow()
+    private val _educationDetails = MutableStateFlow<EducationDetails?>(null)
+    val educationDetails : StateFlow<EducationDetails?> get()  = _educationDetails.asStateFlow()
 
     private val _codingProfilesDetails = MutableStateFlow<List<String>>(emptyList())
     val codingProfilesDetails : StateFlow<List<String>> get()  = _codingProfilesDetails.asStateFlow()
@@ -33,6 +33,9 @@ private val networkMonitor: CheckNetworkConnectivity
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
+
+    private val _userImage = MutableStateFlow("")
+    val userImage: StateFlow<String> = _userImage.asStateFlow()
 
     private fun startOperation(block : suspend  () -> Unit){
         viewModelScope.launch {
@@ -58,7 +61,7 @@ private val networkMonitor: CheckNetworkConnectivity
     fun fetchCollegeDetails(userId: String){
         startOperation{
                 viewProfileRepository.fetchCollegeDetails(userId).collect{details->
-                    _collegeDetails.value = details
+                    _educationDetails.value = details
             }
         }
     }
@@ -81,4 +84,15 @@ private val networkMonitor: CheckNetworkConnectivity
             }
         }
     }
+
+     fun observeCurrentUserImage(userId: String) {
+        startOperation {
+            viewProfileRepository.observeCurrentUserImage(userId).catch {
+
+            }.collect {
+                _userImage.value = it ?: ""
+            }
+        }
+    }
+
 }

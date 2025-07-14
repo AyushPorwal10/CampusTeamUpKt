@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.new_campus_teamup.helper.ProgressIndicator
 import com.example.new_campus_teamup.helper.TimeAndDate
@@ -36,6 +37,7 @@ import com.example.new_campus_teamup.helper.ToastHelper
 import com.example.new_campus_teamup.myactivities.UserData
 import com.example.new_campus_teamup.myactivities.ViewUserProfile
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
+import com.example.new_campus_teamup.ui.theme.Black
 import com.example.new_campus_teamup.ui.theme.BorderColor
 import com.example.new_campus_teamup.ui.theme.LightTextColor
 import com.example.new_campus_teamup.ui.theme.White
@@ -67,11 +69,10 @@ fun TeamJointNotification(
 
     Card(
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = BackGroundColor),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF6C63FF)),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier
             .padding(8.dp)
-            .border(1.dp, BorderColor, RoundedCornerShape(12.dp))
             .fillMaxWidth()
     ) {
         Column(
@@ -87,7 +88,8 @@ fun TeamJointNotification(
                     text = "${memberInviteNotification.senderName} wants to join your Team.",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.weight(1f),
-                    color = White
+                    color = White,
+                    fontWeight = FontWeight.SemiBold
                 )
 
                 Row(
@@ -106,8 +108,8 @@ fun TeamJointNotification(
                                 })
                             },
                             colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = Color(0xFFDFFFE1), // Light green background
-                                contentColor = Color(0xFF2E7D32) // Green icon
+                                containerColor = Color(0xFFDFFFE1),
+                                contentColor = Color(0xFF2E7D32)
                             )
                         ) {
                             Icon(Icons.Default.Check, contentDescription = "Accept")
@@ -143,6 +145,7 @@ fun TeamJointNotification(
                               val intent = Intent(context ,ViewUserProfile::class.java)
                         intent.putExtra("userId",memberInviteNotification.senderId)
                         intent.putExtra("phone_number" , memberInviteNotification.senderPhoneNumber)
+                        intent.putExtra("userName",memberInviteNotification.senderName)
                         context.startActivity(intent)
 
                     },

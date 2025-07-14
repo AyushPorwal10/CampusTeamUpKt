@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,7 +18,7 @@ import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.LoadAnimation
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
-import com.example.new_campus_teamup.vacancy.screens.SingleVacancy
+import com.example.new_campus_teamup.vacancy.screens.SingleVacancyCard
 
 @Composable
 fun ShowSavedVacancies(
@@ -29,13 +30,13 @@ fun ShowSavedVacancies(
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .background(BackGroundColor),
+            .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(savedVacancy.value) { vacancy ->
             Log.d("FetchingVacancy", "Single Vacancy loads")
-            SingleVacancy(modifier = Modifier, vacancy, onSaveVacancy = {
+            SingleVacancyCard(modifier = Modifier, vacancy, onSaveVacancy = {
                 onVacancyUnsave(it.vacancyId)
             }, true)
         }

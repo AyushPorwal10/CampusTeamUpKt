@@ -48,12 +48,12 @@ class SearchRoleVacancy @Inject constructor(
 
     private fun observeRoleSearchQuery() {
         viewModelScope.launch {
-            searchRoleText.debounce(500) // Wait for user to stop typing
+            searchRoleText.debounce(500)
                 .collect { query ->
                     if (query.isNotBlank()) {
                         fetchRolesFromFirebase(query)
                     } else {
-                        _searchedRoles.value = emptyList() // Clear search when empty
+                        _searchedRoles.value = emptyList()
                     }
                 }
         }

@@ -23,15 +23,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.new_campus_teamup.R
-import com.example.new_campus_teamup.helper.LoadAnimation
 import com.example.new_campus_teamup.project.screens.PostProject
-import com.example.new_campus_teamup.ui.theme.BackGroundColor
-import com.example.new_campus_teamup.ui.theme.White
+import com.example.new_campus_teamup.ui.theme.BackgroundGradientColor
+import com.example.new_campus_teamup.ui.theme.Black
+import com.example.new_campus_teamup.ui.theme.TopAppBarColor
 import com.example.new_campus_teamup.vacancy.screens.PostVacancy
 import com.example.new_campus_teamup.viewmodels.CreatePostViewModel
 
@@ -41,7 +43,6 @@ import com.example.new_campus_teamup.viewmodels.CreatePostViewModel
 fun CreatePostScreen(screenToOpen : String , createPostViewModel: CreatePostViewModel) {
 
 
-    val snackbarHostState = remember { SnackbarHostState() }
 
     val activity = LocalContext.current as? Activity
     Scaffold(topBar = {
@@ -49,12 +50,13 @@ fun CreatePostScreen(screenToOpen : String , createPostViewModel: CreatePostView
             title = {
                 Text(
                     text = stringResource(id = R.string.app_name),
-                    color = White
+                    color = Black,
+                    fontWeight = FontWeight.SemiBold
                 )
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = BackGroundColor,
-                navigationIconContentColor = White
+                containerColor = TopAppBarColor,
+                navigationIconContentColor = Black
             ),
             navigationIcon = {
                 IconButton(onClick = {
@@ -63,7 +65,7 @@ fun CreatePostScreen(screenToOpen : String , createPostViewModel: CreatePostView
                     Icon(
                         painter = painterResource(id = R.drawable.browseback),
                         contentDescription = null,
-                        tint = White
+                        tint = Black
                     )
                 }
             }
@@ -74,7 +76,9 @@ fun CreatePostScreen(screenToOpen : String , createPostViewModel: CreatePostView
 
         Box(
             modifier = Modifier
-                .background(BackGroundColor)
+                .background(brush = Brush.verticalGradient(
+                    colors = BackgroundGradientColor
+                ))
                 .fillMaxSize()
                 .clip(RoundedCornerShape(12.dp))
                 .padding(paddingValues),

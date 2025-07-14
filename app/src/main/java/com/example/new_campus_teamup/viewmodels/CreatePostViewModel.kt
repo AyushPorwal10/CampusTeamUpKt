@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
 import com.example.new_campus_teamup.myactivities.UserManager
-import com.example.new_campus_teamup.mydataclass.CollegeDetails
+import com.example.new_campus_teamup.mydataclass.EducationDetails
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
 import com.example.new_campus_teamup.myrepository.CreatePostRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
 @HiltViewModel
@@ -81,12 +80,12 @@ class CreatePostViewModel @Inject constructor(
 
         launchWithLoading {
             val snapshot = createPostRepository.fetchImageUrlFromUserDetails(userId)
-            var userImageUrl = snapshot.toObject(CollegeDetails::class.java)
+            var userImageUrl = snapshot.toObject(EducationDetails::class.java)
             createPostRepository.postRole(
                 collegeName,
                 userId,
                 userName,
-                userImageUrl?.userImageUrl ?: "",
+                 "",
                 role,
                 datePosted, canPostRole = {
                     _isLoading.value = false

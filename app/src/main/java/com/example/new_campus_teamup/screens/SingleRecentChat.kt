@@ -3,15 +3,20 @@ package com.example.new_campus_teamup.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -26,48 +31,18 @@ import com.example.new_campus_teamup.ui.theme.White
 
 
 @Composable
-fun SingleRecentChat(chatData : RecentChats , onClick : () -> Unit){
-    val textColor = LightTextColor
-    val bgColor = BackGroundColor
+fun SingleRecentChat(chatData : RecentChats, onClick : () -> Unit) {
 
-    Box(modifier = Modifier
-        .clickable {
-         onClick()
-        }
-        .background(bgColor)
-        .padding(8.dp)
-        .border(0.5.dp, BorderColor, shape = RoundedCornerShape(Dimensions.smallRoundedShape))
-        , contentAlignment = Alignment.Center
-    ){
+    Card(onClick = {
+        onClick()
+    }, elevation = CardDefaults.cardElevation(6.dp), colors = CardDefaults.cardColors(
+        containerColor =  Color(0xFF7EEBBE)
+    ), modifier = Modifier.fillMaxWidth(0.9f).padding(6.dp)) {
 
-        ConstraintLayout(modifier = Modifier
-            .padding(15.dp)
-            .fillMaxWidth()) {
-            val ( userName , notificationCount , lastMessageDate) = createRefs()
+        Column(modifier = Modifier.padding(10.dp), horizontalAlignment = Alignment.Start, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(chatData.senderName, fontWeight = FontWeight.Bold , style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(6.dp))
 
-            Text(
-                text = chatData.senderName,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                color = White,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier
-                    .constrainAs(userName) {
-                        start.linkTo(parent.start, margin = 2.dp)
-                        top.linkTo(parent.top)
-                    }
-                    .fillMaxWidth(0.75f) )
-
-
-            Text(text = "Created on ${chatData.createdOn}" ,
-                style = MaterialTheme.typography.bodySmall ,
-                color = LightWhite,
-                modifier = Modifier.constrainAs(lastMessageDate){
-                    top.linkTo(userName.bottom , margin = 4.dp)
-                    start.linkTo(parent.start)
-                })
-
+            Text("Created on ${chatData.createdOn}"  , style = MaterialTheme.typography.bodySmall)
         }
     }
 }

@@ -21,25 +21,6 @@ class HomeScreenRepository @Inject constructor(
     private val userManager: UserManager
 ) {
 
-     fun getUserImageUrl(currentUserId: String) : Flow<String> = callbackFlow {
-
-        val documentReference = firebaseFirestore.collection("user_images").document(currentUserId)
-
-        val realTimeImageFetching = documentReference.addSnapshotListener{snapshot , error->
-            if(error != null){
-                close(error)
-                return@addSnapshotListener
-            }
-
-            if(snapshot != null && snapshot.exists()) {
-                val imageUrl = snapshot.getString("user_image") as String
-                Log.d("ImageLoading","Current user image loaded : $imageUrl")
-                trySend(imageUrl)
-            }
-        }
-        awaitClose{realTimeImageFetching.remove()}
-    }
-
     suspend fun fetchInitialOrPaginatedRoles(lastVisible: DocumentSnapshot?): QuerySnapshot {
 
         return if (lastVisible == null) {
@@ -271,4 +252,27 @@ class HomeScreenRepository @Inject constructor(
         }
         awaitClose { listener.remove() }
     }
+
+    fun observeCurrentUserImage(currentUserId : String) : Flow<String?> = callbackFlow{
+        Log.d("CollegeDetails","Current User id is $currentUserId")
+        val documentReference = firebaseFirestore.collection("user_images").document(currentUserId)
+
+        val realTimeImageFetching = documentReference.addSnapshotListener{snapshot , error->
+            if(error != null){
+                close(error)
+                return@addSnapshotListener
+            }
+
+            if(snapshot != null && snapshot.exists()) {
+                val imageUrl = snapshot.getString("user_image") as? String
+                Log.d("CollegeDetails","Current user image loaded : $imageUrl")
+                trySend(imageUrl)
+            }
+            else {
+                Log.d("CollegeDetails","Snapshot is null")
+            }
+        }
+        awaitClose{realTimeImageFetching.remove()}
+    }
+
 }

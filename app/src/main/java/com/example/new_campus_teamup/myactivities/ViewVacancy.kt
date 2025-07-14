@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +38,7 @@ class ViewVacancy : ComponentActivity() {
 
         Log.d("Vacancy", "Received vacancy in activity ${vacancy?.skills}")
         setContent {
+            enableEdgeToEdge()
             val context = LocalContext.current
             val currentUserData = userDataSharedViewModel.userData.collectAsState()
             Log.d("VacancyNotification","Current user id in activity is ${currentUserData.value?.userId} <- ")

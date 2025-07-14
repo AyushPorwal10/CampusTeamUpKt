@@ -12,20 +12,30 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -35,7 +45,10 @@ import com.example.new_campus_teamup.helper.ShimmerEffect
 import com.example.new_campus_teamup.myThemes.TextFieldStyle
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
+import com.example.new_campus_teamup.ui.theme.BackgroundGradientColor
 import com.example.new_campus_teamup.ui.theme.BorderColor
+import com.example.new_campus_teamup.ui.theme.RoleCardSurfaceVariant
+import com.example.new_campus_teamup.ui.theme.RoleOnCardSurfaceVariant
 import com.example.new_campus_teamup.ui.theme.White
 import com.example.new_campus_teamup.viewmodels.HomeScreenViewModel
 import com.example.new_campus_teamup.viewmodels.SearchRoleVacancy
@@ -49,6 +62,7 @@ fun VacanciesScreen(
 ) {
     val textColor = White
     val bgColor = BackGroundColor
+    var isFocused by remember { mutableStateOf(false) }
 
     val idOfSavedVacancy by homeScreenViewModel.listOfSavedVacancy.collectAsState()
     val searchText by searchRoleVacancy.searchVacancyText.collectAsState()
@@ -79,50 +93,58 @@ fun VacanciesScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(bgColor),
+            .padding(top = 60.dp)
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = BackgroundGradientColor
+                )
+            ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OutlinedTextField(
-            value = searchText,
-            onValueChange = { searchQuery ->
-                searchRoleVacancy.onSearchedVacancyTextChange(searchQuery)
-            },
-            colors = TextFieldStyle.myTextFieldColor(),
-            shape = TextFieldStyle.defaultShape,
-            maxLines = 1,
-            modifier = Modifier
-                .fillMaxWidth(0.85f)
-                .padding(top = 16.dp),
-            placeholder = {
-                Box(
-                    modifier = Modifier.animateContentSize(),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(
-                        text = searchOption[placeHolderIndex],
-                        style = MaterialTheme.typography.titleMedium,
-                        color = textColor
+
+        Card(
+            modifier = Modifier.fillMaxWidth(0.9f),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            OutlinedTextField(
+                value = searchText,
+                onValueChange = { searchQuery ->
+                    searchRoleVacancy.onSearchedVacancyTextChange(searchQuery)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .onFocusChanged { isFocused = it.isFocused },
+                placeholder = {
+                    Box(
+                        modifier = Modifier.animateContentSize(),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Text(
+                            text = searchOption[placeHolderIndex],
+                            style = MaterialTheme.typography.titleMedium,
+                            color = RoleOnCardSurfaceVariant
+                        )
+                    }
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = RoleOnCardSurfaceVariant
                     )
-                }
-            },
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.search),
-                    contentDescription = null,
-                    tint = White,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-        )
-
-        HorizontalDivider(
-            thickness = 1.dp,
-            color = BorderColor,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 10.dp)
-        )
-
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF4F46E5),
+                    unfocusedBorderColor = Color(0xFFE5E7EB),
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = RoleCardSurfaceVariant
+                ),
+                shape = RoundedCornerShape(16.dp)
+            )
+        }
         Box(modifier = Modifier.weight(1f)) {
             ShowListOfVacancies(
                 modifier = Modifier
@@ -163,7 +185,7 @@ fun ShowListOfVacancies(
         ) {
             items(filteredVacancy) { vacancy ->
                 ShimmerEffect(modifier = modifier, isLoading = isVacancyLoading.value) {
-                        SingleVacancy(
+                        SingleVacancyCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp)

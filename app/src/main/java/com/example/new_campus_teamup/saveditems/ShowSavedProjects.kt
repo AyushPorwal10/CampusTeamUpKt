@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,7 +25,10 @@ fun ShowSavedProjects(
     onProjectUnsave: (String) -> Unit,
 ) {
     Log.d("FetchingProjects", "In lazy it is ${savedProjectList.value.size}")
-    LazyColumn(modifier = Modifier.background(BackGroundColor) , horizontalAlignment = Alignment.CenterHorizontally) {
+    LazyColumn(
+        modifier = Modifier.padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         items(savedProjectList.value) {
             Log.d("FetchingProjects", "Single Project loads")
             SingleProject(it, onSaveProjectClicked = {
@@ -34,8 +38,8 @@ fun ShowSavedProjects(
         }
 
         item {
-            if(savedProjectList.value.isEmpty()){
-                Box(modifier = Modifier.fillMaxSize() ,  contentAlignment = Alignment.Center) {
+            if (savedProjectList.value.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     LoadAnimation(
                         modifier = Modifier.size(200.dp),
                         animation = R.raw.noresult,

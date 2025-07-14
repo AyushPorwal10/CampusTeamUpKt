@@ -14,19 +14,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.new_campus_teamup.mydataclass.SendMessage
-import com.example.new_campus_teamup.ui.theme.BorderColor
-import com.example.new_campus_teamup.ui.theme.LightTextColor
+import com.example.new_campus_teamup.ui.theme.Black
 import com.example.new_campus_teamup.ui.theme.White
 
 @Composable
 fun ShowChats(messageDetails: SendMessage?, currentUserId: String?) {
-    Log.d(
-        "ChatHistory",
-        "Current user id is $currentUserId <- and other id is ${messageDetails?.senderId} <-"
-    )
-    Log.d("ChatHistory", "Show chats message is ${messageDetails?.message} <-")
+
 
 
     Row(
@@ -36,13 +32,13 @@ fun ShowChats(messageDetails: SendMessage?, currentUserId: String?) {
     ) {
 
         Box(modifier = Modifier.clip(RoundedCornerShape(6.dp))
-            .background(if (messageDetails?.senderId == currentUserId) BorderColor else LightTextColor)) {
+            .background(if (messageDetails?.senderId == currentUserId) Color(0xFFB1FFB6) else Color.LightGray)) {
 
             Text(
                 text = "${messageDetails?.message}",
                 modifier = Modifier.padding(6.dp),
                 style = MaterialTheme.typography.titleMedium,
-                color = White
+                color = Black
             )
         }
     }

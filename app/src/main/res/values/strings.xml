@@ -73,4 +73,17 @@
     <string name="required">Required</string>
     <string name="change_password">Change Password</string>
     <string name="email_sent_message">Password reset email has been\nsent. Please check your email.</string>
+    <string name="explore_opportunities">Explore Opportunities</string>
+    <string name="form_a_team_message1">Form a team for ICPC</string>
+    <string name="form_a_team_message2">or other coding contests.</string>
+    <string name="lets_code_together">Let\'s Code together</string>
+    <string name="cp_teamup">CP TeamUp</string>
+    <string name="founders_hub">Founder\'s Hub</string>
+    <string name="have_a_team">Have a team ?</string>
+    <string name="need_memebers">Need Members ?</string>
+    <string name="looking_for_a_team1">Looking to join</string>
+    <string name="looking_for_a_team2">a team ?</string>
+    <string name="education_details">Education Details</string>
+    <string name="enter_skill">Enter skill</string>
+    <string name="leetcode">Leetcode</string>
 </resources>

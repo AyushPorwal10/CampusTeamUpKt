@@ -19,17 +19,20 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.myactivities.UserData
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
-import com.example.new_campus_teamup.ui.theme.BackGroundColor
+import com.example.new_campus_teamup.ui.theme.BackgroundGradientColor
+import com.example.new_campus_teamup.ui.theme.Black
 import com.example.new_campus_teamup.ui.theme.BorderColor
-import com.example.new_campus_teamup.ui.theme.White
+import com.example.new_campus_teamup.ui.theme.TopAppBarColor
 import com.example.new_campus_teamup.viewmodels.ViewVacancyViewModel
 
 
@@ -48,10 +51,10 @@ fun VacancyAndTeamDetails(
     Scaffold(topBar = {
         TopAppBar(title = {
             Text(
-                text = stringResource(id = R.string.vacancy_details), color = White
+                text = stringResource(id = R.string.vacancy_details), color = Black, fontWeight = FontWeight.SemiBold
             )
         }, colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = BackGroundColor, navigationIconContentColor = White
+            containerColor = TopAppBarColor, navigationIconContentColor = Black
         ), navigationIcon = {
             IconButton(onClick = {
                 activity?.finish()
@@ -59,7 +62,7 @@ fun VacancyAndTeamDetails(
                 Icon(
                     painter = painterResource(id = R.drawable.browseback),
                     contentDescription = null,
-                    tint = White
+                    tint = Black
                 )
             }
         })
@@ -70,7 +73,11 @@ fun VacancyAndTeamDetails(
 
             ConstraintLayout(
                 modifier = Modifier
-                    .background(BackGroundColor)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = BackgroundGradientColor
+                        )
+                    )
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {

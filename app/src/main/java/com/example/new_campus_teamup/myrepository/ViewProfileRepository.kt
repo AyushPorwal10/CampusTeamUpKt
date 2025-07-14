@@ -1,7 +1,7 @@
 package com.example.new_campus_teamup.myrepository
 
 import android.util.Log
-import com.example.new_campus_teamup.mydataclass.CollegeDetails
+import com.example.new_campus_teamup.mydataclass.EducationDetails
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -11,7 +11,7 @@ import javax.inject.Inject
 class ViewProfileRepository @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore
 ) {
-    fun fetchCollegeDetails(userId: String): Flow<CollegeDetails> = callbackFlow {
+    fun fetchCollegeDetails(userId: String): Flow<EducationDetails> = callbackFlow {
 
         val documentReference = firebaseFirestore.collection("all_user_id")
             .document(userId).collection("all_user_details").document("college_details")
@@ -21,7 +21,7 @@ class ViewProfileRepository @Inject constructor(
                 close(error)
                 return@addSnapshotListener
             }
-            snapshot?.toObject(CollegeDetails::class.java)?.let { collegeDetails ->
+            snapshot?.toObject(EducationDetails::class.java)?.let { collegeDetails ->
                 trySend(collegeDetails).isSuccess
             }
         }
@@ -61,5 +61,25 @@ class ViewProfileRepository @Inject constructor(
         }
         awaitClose{realTimeListener.remove()}
     }
+
+    fun observeCurrentUserImage(currentUserId : String) : Flow<String?> = callbackFlow{
+        Log.d("CollegeDetails","Current User id is $currentUserId")
+        val documentReference = firebaseFirestore.collection("user_images").document(currentUserId)
+
+        val realTimeImageFetching = documentReference.addSnapshotListener{snapshot , error->
+            if(error != null){
+                close(error)
+                return@addSnapshotListener
+            }
+
+            if(snapshot != null && snapshot.exists()) {
+                val imageUrl = snapshot.getString("user_image") as? String
+                Log.d("CollegeDetails","Current user image loaded : $imageUrl")
+                trySend(imageUrl)
+            }
+        }
+        awaitClose{realTimeImageFetching.remove()}
+    }
+
 
 }

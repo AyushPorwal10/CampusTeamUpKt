@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.LoadAnimation
 import com.example.new_campus_teamup.mydataclass.RoleDetails
-import com.example.new_campus_teamup.roleprofile.screens.SingleRole
+import com.example.new_campus_teamup.roleprofile.screens.SingleRoleCard
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
 
 
@@ -27,13 +28,13 @@ fun ShowSavedRoles(savedRoleList: State<List<RoleDetails>>, onRoleUnsave: (Strin
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .background(BackGroundColor),
+            .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(savedRoleList.value) {
             Log.d("FetchingRoles", "Single Role loads")
-            SingleRole(it, onSaveRoleClicked = {
+            SingleRoleCard(it, onSaveRoleClicked = {
                 // this is to unsave projects
                 onRoleUnsave(it.roleId)
             }, true)

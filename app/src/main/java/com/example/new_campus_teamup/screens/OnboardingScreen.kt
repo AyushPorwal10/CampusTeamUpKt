@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -12,13 +13,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.ProgressIndicator
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
+import com.example.new_campus_teamup.ui.theme.BackgroundGradientColor
+
 import com.example.new_campus_teamup.ui.theme.White
+
 
 
 @Composable
@@ -35,12 +41,12 @@ fun OnboardingScreen(
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackGroundColor)
-    ) {
+            .background(Color(0xFFBCE3F6))
+            ) {
 
         val (progressBar, imageOfThinkingBox, discoverTalentBtn) = createRefs()
 
-        Image(painter = painterResource(id = R.drawable.onboarding),
+        Image(painter = painterResource(id = R.drawable.onboard),
             contentDescription = "onboardingscreen",
             modifier = Modifier
                 .fillMaxWidth(1f)
@@ -60,6 +66,9 @@ fun OnboardingScreen(
         else {
             OutlinedButton(
                 onClick = { navigateToLoginSignUpScreen() },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF4D00E7)
+                ),
                 modifier = Modifier.constrainAs(discoverTalentBtn) {
                     top.linkTo(imageOfThinkingBox.bottom, margin = 15.dp)
                     start.linkTo(parent.start)

@@ -21,10 +21,6 @@
             android:name=".email_pass_login.LoginSignUp"
             android:exported="false" />
 
-        <activity
-            android:name=".myotp.SignUpLogin"
-            android:exported="false" />
-
         <service
             android:name=".notification.FirebaseMessage"
             android:exported="false">

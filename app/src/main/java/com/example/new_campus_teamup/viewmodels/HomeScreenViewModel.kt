@@ -42,8 +42,7 @@ class HomeScreenViewModel @Inject constructor(
     private val _userData = MutableStateFlow<UserData?>(null)
     val userData: StateFlow<UserData?> get() = _userData.asStateFlow()
 
-    private val _userImage = MutableStateFlow<String>("")
-    val userImage: StateFlow<String> = _userImage.asStateFlow()
+
 
     private val _FCMToken = MutableStateFlow<String>("")
     val FCMToken: StateFlow<String> get() = _FCMToken.asStateFlow()
@@ -92,6 +91,9 @@ class HomeScreenViewModel @Inject constructor(
 
     private val _listOfSavedPost = MutableStateFlow<List<String>>(emptyList())
     val listOfSavedPost: StateFlow<List<String>> get() = _listOfSavedPost.asStateFlow()
+
+    private val _currentUserImage = MutableStateFlow("")
+    val currentUserImage: StateFlow<String> = _currentUserImage.asStateFlow()
 
 
     private val _listOfSavedRoles = MutableStateFlow<List<String>>(emptyList())
@@ -263,31 +265,6 @@ class HomeScreenViewModel @Inject constructor(
     }
 
 
-    fun fetchInitialOrPaginatedRoles() {
-        Log.d("Roles", "ViewModel Going to fetch Initial roles")
-       startOperation {
-            try {
-
-                _isRoleLoading.value = true
-                val snapshot = withContext(Dispatchers.IO) {
-                    homeScreenRepository.fetchInitialOrPaginatedRoles(null)
-                }
-                val roles = snapshot.documents.mapNotNull { it.toObject(RoleDetails::class.java) }
-
-                if (roles.isNotEmpty()) {
-                    lastVisibleRole = snapshot.documents.last()
-                    lastRolePostedOn =
-                        roles.first().postedOn  // because i sort it in descending order
-                }
-                _rolesStateFlow.value = roles
-            } catch (e: Exception) {
-                Log.e("Roles", "Error in loading roles $e")
-            } finally {
-                _isRoleLoading.value = false
-            }
-
-        }
-    }
 
 
     fun observeRolesInRealTime() {
@@ -323,31 +300,6 @@ class HomeScreenViewModel @Inject constructor(
 
     // vacancy section
 
-    fun fetchInitialOrPaginatedVacancy() {
-
-       startOperation{
-            try {
-                _isVacancyLoading.value = true
-                val snapshot =
-                    homeScreenRepository.fetchInitialOrPaginatedVacancy(lastVisibleVacancy)
-                val vacancy =
-                    snapshot.documents.mapNotNull { it.toObject(VacancyDetails::class.java) }
-                Log.d("SizeOfVacancy", "${vacancy.size}")
-
-                if (vacancy.isNotEmpty()) {
-                    lastVisibleVacancy = snapshot.documents.last()
-                    lastVacancyPostedOn = vacancy.first().postedOn
-                }
-
-                _isVacancyLoading.value = false
-
-                _vacancyStateFlow.value = vacancy
-            } catch (e: Exception) {
-                _isVacancyLoading.value = false
-                Log.e("Vacancy", "$e")
-            }
-        }
-    }
 
 
     fun observeVacancyInRealTime() {
@@ -392,20 +344,19 @@ class HomeScreenViewModel @Inject constructor(
             _userData.value = userManager.userData.first()
             _FCMToken.value = userManager.fcmToken.first()
             Log.d("FCM", "FCM fetched in viewmodel ${_FCMToken.value} <-")
-            getUserImageUrl()
+           // getUserImageUrl()
         }
     }
 
-    private fun getUserImageUrl() {
+    fun observeCurrentUserImage() {
         startOperation {
-            userManager.userData
-                .filter { it.userId.isNotEmpty() }
-                .first()
-                .let {
-                    homeScreenRepository.getUserImageUrl(it.userId).collect { imageUrl ->
-                        _userImage.value = imageUrl
-                    }
+            userData.filterNotNull().collectLatest {
+                homeScreenRepository.observeCurrentUserImage(it.userId).catch {
+
+                }.collect {
+                    _currentUserImage.value = it ?: ""
                 }
+            }
         }
     }
 

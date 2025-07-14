@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
 import com.example.new_campus_teamup.myactivities.UserManager
-import com.example.new_campus_teamup.mydataclass.CollegeDetails
+import com.example.new_campus_teamup.mydataclass.EducationDetails
 import com.example.new_campus_teamup.myrepository.UserProfileRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
 
@@ -32,9 +31,10 @@ class UserProfileViewModel @Inject constructor(
 ) : ViewModel() {
 
     private lateinit var userId: String
+    private lateinit var userEmail: String
     private lateinit var collegeName: String
     private lateinit var userName: String
-    private lateinit var phoneNumber : String
+    private lateinit var phoneNumber: String
     private val _isLoading = MutableStateFlow<Boolean>(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
@@ -47,25 +47,30 @@ class UserProfileViewModel @Inject constructor(
     private val _currentUserImage = MutableStateFlow("")
     val currentUserImage: StateFlow<String> = _currentUserImage.asStateFlow()
 
-    private val _collegeDetails = MutableStateFlow<CollegeDetails?>(null)
-    val collegeDetails: StateFlow<CollegeDetails?> = _collegeDetails
+    private val _educationDetails = MutableStateFlow<EducationDetails?>(null)
+    val educationDetails: StateFlow<EducationDetails?> = _educationDetails
 
     private val _codingProfiles = MutableStateFlow<List<String>>(emptyList())
-    val codingProfiles : StateFlow<List<String>> get() = _codingProfiles.asStateFlow()
+    val codingProfiles: StateFlow<List<String>> get() = _codingProfiles.asStateFlow()
 
 
     init {
-        startOperation{
+        startOperation {
             userManager.userData
-                .filter { it.userId.isNotEmpty() && it.phoneNumber.isNotEmpty() }
+                .filter {
+                    it.userId.isNotEmpty()
+                            && it.userName.isNotEmpty()
+                            && it.email.isNotEmpty()
+                            && it.collegeName.isNotEmpty()
+                }
                 .first()
                 .let { userData ->
                     userId = userData.userId
                     userName = userData.userName
                     phoneNumber = userData.phoneNumber
                     collegeName = userData.collegeName
-
-
+                    userEmail = userData.email
+                    fetchSkills()
                     Log.d("Learning", "UserId: ${userData.userId}")
                     observeCurrentUserImage()
                     fetchCodingProfiles()
@@ -77,7 +82,10 @@ class UserProfileViewModel @Inject constructor(
                 userId = it.userId
                 userName = it.userName
                 phoneNumber = it.phoneNumber
-                Log.d("Learning","Initialized data user id is $userId username is $userName phonenumber is $phoneNumber")
+                Log.d(
+                    "Learning",
+                    "Initialized data user id is $userId username is $userName phonenumber is $phoneNumber"
+                )
             }
         }
     }
@@ -87,7 +95,7 @@ class UserProfileViewModel @Inject constructor(
     }
 
 
-    private fun startOperation(block : suspend  () -> Unit){
+    private fun startOperation(block: suspend () -> Unit) {
         viewModelScope.launch {
             _isLoading.value = true;
             if (!networkMonitor.isConnectedNow()) {
@@ -95,14 +103,13 @@ class UserProfileViewModel @Inject constructor(
                 return@launch
             }
             try {
-                 block()
+                block()
             } catch (toe: TimeoutCancellationException) {
                 _errorMessage.value = "Request timed out. Check your connection."
             } catch (e: Exception) {
                 Log.e("HomeScreenVM", "Unexpected error", e)
                 _errorMessage.value = "Something went wrong. Please try again."
-            }
-            finally {
+            } finally {
                 _isLoading.value = false
             }
         }
@@ -122,70 +129,66 @@ class UserProfileViewModel @Inject constructor(
     }
 
 
-
     // college details
-    fun saveCollegeDetails(
-        userImageUrl: String,
+    fun saveEducationDetails(
         year: String,
         branch: String,
         course: String,
         onSuccess: () -> Unit
     ) {
-        Log.d("CollegeDetails", userImageUrl)
 
-       startOperation {
+        startOperation {
             Log.d("CollegeDetails", "Going to save collegeDetails")
 
 //            _isLoading.value = true
 
 
-            val newCollegeDetails = CollegeDetails(
+            val newEducationDetails = EducationDetails(
                 userName,
                 collegeName,
                 year,
                 course,
-                branch,
-                userImageUrl
+                branch
             )
 
-           userProfileRepo.saveCollegeDetails(userId , newCollegeDetails)
+            userProfileRepo.saveEducationDetails(userId, newEducationDetails)
 
-            _collegeDetails.value = newCollegeDetails
-           onSuccess()
-           // _isLoading.value = false
+            _educationDetails.value = newEducationDetails
+            onSuccess()
+            // _isLoading.value = false
 
         }
     }
 
-    fun observeCurrentUserImage(){
-        Log.d("CollegeDetails","User id in observing image is $userId")
+    private fun observeCurrentUserImage() {
+        Log.d("CollegeDetails", "User id in observing image is $userId")
         startOperation {
             userProfileRepo.observeCurrentUserImage(userId).catch {
 
-            }.collect{
-                _currentUserImage.value = it
+            }.collect {
+                _currentUserImage.value = it ?: ""
             }
         }
-
     }
 
-    fun fetchCollegeDetails() {
+    fun fetchEducationDetails() {
 
         startOperation {
-            //_isLoading.value = true
             val result = withContext(Dispatchers.IO) {
                 Log.d("CollegeDetails", "$userId data fetching process started")
-                userProfileRepo.fetchCollegeDetails(userId ).toObject(CollegeDetails::class.java)
+                userProfileRepo.fetchEducationDetails(userId).toObject(EducationDetails::class.java)
             }
-           // _isLoading.value = false
-            Log.d("Image","Fetched Image in viewmodel url is ${result?.userImageUrl}")
-            _collegeDetails.value = result
+            _educationDetails.value = result
         }
     }
 
     // coding profiles
 
-    fun saveCodingProfiles(listOfCodingProfiles: List<String> , onSuccess : () -> Unit , onError : () -> Unit  ) {
+    fun saveCodingProfiles(
+        listOfCodingProfiles: List<String>,
+        onSuccess: () -> Unit,
+        onError: () -> Unit
+    ) {
         startOperation {
             try {
                 Log.d("CodingProfiles", "$userId saving profiles")
@@ -200,52 +203,46 @@ class UserProfileViewModel @Inject constructor(
         }
 
 
-
-
     }
 
-    fun uploadUserImageToStorage(imageUri: Uri, onResult: (String?) -> Unit) {
+    fun saveImageUrl(userImageUri : Uri, onSuccess: () -> Unit){
         startOperation {
-            //_isLoading.value = true
-            val result = withContext(Dispatchers.IO) {
-                userProfileRepo.uploadUserImageToStorage(userId, imageUri)
-            }
-            //_isLoading.value = false
-            onResult(result)
-
+            userProfileRepo.saveUserImage(userId, userImageUri , onSuccess = {
+                onSuccess()
+            })
         }
-
     }
-
-    private  fun fetchCodingProfiles() {
+    private fun fetchCodingProfiles() {
         //_isLoading.value = true
         startOperation {
-            if(userId.isNotEmpty()){
-                Log.d("Learning","User id inside coding profiles is $userId")
+            if (userId.isNotEmpty()) {
+                Log.d("Learning", "User id inside coding profiles is $userId")
                 userProfileRepo.fetchCodingProfiles(userId).collect {
-                    Log.d("Learning","Fetching Coding Profiles")
+                    Log.d("Learning", "Fetching Coding Profiles")
                     //_isLoading.value = false
                     _codingProfiles.value = it
+                    Log.d("Learning", "Fetched coding profiles size is ${it.size}")
                 }
-            }
-            else{
-                Log.d("Learning","Phone number is emptyr")
+            } else {
+                Log.d("Learning", "User id is empty")
             }
         }
 
     }
 
-     fun saveSkills(listOfSkills: List<String> , onSuccess: () -> Unit) {
+    fun saveSkills(listOfSkills: List<String>, onSuccess: () -> Unit) {
         startOperation {
             userProfileRepo.saveSkills(userId, listOfSkills)
+            _skills.value = listOfSkills // this is to update prev skills with current skills
             onSuccess()
         }
     }
 
-     fun fetchSkills()  {
+    fun fetchSkills() {
         startOperation {
             val documentSnapshot = userProfileRepo.fetchSkills(userId)
             val list = documentSnapshot.get("skillList") as? List<String> ?: emptyList()
+            Log.d("Learning", "Fetched skills size is ${list.size}")
             _skills.value = list
         }
     }

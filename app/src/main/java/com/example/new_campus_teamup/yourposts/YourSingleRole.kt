@@ -1,22 +1,44 @@
 package com.example.new_campus_teamup.yourposts
 
+import android.content.Intent
+import android.util.Log
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -29,9 +51,13 @@ import coil.compose.AsyncImage
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.Dimensions
 import com.example.new_campus_teamup.helper.TimeAndDate
+import com.example.new_campus_teamup.myactivities.ViewUserProfile
 import com.example.new_campus_teamup.mydataclass.RoleDetails
+import com.example.new_campus_teamup.roleprofile.screens.DetailItem
 import com.example.new_campus_teamup.ui.theme.BorderColor
 import com.example.new_campus_teamup.ui.theme.LightTextColor
+import com.example.new_campus_teamup.ui.theme.RoleCardGradient
+import com.example.new_campus_teamup.ui.theme.RoleCardTextColor
 import com.example.new_campus_teamup.ui.theme.White
 
 
@@ -41,118 +67,112 @@ fun YourSingleRole(
     onRoleDelete : (String) -> Unit ,
 ) {
 
+
     val context = LocalContext.current
-    val textColor = White
 
-    Box(
+    var isHovered by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(
+        targetValue = if (isHovered) 1.02f else 1f,
+        animationSpec = tween(300),
+        label = "scale"
+    )
+
+
+
+    Card(
         modifier = Modifier
-            .border(
-                0.5.dp, BorderColor,
-                shape = RoundedCornerShape(Dimensions.largeRoundedShape)
-            )
-            .fillMaxWidth(0.9f)
-            .animateContentSize(), contentAlignment = Alignment.Center
+            .fillMaxWidth()
+            .scale(scale)
+            .padding(8.dp)
+            .clickable { isHovered = !isHovered },
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
-
-        ConstraintLayout(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth()
+        Column(
+            modifier = Modifier.padding(24.dp)
         ) {
-            val (userImage, userName, roleLookingFor, collegeName , postedOn, saveProjectBtn) = createRefs()
 
 
-
-            AsyncImage(
-                model = roleDetails.userImageUrl ?: R.drawable.profile,
-                contentDescription = "User Profile",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .constrainAs(userImage) {
-                        top.linkTo(parent.top)
-                        start.linkTo(parent.start)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .background(
+                                Color.White,
+                                RoundedCornerShape(16.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AsyncImage(model = R.drawable.profile,
+                            contentDescription = null ,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clip(CircleShape)
+                        )
                     }
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .border(1.dp, White, CircleShape))
 
-            Text(text = roleDetails.userName,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                softWrap = false,
-                fontWeight = FontWeight.SemiBold,
-                color = textColor,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.constrainAs(userName)
-                {
-                    top.linkTo(userImage.top)
-                    bottom.linkTo(userImage.bottom)
-                    start.linkTo(userImage.end, margin = 8.dp)
-                })
 
-            IconButton(onClick = {
-                                 onRoleDelete(roleDetails.roleId)
-            }, modifier = Modifier
-                .constrainAs(saveProjectBtn) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(userName.bottom)
-                    end.linkTo(parent.end)
+                    Text(
+                        text = roleDetails.userName,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = RoleCardTextColor
+                        )
+                    )
                 }
-                .size(26.dp)) {
-                Icon(
-                    painter = painterResource(id = R.drawable.delete),
-                    contentDescription = null,
-                    tint = White
-                )
+                IconButton(
+                    onClick = { onRoleDelete(roleDetails.roleId) }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.delete),
+                        contentDescription = "Delete",
+                        tint = Color.Red
+                    )
+                }
 
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "Role : ${roleDetails.role}",
-                maxLines = 1,
-                fontWeight = FontWeight.Medium,
-                overflow = TextOverflow.Ellipsis,
-                softWrap = false,
-                style = MaterialTheme.typography.titleMedium,
-                color = LightTextColor,
-                modifier = Modifier.constrainAs(roleLookingFor) {
-                    top.linkTo(userImage.bottom, margin = 12.dp)
-                    start.linkTo(parent.start)
-                })
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                DetailItem(
+                    icon = R.drawable.roles,
+                    text = roleDetails.role,
 
-            Text(
-                text = "College : ${roleDetails.collegeName}",
-                maxLines = 2,
-                fontWeight = FontWeight.Medium,
-                overflow = TextOverflow.Ellipsis,
-                softWrap = false,
-                style = MaterialTheme.typography.titleMedium,
-                color = LightTextColor,
-                modifier = Modifier.constrainAs(collegeName) {
-                    top.linkTo(roleLookingFor.bottom, margin = 12.dp)
-                    start.linkTo(parent.start)
-                })
+                    )
+
+                DetailItem(
+                    icon = R.drawable.college,
+                    text = roleDetails.collegeName,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
 
 
-
-            TextButton(onClick = {  } , enabled = false, modifier = Modifier.constrainAs(postedOn) {
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                top.linkTo(collegeName.bottom, margin = 4.dp)
-            }) {
-
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     text = "Posted ${TimeAndDate.getTimeAgoFromDate(roleDetails.postedOn)}",
-                    color = LightTextColor,
-                    fontSize = 12.sp
+                    style = MaterialTheme.typography.bodySmall,
+                    color = RoleCardTextColor
                 )
-
             }
-
         }
     }
-
-
 }
-

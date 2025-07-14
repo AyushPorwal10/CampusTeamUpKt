@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.LoadAnimation
 import com.example.new_campus_teamup.helper.ToastHelper
-import com.example.new_campus_teamup.ui.theme.BackGroundColor
+
 
 
 @Composable
@@ -28,8 +28,7 @@ fun ShowPostedProjects(yourPostViewModel: YourPostViewModel ) {
     val context = LocalContext.current
     LazyColumn(
         modifier = Modifier
-            .fillMaxWidth()
-            .background(BackGroundColor),
+            .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {

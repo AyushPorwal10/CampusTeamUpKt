@@ -2,27 +2,61 @@ package com.example.new_campus_teamup.email_pass_login
 
 import android.app.Activity
 import android.content.Intent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.EaseInOutSine
+import androidx.compose.animation.core.EaseOutCubic
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -30,17 +64,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.CheckEmptyFields
-import com.example.new_campus_teamup.helper.ProgressIndicator
 import com.example.new_campus_teamup.helper.ToastHelper
-import com.example.new_campus_teamup.myAnimation.TextAnimation
+import com.example.new_campus_teamup.myAnimation.FloatingBubbles
 import com.example.new_campus_teamup.myThemes.TextFieldStyle
 import com.example.new_campus_teamup.myactivities.MainActivity
-import com.example.new_campus_teamup.ui.theme.BackGroundColor
+import com.example.new_campus_teamup.mysealedClass.BottomNavScreens
+import com.example.new_campus_teamup.ui.theme.BackgroundGradientColor
+import com.example.new_campus_teamup.ui.theme.ButtonColor
+import com.example.new_campus_teamup.ui.theme.IconColor
 import com.example.new_campus_teamup.ui.theme.White
+
+
 
 @Composable
 fun LoginScreen(
@@ -50,6 +88,11 @@ fun LoginScreen(
 ) {
 
 
+    val animatedProgress by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = tween(1000, easing = EaseOutCubic),
+        label = "progress"
+    )
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
 
@@ -58,7 +101,7 @@ fun LoginScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val isLoading = loginSignUpViewModel.isLoading.collectAsState()
+     val isLoading = loginSignUpViewModel.isLoading.collectAsState()
 
     val context = LocalContext.current
     val textColor = White
@@ -73,87 +116,140 @@ fun LoginScreen(
         }
     }
 
-    Box(
+
+    Box(modifier = Modifier.fillMaxSize()
+        .background(
+            brush = Brush.verticalGradient(
+                colors = BackgroundGradientColor,
+                startY = 0f,
+                endY = Float.POSITIVE_INFINITY
+            )
+        ),
+    ){
+
+        FloatingBubbles()
+     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackGroundColor), contentAlignment = Alignment.Center
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp)
+            .systemBarsPadding(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        ConstraintLayout() {
-            val (appLogo, welComeText, loginHeading, emailField, passwordField ,forgotPassword,  progressBar, loginButton, signUp) = createRefs()
 
 
-            Image(
-                painterResource(id = R.drawable.app_logo), contentDescription = stringResource(
-                    id = R.string.app_name
-                ), modifier = Modifier
-                    .constrainAs(appLogo) {
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        top.linkTo(parent.top, margin = 20.dp)
-                    }
-                    .size(100.dp))
+         Spacer(modifier = Modifier.height(60.dp))
+
+         AnimatedVisibility(
+             visible = animatedProgress > 0.6f,
+             enter = slideInVertically(
+                 initialOffsetY = { it },
+                 animationSpec = tween(800, easing = EaseOutCubic)
+             ) + fadeIn(animationSpec = tween(800))
+         ) {
+         Column(
+             horizontalAlignment = Alignment.CenterHorizontally
+         ) {
+
+             Box(
+                 modifier = Modifier
+                     .size(80.dp)
+                     .clip(CircleShape),
+                 contentAlignment = Alignment.Center
+             ) {
+                 Image(
+                     painter = painterResource(R.drawable.app_logo),
+                     contentDescription = null,
+                     modifier = Modifier.fillMaxSize()
+                 )
+             }
+
+             Spacer(modifier = Modifier.height(24.dp))
+
+             Text(
+                 text = "Welcome back",
+                 color = Color.Black,
+                 fontSize = 32.sp,
+                 fontWeight = FontWeight.Bold
+             )
+
+             Text(
+                 text = "Welcome to Campus TeamUp",
+                 color = Color.Black.copy(alpha = 0.8f),
+                 fontSize = 16.sp,
+                 fontWeight = FontWeight.Normal
+             )
+             // TextAnimation.AnimatedText(modifier = Modifier)
+         }
+
+     }
+
+         Spacer(modifier = Modifier.height(60.dp))
+
+         Card(modifier = Modifier.fillMaxWidth()
+             .padding(horizontal = 8.dp),
+             shape = RoundedCornerShape(28.dp),
+             colors = CardDefaults.cardColors(
+                 containerColor = Color.White.copy(alpha = 0.95f)
+             ),
+             elevation = CardDefaults.cardElevation(defaultElevation = 20.dp)
+         ) {
+             Column(
+                 modifier = Modifier.padding(32.dp),
+                 horizontalAlignment = Alignment.CenterHorizontally
+             ) {
+                 Text(
+                     text = "Login",
+                     fontSize = 28.sp,
+                     fontWeight = FontWeight.Bold,
+                     color = Color(0xFF2D3748)
+                 )
+                 Spacer(modifier = Modifier.height(32.dp))
+
+                 // Email Field
+
+                 UserEmailField(
+                     modifier = Modifier
+                         .fillMaxWidth(), email
+                 )
 
 
 
-            TextAnimation.AnimatedText(modifier = Modifier.constrainAs(welComeText) {
-                top.linkTo(appLogo.bottom, margin = 20.dp)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-            })
 
-            Text(
-                text = stringResource(id = R.string.login_here),
-                style = MaterialTheme.typography.headlineLarge,
-                modifier = Modifier.constrainAs(loginHeading) {
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    top.linkTo(welComeText.bottom, margin = 40.dp)
-                },
-                color = textColor,
-                fontWeight = FontWeight.Bold
+                 Spacer(modifier = Modifier.height(16.dp))
 
-            )
+                 // Password Field
 
-            //  Email input field
+                 UserPasswordField(
+                     modifier = Modifier
 
-            UserEmailField(modifier = Modifier
-                .constrainAs(emailField) {
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    top.linkTo(loginHeading.bottom, margin = 20.dp)
+                         .fillMaxWidth(), password, showPassword
+                 )
+
+                 Spacer(modifier = Modifier.height(8.dp))
+
+                 // Forgot Password
+
+
+                 ForgotPasswordButton(modifier = Modifier.align(Alignment.End), onClick = {
+                navController.navigate("forgotpassword"){
+                    popUpTo("login") {inclusive = false}
+                    launchSingleTop = true
                 }
-                .fillMaxWidth(0.85f), email)
+                 })
 
 
-            UserPasswordField(modifier = Modifier
-                .constrainAs(passwordField) {
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    top.linkTo(emailField.bottom, margin = 20.dp)
-                }
-                .fillMaxWidth(0.85f), password , showPassword)
+                 Spacer(modifier = Modifier.height(24.dp))
 
-
-            if(isLoading.value){
-                ProgressIndicator.showProgressBar(
-                    modifier = Modifier.constrainAs(progressBar) {
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        top.linkTo(passwordField.bottom, margin = 20.dp)
-                    },
-                    isLoading.value
-                )
-            }
-            else {
-                OutlinedButton(onClick = {
-                    if(!CheckEmptyFields.isValidEmail(email.value.trim())){
-                        ToastHelper.showToast(context , "Please Enter valid email")
-                    }
-                    else if(password.value.trim().isEmpty()){
-                        ToastHelper.showToast(context , "Please Enter valid password")
-                    }
-                    else {
+                 // Login Button
+                 Button(
+                     onClick = {
+                         if (!CheckEmptyFields.isValidEmail(email.value.trim())) {
+                             ToastHelper.showToast(context, "Please Enter valid email")
+                         } else if (password.value.trim().isEmpty()) {
+                             ToastHelper.showToast(context, "Please Enter valid password")
+                         } else {
                         loginSignUpViewModel.signInUser(email.value , password.value , onSuccess = {
 
                             loginSignUpViewModel.fetchDataFromDatabase(loginSignUpViewModel.getUserId(email.value.trim()), onUserDataSaved = {
@@ -162,55 +258,102 @@ fun LoginScreen(
                                 context.startActivity(intent)
                             })
                         })
-                    }
-                }, modifier = Modifier.constrainAs(loginButton){
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    top.linkTo(passwordField.bottom, margin = 12.dp)
-                }) {
-                    Text(text = stringResource(id = R.string.login), color = textColor)
-                }
-            }
+                         }
+                     },
+                     modifier = Modifier
+                         .fillMaxWidth()
+                         .height(56.dp),
+                     shape = RoundedCornerShape(16.dp),
+                     colors = ButtonDefaults.buttonColors(
+                         containerColor = Color.Transparent
+                     ),
+                     contentPadding = PaddingValues(0.dp)
+                 ) {
+                     Box(
+                         modifier = Modifier
+                             .fillMaxSize()
+                             .background(
+                                 brush = Brush.horizontalGradient(
+                                     colors = ButtonColor
+                                 ),
+                                 shape = RoundedCornerShape(16.dp)
+                             ),
+                         contentAlignment = Alignment.Center
+                     ) {
+                         if (isLoading.value) {
+                             CircularProgressIndicator(
+                                 color = Color.White,
+                                 modifier = Modifier.size(24.dp)
+                             )
+                         } else {
+                         Text(
+                             text = "Login",
+                             color = Color.White,
+                             fontSize = 18.sp,
+                             fontWeight = FontWeight.SemiBold
+                         )
+                         }
+                     }
+                 }
 
-            // new account sign up button
-            NewAccountSignUpButton(modifier = Modifier.constrainAs(signUp) {
-                end.linkTo(parent.end)
-                top.linkTo(if(isLoading.value) progressBar.bottom else loginButton.bottom , margin = 20.dp)
-            }, onClick = {
+                 Spacer(modifier = Modifier.height(24.dp))
+
+                 // Sign Up Text
+                 Row(
+                     horizontalArrangement = Arrangement.Center,
+                     verticalAlignment = Alignment.CenterVertically
+                 ) {
+                     Text(
+                         text = "Don't have an account? ",
+                         color = Color(0xFF718096),
+                         fontSize = 14.sp
+                     )
+                     NewAccountSignUpButton(onClick = {
                 navController.navigate("signup"){
                     popUpTo("login") {inclusive = false}
                     launchSingleTop = true
                 }
-            })
+                     })
+                 }
 
-            // forgot password button
-            ForgotPasswordButton(modifier = Modifier.constrainAs(forgotPassword) {
-                start.linkTo(parent.start)
-                top.linkTo(if(isLoading.value) progressBar.bottom else loginButton.bottom , margin = 20.dp)
-            }, onClick = {
-                navController.navigate("forgotpassword"){
-                    popUpTo("login") {inclusive = false}
-                    launchSingleTop = true
-                }
-            })
-        }
+         }
+         }
+    }
     }
 }
 
 @Composable
-fun NewAccountSignUpButton(modifier: Modifier, onClick: () -> Unit) {
-    Text(text = stringResource(id = R.string.signUp),
-        color = White, modifier = modifier.clickable {
-            onClick()
-        })
+fun NewAccountSignUpButton( onClick: () -> Unit) {
+    TextButton(
+        onClick = { onClick() },
+        contentPadding = PaddingValues(0.dp)
+    ) {
+        Text(
+            text = "Sign up",
+            color = Color(0xFF667eea),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold
+        )
+    }
 }
 
 @Composable
 fun ForgotPasswordButton(modifier: Modifier, onClick: () -> Unit) {
-    Text(text = stringResource(id = R.string.forgotPassword),
-        color = White, modifier = modifier.clickable {
+
+
+
+    TextButton(
+        onClick = {
             onClick()
-        })
+        },
+        modifier = modifier
+    ) {
+        Text(
+            text = stringResource(id = R.string.forgotPassword),
+            color = Color(0xFF667eea),
+            fontSize = 14.sp
+        )
+    }
 }
 
 
@@ -221,14 +364,14 @@ fun UserEmailField(modifier: Modifier, email: MutableState<String>) {
         onValueChange = { email.value = it },
         colors = TextFieldStyle.myTextFieldColor(),
         shape = TextFieldStyle.defaultShape,
-        maxLines = 1,
+        maxLines = 2,
         label = {
             Text(text = stringResource(id = R.string.enter_email))
         },
         leadingIcon = {
             Icon(
                 painterResource(id = R.drawable.email), contentDescription = "Phone Icon",
-                modifier = Modifier.size(22.dp), tint = White
+                modifier = Modifier.size(22.dp), tint = IconColor
             )
         }, modifier = modifier
     )
@@ -245,26 +388,31 @@ fun UserPasswordField(
         onValueChange = { password.value = it },
         colors = TextFieldStyle.myTextFieldColor(),
         shape = TextFieldStyle.defaultShape,
-        maxLines = 1,
+        maxLines = 2,
         label = {
             Text(text = stringResource(id = R.string.enter_password))
         },
         leadingIcon = {
             Icon(
                 painterResource(id = R.drawable.password), contentDescription = "Password Icon",
-                modifier = Modifier.size(22.dp), tint = White
+                modifier = Modifier.size(22.dp), tint = Color(0xFF667eea)
             )
         },
         trailingIcon = {
             Icon(
-                painterResource( if(showPassword.value)R.drawable.showpass else R.drawable.hidepass), contentDescription = "Eye Icon",
-                modifier = Modifier.size(22.dp).clickable {
-                    showPassword.value = !showPassword.value
-                }, tint = White
+                painterResource(if (showPassword.value) R.drawable.showpass else R.drawable.hidepass),
+                contentDescription = "Eye Icon",
+                modifier = Modifier
+                    .size(22.dp)
+                    .clickable {
+                        showPassword.value = !showPassword.value
+                    },
+                tint = IconColor
             )
         },
         visualTransformation = if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(),
         modifier = modifier
     )
 }
+
 

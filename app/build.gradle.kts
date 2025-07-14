@@ -75,6 +75,7 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging:24.1.0")
     implementation("com.google.firebase:firebase-crashlytics:19.4.3")
     implementation("androidx.activity:activity:1.10.1")
+    implementation("com.google.firebase:firebase-database:21.0.0")
     testImplementation("junit:junit:4.13.2")
 
 

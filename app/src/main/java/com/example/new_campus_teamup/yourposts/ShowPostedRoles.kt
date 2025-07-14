@@ -28,8 +28,7 @@ fun ShowPostedRoles(yourPostViewModel: YourPostViewModel) {
 
     LazyColumn(
         modifier = Modifier
-            .fillMaxWidth()
-            .background(BackGroundColor),
+            .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {

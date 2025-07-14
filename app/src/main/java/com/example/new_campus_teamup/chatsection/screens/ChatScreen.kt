@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -45,8 +46,11 @@ import com.example.new_campus_teamup.helper.ToastHelper
 import com.example.new_campus_teamup.myThemes.TextFieldStyle
 import com.example.new_campus_teamup.mydataclass.SendMessage
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
+import com.example.new_campus_teamup.ui.theme.BackgroundGradientColor
+import com.example.new_campus_teamup.ui.theme.Black
 import com.example.new_campus_teamup.ui.theme.BorderColor
 import com.example.new_campus_teamup.ui.theme.LightTextColor
+import com.example.new_campus_teamup.ui.theme.TopAppBarColor
 import com.example.new_campus_teamup.ui.theme.White
 import com.example.new_campus_teamup.viewmodels.ChatViewModel
 
@@ -57,13 +61,13 @@ import com.example.new_campus_teamup.viewmodels.ChatViewModel
 fun ChatScreen(senderName: String? ,chatRoomId : String? ,  currentUserId : String? , chatViewModel: ChatViewModel = hiltViewModel()) {
 
     val chatHistory = chatViewModel.chatHistory.collectAsState()
+
     val chatHistoryState = rememberLazyListState()
     val activity = LocalContext.current as? Activity
     LaunchedEffect(chatHistory.value){
         chatViewModel.fetchChatHistory(chatRoomId!!)
     }
     val context = LocalContext.current
-    Log.d("ChatHistory","Current user id is $currentUserId <-  ChatRoomId is $chatRoomId <-  SenderName is $senderName")
     var messageText by remember {
         mutableStateOf("")
     }
@@ -82,10 +86,10 @@ fun ChatScreen(senderName: String? ,chatRoomId : String? ,  currentUserId : Stri
     Scaffold(topBar = {
         TopAppBar(title = {
             Text(
-                text = senderName + "", color = White
+                text = senderName + "", color = Black
             )
         }, colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = BackGroundColor, navigationIconContentColor = White
+            containerColor = TopAppBarColor, navigationIconContentColor = Black
         ),
             navigationIcon = {
                 IconButton(onClick = {
@@ -94,15 +98,20 @@ fun ChatScreen(senderName: String? ,chatRoomId : String? ,  currentUserId : Stri
                     Icon(
                         painter = painterResource(id = R.drawable.browseback),
                         contentDescription = null,
-                        tint = White
+                        tint = Black
                     )
                 }
             })
     }) { paddingValues ->
 
+
         ConstraintLayout(
             modifier = Modifier
-                .background(BackGroundColor)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = BackgroundGradientColor
+                    )
+                )
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
@@ -158,7 +167,8 @@ fun ChatScreen(senderName: String? ,chatRoomId : String? ,  currentUserId : Stri
                     placeholder = {
                                   Text(text = "Message", color = LightTextColor)
                     },
-                     colors = TextFieldStyle.myTextFieldColor()
+                     colors = TextFieldStyle.myTextFieldColor(),
+                    shape = TextFieldStyle.defaultShape
                 )
 
                 if(messageText.trim().isNotEmpty()){
@@ -176,7 +186,7 @@ fun ChatScreen(senderName: String? ,chatRoomId : String? ,  currentUserId : Stri
                         }
                         messageText = ""
                     },modifier = Modifier.padding(4.dp)) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = null , tint = White)
+                        Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = null , tint = Black)
                     }
                 }
             }

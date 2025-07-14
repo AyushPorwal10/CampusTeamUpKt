@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.ProgressIndicator
@@ -78,13 +79,13 @@ fun TeamInviteNotification(
         }
     }
 
+
     Card(
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = BorderColor),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF6C63FF)),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier
             .padding(8.dp)
-            .border(1.dp, BackGroundColor, RoundedCornerShape(12.dp))
             .fillMaxWidth()
     ) {
         Column(
@@ -100,7 +101,8 @@ fun TeamInviteNotification(
                     text = "${teamInviteNotification.senderName} " + stringResource(id = R.string.invite_message),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.weight(1f),
-                    color = White
+                    color = White,
+                    fontWeight = FontWeight.SemiBold
                 )
 
                 Row(
@@ -155,6 +157,8 @@ fun TeamInviteNotification(
                         val intent = Intent(context , ViewUserProfile::class.java)
                         intent.putExtra("userId",teamInviteNotification.senderId)
                         intent.putExtra("phone_number" , teamInviteNotification.senderPhoneNumber)
+                        intent.putExtra("userName",teamInviteNotification.senderName)
+
                         context.startActivity(intent)
                     },
                 ) {

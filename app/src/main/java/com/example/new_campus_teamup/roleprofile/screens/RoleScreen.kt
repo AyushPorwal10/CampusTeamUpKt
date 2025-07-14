@@ -12,32 +12,37 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.LoadAnimation
 import com.example.new_campus_teamup.helper.ShimmerEffect
-import com.example.new_campus_teamup.myThemes.TextFieldStyle
 import com.example.new_campus_teamup.mydataclass.RoleDetails
-import com.example.new_campus_teamup.ui.theme.BackGroundColor
-import com.example.new_campus_teamup.ui.theme.BorderColor
-import com.example.new_campus_teamup.ui.theme.White
+import com.example.new_campus_teamup.ui.theme.BackgroundGradientColor
+import com.example.new_campus_teamup.ui.theme.RoleCardSurfaceVariant
+import com.example.new_campus_teamup.ui.theme.RoleOnCardSurfaceVariant
 import com.example.new_campus_teamup.viewmodels.HomeScreenViewModel
 import com.example.new_campus_teamup.viewmodels.SearchRoleVacancy
 
@@ -47,9 +52,8 @@ fun RolesScreen(
     searchRoleVacancy: SearchRoleVacancy,
     saveRole: (RoleDetails) -> Unit
 ) {
-    val textColor = White
-    val bgColor = BackGroundColor
 
+    var isFocused by remember { mutableStateOf(false) }
     val searchText by searchRoleVacancy.searchRoleText.collectAsState()
     val idOfSavedRoles by homeScreenViewModel.listOfSavedRoles.collectAsState()
 
@@ -72,51 +76,63 @@ fun RolesScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(bgColor),
+            .padding(top = 60.dp)
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = BackgroundGradientColor
+                )
+            ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OutlinedTextField(
-            value = searchText,
-            onValueChange = { searchQuery ->
-                searchRoleVacancy.onSearchRoleTextChange(searchQuery)
-            },
-            colors = TextFieldStyle.myTextFieldColor(),
-            shape = TextFieldStyle.defaultShape,
-            maxLines = 1,
-            modifier = Modifier
-                .fillMaxWidth(0.85f)
-                .padding(top = 16.dp),
-            placeholder = {
-                Box(
-                    modifier = Modifier.animateContentSize(),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(
-                        text = placeholders[currentPlaceholderIndex],
-                        style = MaterialTheme.typography.titleMedium,
-                        color = textColor
+
+
+        Card(
+            modifier = Modifier.fillMaxWidth(0.9f),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            OutlinedTextField(
+                value = searchText,
+                onValueChange = { searchQuery ->
+                    searchRoleVacancy.onSearchRoleTextChange(searchQuery)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .onFocusChanged { isFocused = it.isFocused },
+                placeholder = {
+                    Box(
+                        modifier = Modifier.animateContentSize(),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Text(
+                            text = placeholders[currentPlaceholderIndex],
+                            style = MaterialTheme.typography.titleMedium,
+                            color = RoleOnCardSurfaceVariant
+                        )
+                    }
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = RoleOnCardSurfaceVariant
                     )
-                }
-            },
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.search),
-                    contentDescription = null,
-                    modifier = Modifier.size(22.dp),
-                    tint = White
-                )
-            }
-        )
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF4F46E5),
+                    unfocusedBorderColor = Color(0xFFE5E7EB),
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = RoleCardSurfaceVariant
+                ),
+                shape = RoundedCornerShape(16.dp)
+            )
+        }
 
-        HorizontalDivider(
-            thickness = 1.dp,
-            color = BorderColor,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 10.dp)
-        )
-
-        Box(modifier = Modifier.weight(1f)) {
+        Box(modifier = Modifier
+            .weight(1f)
+            .padding(10.dp)) {
             ShowListOfRoles(
                 modifier = Modifier.fillMaxSize(),
                 roles = roles,
@@ -128,7 +144,6 @@ fun RolesScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShowListOfRoles(
     modifier: Modifier,
@@ -145,7 +160,6 @@ fun ShowListOfRoles(
     }
 
 
-
     val filteredRoles = roles.filter { !idOfSavedRoles.contains(it.roleId) }
 
     LazyColumn(
@@ -155,21 +169,18 @@ fun ShowListOfRoles(
     ) {
         items(filteredRoles) { role ->
             ShimmerEffect(modifier, isLoading, contentAfterLoading = {
-
-                    Log.d("FetchedRole", "Showing unsaved role")
-                    SingleRole(role, onSaveRoleClicked = {
-                        saveRole(it)
-                    }, false)
-
-
+                Log.d("FetchedRole", "Showing unsaved role")
+                SingleRoleCard(role, onSaveRoleClicked = {
+                    saveRole(it)
+                }, false)
             })
         }
 
 
         item {
 
-            if(roles.isEmpty() || (roles.size-idOfSavedRoles.size)==0) {
-                Box( contentAlignment = Alignment.Center) {
+            if (roles.isEmpty() || (roles.size - idOfSavedRoles.size) == 0) {
+                Box(contentAlignment = Alignment.Center) {
                     LoadAnimation(
                         modifier = Modifier.size(200.dp),
                         animation = R.raw.noresult,

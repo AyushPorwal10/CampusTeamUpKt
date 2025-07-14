@@ -3,7 +3,7 @@ package com.example.new_campus_teamup.myrepository
 import android.net.Uri
 import android.util.Log
 import com.example.new_campus_teamup.myactivities.UserManager
-import com.example.new_campus_teamup.mydataclass.CollegeDetails
+import com.example.new_campus_teamup.mydataclass.EducationDetails
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.StorageReference
@@ -20,24 +20,29 @@ class UserProfileRepo @Inject constructor(
 ) {
     // college Details
 
-    suspend fun saveCollegeDetails(userId: String,  collegeDetails: CollegeDetails) {
+    suspend fun saveEducationDetails(userId: String, educationDetails: EducationDetails) {
         Log.d("CollegeDetails", "Saving CollegeDetails data")
         Log.d("Parallel","Going to start D1")
          val deferred1 = firebaseFirestore.collection("all_user_id").document(userId).collection("all_user_details")
-            .document("college_details").set(collegeDetails)
+            .document("college_details").set(educationDetails)
         Log.d("Parallel","Going to start D2")
 
-        val deferred2 = firebaseFirestore.collection("user_images").document(userId)
-            .set(mapOf("user_image" to collegeDetails.userImageUrl))
 
-        deferred1.await()
-        Log.d("Parallel","D1 Done")
-        deferred2.await()
-        Log.d("Parallel","D2 Done")
     }
 
+    suspend fun saveUserImage(userId : String, userImageUrl : Uri , onSuccess : () -> Unit ){
 
-    suspend fun observeCurrentUserImage(currentUserId : String) : Flow<String> = callbackFlow{
+        val userImageDownloadUrl = uploadUserImageToStorage(userId , userImageUrl)
+
+        val deferred = firebaseFirestore.collection("user_images").document(userId)
+            .set(mapOf("user_image" to userImageDownloadUrl))
+
+        deferred.await()
+
+        onSuccess()
+    }
+
+     fun observeCurrentUserImage(currentUserId : String) : Flow<String?> = callbackFlow{
         Log.d("CollegeDetails","Current User id is $currentUserId")
         val documentReference = firebaseFirestore.collection("user_images").document(currentUserId)
 
@@ -48,7 +53,7 @@ class UserProfileRepo @Inject constructor(
             }
 
             if(snapshot != null && snapshot.exists()) {
-                val imageUrl = snapshot.getString("user_image") as String
+                val imageUrl = snapshot.getString("user_image") as? String
                 Log.d("CollegeDetails","Current user image loaded : $imageUrl")
                 trySend(imageUrl)
             }
@@ -56,7 +61,7 @@ class UserProfileRepo @Inject constructor(
         awaitClose{realTimeImageFetching.remove()}
     }
 
-    suspend fun fetchCollegeDetails(userId: String): DocumentSnapshot {
+    suspend fun fetchEducationDetails(userId: String): DocumentSnapshot {
         return firebaseFirestore.collection("all_user_id").document(userId)
             .collection("all_user_details").document("college_details").get().await()
 

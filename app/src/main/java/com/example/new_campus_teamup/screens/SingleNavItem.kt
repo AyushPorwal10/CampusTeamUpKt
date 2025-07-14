@@ -7,8 +7,11 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.new_campus_teamup.ui.theme.Black
 import com.example.new_campus_teamup.ui.theme.White
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -21,13 +24,13 @@ fun NavItem(
     label : String,
     navigate : () -> Unit) {
     NavigationDrawerItem(
-        label = { Text(text = label, color = White) },
+        label = { Text(text = label, color = Black , fontWeight = FontWeight.Medium) },
         selected = false,
         icon = {
             Icon(
                 painter = painterResource(id = icon),
                 contentDescription = null,
-                tint = White,
+                tint = Black,
                 modifier = Modifier.size(26.dp)
             )
         },

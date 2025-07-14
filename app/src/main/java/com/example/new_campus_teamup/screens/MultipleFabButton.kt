@@ -56,7 +56,6 @@ enum class Identifier{
     Project
 }
 class MinFabItem(
-    val icon : ImageBitmap,
     val label : String,
     val identifier : String
 )
@@ -75,9 +74,7 @@ fun MultipleFabButton(
     val rotate by transition.animateFloat(label = "rotate") {
         if (it == MultifloatingState.Expanded) 315f else 0f
     }
-    val fabScale by transition.animateFloat(label = "FabScale"){
-        if(it == MultifloatingState.Expanded) 30f else 0f
-    }
+
     val alpha by transition.animateFloat(
         label = "alpha",
         transitionSpec = { tween(durationMillis = 50) }
@@ -85,17 +82,12 @@ fun MultipleFabButton(
         if(it == MultifloatingState.Expanded) 1f else 0f
     }
 
-    val textShadow by transition.animateDp(
-        label = "textShadow",
-        transitionSpec = { tween(durationMillis = 50) }
-    ) {
-        if(it == MultifloatingState.Expanded)  2.dp else 0.dp
-    }
+
 
 
     Column(
         horizontalAlignment = Alignment.End,
-        modifier = Modifier.background(Color.Transparent)//try to remove
+        modifier = Modifier.background(Color.Transparent)
     ){
 
         if(transition.currentState == MultifloatingState.Expanded){
@@ -198,16 +190,6 @@ fun MinFab(
                 )
         ) {
 
-
-            drawImage(
-                image = item.icon,
-                topLeft = Offset(
-                    center.x - (item.icon.width / 2),
-                    center.y - (item.icon.width / 2),
-                ),
-                alpha = alpha,
-                colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.White)
-            )
         }
     }
 }

@@ -4,4 +4,5 @@ sealed class BottomNavScreens(val screen : String) {
     data object Roles : BottomNavScreens("roles")
     data object Vacancies : BottomNavScreens("vacancies")
     data object Projects : BottomNavScreens("projects")
+    data object Home : BottomNavScreens("home")
 }

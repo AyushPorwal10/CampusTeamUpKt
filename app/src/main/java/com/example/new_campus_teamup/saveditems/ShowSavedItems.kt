@@ -28,9 +28,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -43,8 +46,11 @@ import com.example.new_campus_teamup.helper.LoadAnimation
 import com.example.new_campus_teamup.helper.ToastHelper
 import com.example.new_campus_teamup.myactivities.UserData
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
+import com.example.new_campus_teamup.ui.theme.BackgroundGradientColor
 import com.example.new_campus_teamup.ui.theme.Black
 import com.example.new_campus_teamup.ui.theme.BorderColor
+import com.example.new_campus_teamup.ui.theme.LightBlueColor
+import com.example.new_campus_teamup.ui.theme.TopAppBarColor
 import com.example.new_campus_teamup.ui.theme.White
 import com.example.new_campus_teamup.viewmodels.SavedItemsViewModel
 
@@ -84,18 +90,18 @@ fun ShowSavedItems(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(id = R.string.saved_items)) },
+                title = { Text(text = stringResource(id = R.string.saved_items) , fontWeight = FontWeight.SemiBold) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = bgColor,
-                    titleContentColor = textColor,
-                    navigationIconContentColor = textColor
+                    containerColor = TopAppBarColor,
+                    titleContentColor = Black,
+                    navigationIconContentColor = Black
                 ),
                 navigationIcon = {
                     IconButton(onClick = { activity?.finish() }) {
                         Icon(
                             painter = painterResource(id = R.drawable.browseback),
                             contentDescription = null,
-                            tint = textColor
+                            tint = Black
                         )
                     }
                 }
@@ -111,7 +117,11 @@ fun ShowSavedItems(
                 modifier = Modifier
                     .padding(paddingValues)
                     .fillMaxSize()
-                    .background(bgColor)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = BackgroundGradientColor
+                        )
+                    )
             ) {
                 HorizontalDivider(
                     modifier = Modifier
@@ -133,12 +143,13 @@ fun ShowSavedItems(
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (currentDestination == "savedRoles") White else BackGroundColor
+                            containerColor = if (currentDestination == "savedRoles")  LightBlueColor else Color.LightGray
                         )
                     ) {
                         Text(
                             text = stringResource(id = R.string.roles),
-                            color = if (currentDestination == "savedRoles") Black else White
+                            color = if (currentDestination == "savedRoles") White else Black,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
 
@@ -150,12 +161,13 @@ fun ShowSavedItems(
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (currentDestination == "savedVacancy") White else BackGroundColor
+                            containerColor = if (currentDestination == "savedVacancy") LightBlueColor else Color.LightGray
                         )
                     ) {
                         Text(
                             text = stringResource(id = R.string.vacancies),
-                            color = if (currentDestination == "savedVacancy") Black else White
+                            color = if (currentDestination == "savedVacancy")  White else Black,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
 
@@ -167,12 +179,13 @@ fun ShowSavedItems(
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (currentDestination == "savedProjects") White else BackGroundColor
+                            containerColor = if (currentDestination == "savedProjects") LightBlueColor else Color.LightGray
                         )
                     ) {
                         Text(
                             text = stringResource(id = R.string.projects),
-                            color = if (currentDestination == "savedProjects") Black else White
+                            color = if (currentDestination == "savedProjects")  White else Black,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
@@ -180,7 +193,7 @@ fun ShowSavedItems(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = 8.dp)
+                        .padding(8.dp)
                 ) {
                     NavHost(navController, startDestination = "savedRoles") {
                         composable("savedRoles") {

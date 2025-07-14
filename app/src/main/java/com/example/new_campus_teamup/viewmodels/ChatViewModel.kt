@@ -69,13 +69,12 @@ class ChatViewModel @Inject constructor(
     }
 
     fun fetchChatHistory(chatRoomId: String){
-        Log.d("ChatHistory","viewmodel chat room id is $chatRoomId <-")
         startOperation {
-            Log.d("ChatHistory" , "viewmodel Going to fetch chats")
 
             chatRepository.fetchChatHistory(chatRoomId).collect{chats->
                 _chatHistory.value = chats
             }
+
         }
     }
 }

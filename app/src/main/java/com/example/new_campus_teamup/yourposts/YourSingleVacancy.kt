@@ -1,16 +1,26 @@
 package com.example.new_campus_teamup.yourposts
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +34,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -39,188 +51,128 @@ import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.Dimensions
 import com.example.new_campus_teamup.helper.TimeAndDate
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
+import com.example.new_campus_teamup.roleprofile.screens.DetailItem
 import com.example.new_campus_teamup.ui.theme.BluePrimary
 import com.example.new_campus_teamup.ui.theme.BorderColor
 import com.example.new_campus_teamup.ui.theme.LightTextColor
+import com.example.new_campus_teamup.ui.theme.RoleCardTextColor
 import com.example.new_campus_teamup.ui.theme.White
 
 
 @Composable
 fun YourSingleVacancy(vacancy: VacancyDetails, onVacancyDelete: (String) -> Unit) {
+    val isExpanded = remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    val textColor = White
-    var isExpanded by remember { mutableStateOf(false) }
 
-    Box(
+    var isHovered by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(
+        targetValue = if (isHovered) 1.02f else 1f,
+        animationSpec = tween(300),
+        label = "scale"
+    )
+
+
+
+    Card(
         modifier = Modifier
-            .border(
-                0.5.dp, BorderColor,
-                shape = RoundedCornerShape(Dimensions.largeRoundedShape)
-            )
-            .fillMaxWidth(0.9f)
-
-            .animateContentSize(), contentAlignment = Alignment.Center
+            .fillMaxWidth()
+            .scale(scale)
+            .padding(8.dp)
+            .clickable { isHovered = !isHovered },
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
-
-        ConstraintLayout(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth()
+        Column(
+            modifier = Modifier.padding(24.dp)
         ) {
-            val (teamLogo, teamName, roleLookingFor, hackathonName, roleDescription, knowMoreBtn, downIcon, applyBtn, skillRequired, saveVacancyBtn) = createRefs()
 
 
-
-            AsyncImage(
-                model = vacancy.teamLogo ?: R.drawable.profile,
-                contentDescription = "User Profile",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .constrainAs(teamLogo) {
-                        top.linkTo(parent.top)
-                        start.linkTo(parent.start)
-                    }
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .border(1.dp, White, CircleShape))
-
-            Text(text = vacancy.teamName,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                softWrap = false,
-                fontWeight = FontWeight.SemiBold,
-                color = textColor,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.constrainAs(teamName)
-                {
-                    top.linkTo(teamLogo.top)
-                    bottom.linkTo(teamLogo.bottom)
-                    start.linkTo(teamLogo.end, margin = 8.dp)
-                })
-
-            IconButton(onClick = {
-                onVacancyDelete(vacancy.vacancyId)
-            },
-                modifier = Modifier
-                    .constrainAs(saveVacancyBtn) {
-                        top.linkTo(teamName.top)
-                        bottom.linkTo(teamName.bottom)
-                        end.linkTo(parent.end)
-                    }
-                    .size(26.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.delete),
-                    contentDescription = null,
-                    tint = White
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .background(
+                                Color.White,
+                                RoundedCornerShape(16.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AsyncImage(model = vacancy.teamLogo.ifBlank { R.drawable.vacancies },
+                            contentDescription = null ,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clip(CircleShape)
+                                .border(0.5.dp , Color.LightGray , CircleShape)
+                        )
+                    }
+
+
+                    Text(
+                        text = vacancy.teamName,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = RoleCardTextColor
+                        )
+                    )
+                }
+
+                IconButton(
+                    onClick = { onVacancyDelete(vacancy.vacancyId) }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.delete),
+                        contentDescription = "Delete",
+                        tint = Color.Red
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                DetailItem(
+                    icon = R.drawable.roles,
+                    text = "Looking for "+ vacancy.roleLookingFor,
+
+                    )
+
+                DetailItem(
+                    icon = R.drawable.hackathon,
+                    text = vacancy.hackathonName,
+                )
+                DetailItem(
+                        icon = R.drawable.skills,
+                text = vacancy.skills,
                 )
             }
 
-            Text(
-                text = "Looking For : ${vacancy.roleLookingFor}",
-                maxLines = 1,
-                fontWeight = FontWeight.Medium,
-                overflow = TextOverflow.Ellipsis,
-                softWrap = false,
-                style = MaterialTheme.typography.titleMedium,
-                color = LightTextColor,
-                modifier = Modifier.constrainAs(roleLookingFor) {
-                    top.linkTo(teamLogo.bottom, margin = 12.dp)
-                    start.linkTo(parent.start)
-                })
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
-            if (isExpanded) {
-                Text(text = "Hackathon : ${vacancy.hackathonName}", color = LightTextColor,
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .constrainAs(hackathonName) {
-                            top.linkTo(roleLookingFor.bottom, margin = 4.dp)
-                            start.linkTo(parent.start)
-                        })
-
-                Text(text = "Skills Required : ${vacancy.skills}", color = BluePrimary,
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .constrainAs(skillRequired) {
-                            top.linkTo(hackathonName.bottom, margin = 4.dp)
-                            start.linkTo(parent.start)
-                        })
-
-
-
-                if (isExpanded) {
-
-                    Text(
-                        modifier = Modifier.constrainAs(roleDescription){
-                            top.linkTo(skillRequired.bottom , margin = 6.dp)
-                            start.linkTo(parent.start)
-                        },
-                        softWrap = true,
-                        text = "Description : " + vacancy.roleDescription.ifEmpty { "No Description" },
-                        style = MaterialTheme.typography.titleSmall,
-                        color = LightTextColor,
-                    )
-                }
-                TextButton(
-                    onClick = {
-                    },
-                    modifier = Modifier.constrainAs(applyBtn) {
-                        top.linkTo(roleDescription.bottom, margin = 4.dp)
-                        start.linkTo(parent.start)
-                    }, contentPadding = PaddingValues(vertical = 2.dp, horizontal = 10.dp)
-                ) {
-                    Text(
-                        text = "Posted on : ${TimeAndDate.getTimeAgoFromDate(vacancy.postedOn)}",
-                        color = White,
-                        fontSize = 12.sp
-                    )
-                }
+                Text(
+                    text = "Posted ${TimeAndDate.getTimeAgoFromDate(vacancy.postedOn)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = RoleCardTextColor
+                )
             }
 
-            Text(text = if (isExpanded) stringResource(R.string.view_less) else stringResource(R.string.view_more),
-                color = textColor,
-                fontWeight = FontWeight.Light,
-                modifier = Modifier
-                    .constrainAs(knowMoreBtn) {
-                        top.linkTo(
-                            if (isExpanded) roleDescription.bottom else roleLookingFor.bottom,
-                            margin = 20.dp
-                        )
-                    }
-                    .clickable {
-                        isExpanded = !isExpanded
-                    })
-
-
-            Icon(painter = painterResource(id = R.drawable.knowmore),
-                contentDescription = null,
-                tint = White,
-                modifier = Modifier
-                    .size(18.dp)
-                    .constrainAs(downIcon) {
-                        top.linkTo(
-                            if (isExpanded) roleDescription.bottom else roleLookingFor.bottom,
-                            margin = 20.dp
-                        )
-                        end.linkTo(knowMoreBtn.end)
-                        start.linkTo(knowMoreBtn.end)
-                    }
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) {
-                        isExpanded = !isExpanded
-                    })
-            createHorizontalChain(knowMoreBtn, downIcon, chainStyle = ChainStyle.Packed)
-
-            if (isExpanded) {
-                createHorizontalChain(applyBtn, knowMoreBtn, chainStyle = ChainStyle.Spread)
-            }
         }
     }
-
-
 }
