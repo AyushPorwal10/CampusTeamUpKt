@@ -3,9 +3,11 @@
 
     <style name="Theme.CAMPUS_TEAMUP" parent="android:Theme.Material.Light.NoActionBar" >
         <item name="android:windowLightStatusBar">false</item>
-<!--        <item name="android:statusBarColor">@color/appBgColor</item>-->
-<!--        <item name="android:navigationBarColor">@color/appBgColor</item>-->
-<!--        <item name="android:windowBackground">@drawable/splash_screen</item>-->
+    </style>
 
+    <style name="Theme.CampusTeamUp.TransparentSplash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@android:color/transparent</item>
+        <item name="windowSplashScreenAnimatedIcon">@null</item>
+        <item name="postSplashScreenTheme">@style/Theme.CAMPUS_TEAMUP</item>
     </style>
 </resources>

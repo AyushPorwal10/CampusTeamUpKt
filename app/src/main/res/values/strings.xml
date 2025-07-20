@@ -86,4 +86,8 @@
     <string name="education_details">Education Details</string>
     <string name="enter_skill">Enter skill</string>
     <string name="leetcode">Leetcode</string>
+    <string name="browse_project">Browse Projects</string>
+    <string name="find_team_members">Find your team members.</string>
+    <string name="find_your_team">Find your team.</string>
+    <string name="collaborate_on_projects">Collaborate on Projects.</string>
 </resources>

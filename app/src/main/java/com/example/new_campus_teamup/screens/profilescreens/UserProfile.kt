@@ -1,21 +1,13 @@
 package com.example.new_campus_teamup.screens.profilescreens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -26,8 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.myAnimation.FloatingBubbles
 import com.example.new_campus_teamup.ui.theme.BackgroundGradientColor
@@ -35,7 +25,11 @@ import com.example.new_campus_teamup.viewmodels.UserProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserProfileScreen(userProfileViewModel: UserProfileViewModel) {
+fun UserProfileScreen(
+    userProfileViewModel: UserProfileViewModel,
+    userName: String,
+    userEmail: String
+) {
 
     Scaffold(topBar = {
         TopAppBar(
@@ -69,7 +63,7 @@ fun UserProfileScreen(userProfileViewModel: UserProfileViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally,
 
                 ) {
-                ProfileCard(userProfileViewModel)
+                ProfileCard(userProfileViewModel, userName , userEmail)
                 EducationDetailsCard(userProfileViewModel)
                 SkillsCard(userProfileViewModel)
                 CodingProfilesCard(userProfileViewModel)

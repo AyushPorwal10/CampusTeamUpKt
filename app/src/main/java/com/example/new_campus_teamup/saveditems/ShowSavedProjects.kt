@@ -17,7 +17,6 @@ import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.LoadAnimation
 import com.example.new_campus_teamup.mydataclass.ProjectDetails
 import com.example.new_campus_teamup.project.screens.SingleProject
-import com.example.new_campus_teamup.ui.theme.BackGroundColor
 
 @Composable
 fun ShowSavedProjects(

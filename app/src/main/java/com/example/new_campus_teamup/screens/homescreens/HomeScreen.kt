@@ -154,7 +154,10 @@ fun HomeScreen(
                         .padding(start = 20.dp)
                         .height(150.dp)
                         .clickable {
-                            val intent = Intent(context, UserProfile::class.java)
+                            val intent = Intent(context, UserProfile::class.java).apply {
+                                putExtra("userName",homeScreenViewModel.userData.value?.userName)
+                                putExtra("userEmail",homeScreenViewModel.userData.value?.email)
+                            }
                             context.startActivity(intent)
                         },
                     contentAlignment = Alignment.CenterStart

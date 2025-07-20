@@ -177,7 +177,7 @@ fun ForgotPasswordScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Image(
-                                painter = painterResource(R.drawable.app_logo),
+                                painter = painterResource(R.drawable.campus_teamup_circle),
                                 contentDescription = null,
                                 modifier = Modifier.fillMaxSize()
                             )

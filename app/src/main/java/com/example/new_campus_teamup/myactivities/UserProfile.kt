@@ -22,6 +22,10 @@ class UserProfile : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val userName = intent.getStringExtra("userName") ?: ""
+        val userEmail = intent.getStringExtra("userEmail") ?: ""
+
+
         setContent {
             enableEdgeToEdge()
             val context = LocalContext.current
@@ -35,7 +39,7 @@ class UserProfile : ComponentActivity() {
                 Log.d("CollegeDetails", "Fetched for first time")
             }
 //            UserProfiles(userProfileViewModel)
-            UserProfileScreen(userProfileViewModel)
+            UserProfileScreen(userProfileViewModel, userName , userEmail)
             LaunchedEffect(Unit) {
                 userProfileViewModel.errorMessage.collect { error ->
                     error?.let {

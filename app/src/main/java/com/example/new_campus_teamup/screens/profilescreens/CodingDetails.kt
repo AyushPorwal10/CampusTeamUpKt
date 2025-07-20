@@ -1,5 +1,6 @@
 package com.example.new_campus_teamup.screens.profilescreens
 
+import android.content.Intent
 import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -54,7 +55,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.core.net.toUri
 import com.example.new_campus_teamup.R
+import com.example.new_campus_teamup.helper.CheckEmptyFields
 import com.example.new_campus_teamup.helper.ToastHelper
 import com.example.new_campus_teamup.myThemes.TextFieldStyle
 import com.example.new_campus_teamup.ui.theme.IconColor
@@ -121,7 +124,7 @@ fun CodingProfilesCard(userProfileViewModel: UserProfileViewModel) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 70.dp ,max = 300.dp),
+                    .heightIn(min = 20.dp ,max = 300.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 items(codingProfiles.value) { profileUrl ->
@@ -137,6 +140,7 @@ fun CodingProfilesCard(userProfileViewModel: UserProfileViewModel) {
 
 @Composable
 fun ShowCodingProfiles(profileUrl: String) {
+    val context = LocalContext.current
 
     val platformNameAndIcon = CheckProfileLink.getPlatformNameAndIcon(profileUrl)
     Box(
@@ -177,7 +181,15 @@ fun ShowCodingProfiles(profileUrl: String) {
                     .background(
                         color = Color(0xFF6E66D3),
                         shape = RoundedCornerShape(16.dp)
-                    )
+                    ).clickable {
+                        if(CheckEmptyFields.isValidHttpsUrl(profileUrl)){
+                            val browseLink = Intent(Intent.ACTION_VIEW , profileUrl.toUri())
+                            context.startActivity(browseLink)
+                        }
+                        else {
+                            ToastHelper.showToast(context , "No Profile found.")
+                        }
+                    }
             ) {
                 Text(
                     "Visit",
@@ -186,7 +198,7 @@ fun ShowCodingProfiles(profileUrl: String) {
                     modifier = Modifier.padding(start = 10.dp, end = 2.dp)
                 )
                 Icon(
-                    painter = painterResource(R.drawable.college),
+                    painter = painterResource(R.drawable.visit),
                     tint = Color.White,
                     contentDescription = null,
                     modifier = Modifier

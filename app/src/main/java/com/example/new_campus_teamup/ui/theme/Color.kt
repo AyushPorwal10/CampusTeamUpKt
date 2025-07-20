@@ -31,6 +31,10 @@ val ButtonColor = listOf(
 val RoleCardGradient = Brush.linearGradient(
 colors = listOf(Color(0xFF4F46E5), Color(0xFF7C3AED))
 )
+
+val WhiteGradient = Brush.linearGradient(
+    listOf( Color(0xFFFFFFFF) , Color(0xFFFFFFFF))
+)
 val  RoleCardTextColor = Color(0xFF6B7280)
 
 val RoleCardSurfaceVariant = Color(0xFFF9FAFB)

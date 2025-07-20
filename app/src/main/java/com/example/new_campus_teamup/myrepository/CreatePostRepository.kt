@@ -61,8 +61,7 @@ class CreatePostRepository @Inject constructor(
     }
 
     suspend fun fetchImageUrlFromUserDetails(userId: String): DocumentSnapshot {
-        return firebaseFirestore.collection("all_user_id").document(userId)
-            .collection("all_user_details").document("college_details").get().await()
+        return firebaseFirestore.collection("user_images").document(userId).get().await()
     }
 
 

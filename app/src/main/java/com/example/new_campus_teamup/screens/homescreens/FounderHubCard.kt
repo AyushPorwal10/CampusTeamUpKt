@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -84,7 +85,7 @@ fun FounderHubCard(onClick: () -> Unit ) {
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(painter = painterResource(R.drawable.profile), contentDescription = null)
+                    Icon(painter = painterResource(R.drawable.idea), contentDescription = null , modifier = Modifier.size(26.dp))
                     Text(
                         stringResource(R.string.founders_hub),
                         style = MaterialTheme.typography.titleLarge,

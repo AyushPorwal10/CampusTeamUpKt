@@ -50,7 +50,7 @@ import com.example.new_campus_teamup.viewmodels.UserProfileViewModel
 
 
 @Composable
-fun ProfileCard(userProfileViewModel: UserProfileViewModel) {
+fun ProfileCard(userProfileViewModel: UserProfileViewModel, userName: String, userEmail: String) {
 
 
     var pressed by remember { mutableStateOf(false) }
@@ -118,12 +118,12 @@ fun ProfileCard(userProfileViewModel: UserProfileViewModel) {
                 )
 
                 Text(
-                    "Ayush Porwal",
+                    userName,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    "ayushporwal1010@gmail.com",
+                    userEmail,
                     fontWeight = FontWeight.Light,
                     style = MaterialTheme.typography.titleSmall
                 )
@@ -149,11 +149,22 @@ fun AddImageCard(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         if (uri != null) {
-            selectedImageFromUser.value = uri
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val fileSizeInBytes = inputStream?.available() ?: 0
+            inputStream?.close()
+
+            val maxFileSizeInBytes = 2 * 1024 * 1024
+
+            if (fileSizeInBytes > maxFileSizeInBytes) {
+                ToastHelper.showToast(context, "Image size should be less than 2MB")
+            } else {
+                selectedImageFromUser.value = uri
+            }
         } else {
             ToastHelper.showToast(context, "No image selected")
         }
     }
+
 
     if (showDialog) {
 

@@ -40,16 +40,21 @@ import com.example.new_campus_teamup.viewmodels.ViewProfileViewModel
 fun ViewUserImage(
     viewProfileViewModel: ViewProfileViewModel,
     notificationViewModel: NotificationViewModel,
-    receiverName: String?
+    receiverName: String?,
+    receiverId: String?
 ) {
 
-    val currentUserId by notificationViewModel.senderId.collectAsState()
     var pressed by remember { mutableStateOf(false) }
 
-    LaunchedEffect(currentUserId) {
-        viewProfileViewModel.observeCurrentUserImage(currentUserId)
-    }
+
+        LaunchedEffect(receiverId) {
+            if(receiverId != null)
+            viewProfileViewModel.observeCurrentUserImage(receiverId)
+        }
+
     val userImage = viewProfileViewModel.userImage.collectAsState()
+
+
 
 
     val scale by animateFloatAsState(

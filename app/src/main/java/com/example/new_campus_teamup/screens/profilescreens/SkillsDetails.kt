@@ -219,12 +219,13 @@ fun EditSkillsDialog(
                             },
                             leadingIcon = {
                                 Icon(
-                                    painterResource(id = R.drawable.skills), contentDescription = "Phone Icon",
+                                    painterResource(id = R.drawable.skills), contentDescription = null,
                                     modifier = Modifier.size(22.dp), tint = IconColor
                                 )
                             },
+                            modifier = Modifier.weight(0.8f)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+//                        Spacer(modifier = Modifier.width(8.dp))
 
                         IconButton(onClick = {
                             if(currentSkillUserAdding.value.isNotEmpty() && !updatedSkillList.contains(currentSkillUserAdding.value)){
@@ -232,7 +233,7 @@ fun EditSkillsDialog(
                                 currentSkillUserAdding.value = ""// reset
                             }
                         }) {
-                            Icon(imageVector = Icons.Default.Add, contentDescription = null , modifier = Modifier.size(22.dp).padding(start = 6.dp))
+                            Icon(imageVector = Icons.Default.Add, contentDescription = null , modifier = Modifier.size(22.dp), tint = IconColor)
                         }
                     }
 

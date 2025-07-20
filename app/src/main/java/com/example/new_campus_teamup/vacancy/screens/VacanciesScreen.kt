@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,12 +18,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,6 +42,8 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.new_campus_teamup.R
@@ -44,6 +51,7 @@ import com.example.new_campus_teamup.helper.LoadAnimation
 import com.example.new_campus_teamup.helper.ShimmerEffect
 import com.example.new_campus_teamup.myThemes.TextFieldStyle
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
+import com.example.new_campus_teamup.screens.homescreens.CustomRoundedCorner
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
 import com.example.new_campus_teamup.ui.theme.BackgroundGradientColor
 import com.example.new_campus_teamup.ui.theme.BorderColor
@@ -54,6 +62,7 @@ import com.example.new_campus_teamup.viewmodels.HomeScreenViewModel
 import com.example.new_campus_teamup.viewmodels.SearchRoleVacancy
 import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VacanciesScreen(
     homeScreenViewModel: HomeScreenViewModel,
@@ -90,75 +99,90 @@ fun VacanciesScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 60.dp)
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = BackgroundGradientColor
-                )
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Scaffold(topBar = {
+        TopAppBar(
+            title = {
+                Text(stringResource(R.string.app_name), fontWeight = FontWeight.Bold)
+            },
+            colors = topAppBarColors(
+                containerColor = Color(0xFFEFEEFF),
+            )
+        )
+    }) { paddingValues ->
 
-        Card(
-            modifier = Modifier.fillMaxWidth(0.9f),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-        ) {
-            OutlinedTextField(
-                value = searchText,
-                onValueChange = { searchQuery ->
-                    searchRoleVacancy.onSearchedVacancyTextChange(searchQuery)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .onFocusChanged { isFocused = it.isFocused },
-                placeholder = {
-                    Box(
-                        modifier = Modifier.animateContentSize(),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        Text(
-                            text = searchOption[placeHolderIndex],
-                            style = MaterialTheme.typography.titleMedium,
-                            color = RoleOnCardSurfaceVariant
-                        )
-                    }
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
-                        tint = RoleOnCardSurfaceVariant
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = BackgroundGradientColor
                     )
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF4F46E5),
-                    unfocusedBorderColor = Color(0xFFE5E7EB),
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = RoleCardSurfaceVariant
                 ),
-                shape = RoundedCornerShape(16.dp)
-            )
-        }
-        Box(modifier = Modifier.weight(1f)) {
-            ShowListOfVacancies(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(5.dp),
-                vacancies = vacancies,
-                homeScreenViewModel = homeScreenViewModel,
-                saveVacancy = saveVacancy,
-                idOfSavedVacancy = idOfSavedVacancy
-            )
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            HorizontalDivider(modifier = Modifier.height(1.dp) , color = Color.LightGray)
+
+            CustomRoundedCorner(stringResource(R.string.find_your_team))
+
+
+            Card(
+                modifier = Modifier.fillMaxWidth(0.9f),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            ) {
+                OutlinedTextField(
+                    value = searchText,
+                    onValueChange = { searchQuery ->
+                        searchRoleVacancy.onSearchedVacancyTextChange(searchQuery)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .onFocusChanged { isFocused = it.isFocused },
+                    placeholder = {
+                        Box(
+                            modifier = Modifier.animateContentSize(),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            Text(
+                                text = searchOption[placeHolderIndex],
+                                style = MaterialTheme.typography.titleMedium,
+                                color = RoleOnCardSurfaceVariant
+                            )
+                        }
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search",
+                            tint = RoleOnCardSurfaceVariant
+                        )
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF4F46E5),
+                        unfocusedBorderColor = Color(0xFFE5E7EB),
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = RoleCardSurfaceVariant
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                )
+            }
+            Box(modifier = Modifier.weight(1f)) {
+                ShowListOfVacancies(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(5.dp),
+                    vacancies = vacancies,
+                    homeScreenViewModel = homeScreenViewModel,
+                    saveVacancy = saveVacancy,
+                    idOfSavedVacancy = idOfSavedVacancy
+                )
+            }
         }
     }
 }
-
 @Composable
 fun ShowListOfVacancies(
     modifier: Modifier,

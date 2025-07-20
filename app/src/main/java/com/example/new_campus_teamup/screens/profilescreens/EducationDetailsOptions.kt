@@ -2,7 +2,6 @@ package com.example.new_campus_teamup.screens.profilescreens
 
 object EducationDetailsOptions {
     val courseOptionList = listOf(
-        "Select course",
         "Bachelor of Technology",
         "Business Administration (BBA)",
         "Master of Technology",
@@ -11,7 +10,6 @@ object EducationDetailsOptions {
         "other"
     )
     val branchOptionList = listOf(
-        "Select branch",
        "Computer Science",
         "Artificial Intelligence",
         "Information Technology",
@@ -22,7 +20,6 @@ object EducationDetailsOptions {
     )
 
     val yearOfPassingOptionList = listOf(
-        "Select year",
         "Passing year : 2022",
         "Passing year : 2023",
         "Passing year : 2024",

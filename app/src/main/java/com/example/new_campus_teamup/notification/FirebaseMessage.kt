@@ -85,7 +85,7 @@ class FirebaseMessage : FirebaseMessagingService() {
         )
 
         val notificationBuilder = NotificationCompat.Builder(this,"channel_id")
-            .setSmallIcon(R.drawable.notifications)
+            .setSmallIcon(R.drawable.campus_teamup_circle)
             .setContentTitle(title)
             .setContentText(message)
             .setAutoCancel(true)

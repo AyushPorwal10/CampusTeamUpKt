@@ -80,12 +80,13 @@ class CreatePostViewModel @Inject constructor(
 
         launchWithLoading {
             val snapshot = createPostRepository.fetchImageUrlFromUserDetails(userId)
-            var userImageUrl = snapshot.toObject(EducationDetails::class.java)
+            var userImageUrl = snapshot.get("user_image")
+
             createPostRepository.postRole(
                 collegeName,
                 userId,
                 userName,
-                 "",
+                userImageUrl?.toString() ?: "",
                 role,
                 datePosted, canPostRole = {
                     _isLoading.value = false

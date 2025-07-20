@@ -1,5 +1,7 @@
 package com.example.new_campus_teamup.screens
 
+import android.app.Activity
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -14,11 +16,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.content.ContextCompat.startActivity
 import com.example.new_campus_teamup.R
+import com.example.new_campus_teamup.email_pass_login.LoginSignUp
 import com.example.new_campus_teamup.helper.ProgressIndicator
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
 import com.example.new_campus_teamup.ui.theme.BackgroundGradientColor
@@ -29,11 +34,13 @@ import com.example.new_campus_teamup.ui.theme.White
 
 @Composable
 fun OnboardingScreen(
-    navigateToLoginSignUpScreen: () -> Unit = {}
+
 ) {
 
     val showProgressBar = remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+    val activity = context as? Activity
 
 
 
@@ -65,7 +72,10 @@ fun OnboardingScreen(
         }
         else {
             OutlinedButton(
-                onClick = { navigateToLoginSignUpScreen() },
+                onClick = {
+                    context.startActivity(Intent(context, LoginSignUp::class.java))
+                    activity?.finish()
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF4D00E7)
                 ),

@@ -70,6 +70,9 @@ fun HomeScreenContent(modifier: Modifier, navController: NavController, userName
             CPTeamUp{
                 ToastHelper.showToast(context , "Feature coming soon..")
             }
+            ProjectCard {
+                navController.navigate(BottomNavScreens.Projects.screen)
+            }
         }
 
     }
