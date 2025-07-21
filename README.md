@@ -22,16 +22,16 @@
 
    <tr>
     <td>
+      <img src="https://github.com/AyushPorwal10/CT_Play_Store_SS/blob/main/home.png" alt="Discover projects" width="200"/>
+      <h2>Explore Opportunities</h2>
+    </td>
+       <td>
       <img src="https://github.com/AyushPorwal10/CT_Play_Store_SS/blob/main/roles.png" alt="Find Talent" width="200"/>
       <h2>Find Talent</h2>
     </td>
-    <td>
+      <td>
       <img src="https://github.com/AyushPorwal10/CT_Play_Store_SS/blob/main/vacancy.png" alt="Find teams to join" width="200"/>
       <h2>Find teams to join</h2>
-    </td>
-    <td>
-      <img src="https://github.com/AyushPorwal10/CT_Play_Store_SS/blob/main/projects.png" alt="Discover projects" width="200"/>
-      <h2>Discover projects</h2>
     </td>
     <td>
       <img src="https://github.com/AyushPorwal10/CT_Play_Store_SS/blob/main/profile.png" alt="Manage Profile" width="200"/>
@@ -52,6 +52,11 @@
       <img src="https://github.com/AyushPorwal10/CT_Play_Store_SS/blob/main/chat.png" alt="Collaborate" width="200"/>
       <h2>Collaborate</h2>
     </td>
+     <td>
+      <img src="https://github.com/AyushPorwal10/CT_Play_Store_SS/blob/main/projects.png" alt="Discover projects" width="200"/>
+      <h2>Discover projects</h2>
+    </td>
+     
   </tr>
   
 </table>
