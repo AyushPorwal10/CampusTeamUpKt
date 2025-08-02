@@ -29,7 +29,6 @@ class ChatViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
-
     private fun startOperation(block : suspend  () -> Unit){
         viewModelScope.launch {
             if (!networkMonitor.isConnectedNow()) {

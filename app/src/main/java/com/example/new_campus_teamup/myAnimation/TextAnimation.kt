@@ -10,7 +10,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.ui.theme.White
 import kotlinx.coroutines.delay
@@ -40,7 +43,11 @@ object TextAnimation {
                 delay(typingDelayInMs)
             }
         }
-        Text(substringText , color = White , style = MaterialTheme.typography.titleMedium , modifier = modifier)
+        Text(substringText ,
+            color = Color.Black.copy(alpha = 0.8f),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Normal,
+            modifier = modifier)
     }
 
 }

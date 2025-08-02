@@ -40,10 +40,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.screens.OnboardingScreen
 import com.example.new_campus_teamup.ui.theme.Black
-import com.example.new_campus_teamup.ui.theme.White
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -51,7 +48,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MySplash  : ComponentActivity() {
-    private val auth = Firebase.auth
+    private val auth = FirebaseAuth.getInstance()
 
     @Inject
     lateinit var firebaseFirestore: FirebaseFirestore

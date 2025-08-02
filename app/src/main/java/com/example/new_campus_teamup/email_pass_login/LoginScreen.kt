@@ -70,6 +70,7 @@ import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.CheckEmptyFields
 import com.example.new_campus_teamup.helper.ToastHelper
 import com.example.new_campus_teamup.myAnimation.FloatingBubbles
+import com.example.new_campus_teamup.myAnimation.TextAnimation
 import com.example.new_campus_teamup.myThemes.TextFieldStyle
 import com.example.new_campus_teamup.myactivities.MainActivity
 import com.example.new_campus_teamup.mysealedClass.BottomNavScreens
@@ -174,13 +175,7 @@ fun LoginScreen(
                  fontWeight = FontWeight.Bold
              )
 
-             Text(
-                 text = "Welcome to Campus TeamUp",
-                 color = Color.Black.copy(alpha = 0.8f),
-                 fontSize = 16.sp,
-                 fontWeight = FontWeight.Normal
-             )
-             // TextAnimation.AnimatedText(modifier = Modifier)
+              TextAnimation.AnimatedText(modifier = Modifier, )
          }
 
      }

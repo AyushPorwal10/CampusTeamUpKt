@@ -14,7 +14,6 @@ import coil.util.DebugLogger
 import com.google.firebase.BuildConfig
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.FirebaseAppCheck
-import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
@@ -28,10 +27,6 @@ class MyApplication : Application() ,ImageLoaderFactory {
 
         FirebaseApp.initializeApp(this)
 
-        // 👇 Debug-only App Check
-        FirebaseAppCheck.getInstance().installAppCheckProviderFactory(
-            DebugAppCheckProviderFactory.getInstance()
-        )
 
         if (BuildConfig.DEBUG) {
             Log.d("AppCheck", "Debug build detected. App Check using Debug provider.")

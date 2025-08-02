@@ -34,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -105,6 +106,7 @@ fun ChatScreen(senderName: String? ,chatRoomId : String? ,  currentUserId : Stri
     }) { paddingValues ->
 
 
+
         ConstraintLayout(
             modifier = Modifier
                 .background(
@@ -114,25 +116,25 @@ fun ChatScreen(senderName: String? ,chatRoomId : String? ,  currentUserId : Stri
                 )
                 .fillMaxSize()
                 .padding(paddingValues)
+
         ) {
-
-            val (divider, typeAndSendMessage , chatHistoryArea) = createRefs()
-
 
             HorizontalDivider(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(BorderColor)
-                    .constrainAs(divider) {
+                    .background(BorderColor))
 
-                    })
+            val ( typeAndSendMessage , chatHistoryArea) = createRefs()
+
+
+
 
             LazyColumn(
                 state = chatHistoryState,
                 modifier = Modifier
-                    .padding(paddingValues)
+                    .padding(4.dp)
                     .constrainAs(chatHistoryArea) {
-                        top.linkTo(divider.bottom)
+                        top.linkTo(parent.top)
                         bottom.linkTo(typeAndSendMessage.top, margin = 8.dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
@@ -144,11 +146,13 @@ fun ChatScreen(senderName: String? ,chatRoomId : String? ,  currentUserId : Stri
                 }
             }
 
-            LaunchedEffect(chatHistory.value.size){
-                if(chatHistory.value.isNotEmpty()){
-                    chatHistoryState.animateScrollToItem(chatHistory.value.size-1)
+            LaunchedEffect(chatHistory.value.size) {
+                if (chatHistory.value.isNotEmpty()) {
+                    chatHistoryState.scrollToItem(chatHistory.value.size - 1)
                 }
             }
+
+
 
             Row(modifier = Modifier
                 .constrainAs(typeAndSendMessage) {

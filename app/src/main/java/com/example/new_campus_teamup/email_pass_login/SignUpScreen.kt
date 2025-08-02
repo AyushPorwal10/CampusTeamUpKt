@@ -171,13 +171,8 @@ fun SignUpScreen(
                         fontWeight = FontWeight.Bold
                     )
 
-                    Text(
-                        text = "Welcome to Campus TeamUp",
-                        color = Color.Black.copy(alpha = 0.8f),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Normal
-                    )
-                    // TextAnimation.AnimatedText(modifier = Modifier)
+
+                    TextAnimation.AnimatedText(modifier = Modifier)
                 }
             }
             Spacer(modifier = Modifier.height(60.dp))
