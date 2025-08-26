@@ -13,7 +13,7 @@
 - 👤 Detailed user profiles to showcase skills, college, and coding experience.
 - 📂 Project section with GitHub links to explore and join exciting projects.
 - 🔎 Strong search functionality to filter roles and vacancies.
-- 🔐 OTP-based login for secure and easy access.
+- 🔐 Email-Password login for secure and easy access (with forgot password option).
 
 ---
 
