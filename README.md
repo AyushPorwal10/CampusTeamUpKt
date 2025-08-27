@@ -15,6 +15,11 @@
 - 🔎 Strong search functionality to filter roles and vacancies.
 - 🔐 Email-Password login for secure and easy access (with forgot password option).
 
+## Video Explanation
+
+Drive Link : https://drive.google.com/file/d/149rt-LIaRwLAZL7jYeu9rVSCpXzmipMi/view?usp=drive_link
+
+
 ---
 
 ## 📱 Screenshots
