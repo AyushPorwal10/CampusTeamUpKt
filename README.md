@@ -4,6 +4,13 @@
 
 ---
 
+
+## Contributors
+
+- Ayush Porwal - Developer of Campus TeamUp
+- Aman Patel - Designed UI of Campus TeamUp (Figma Design)
+
+  ---
 ## 🚀 Features
 
 - 🔍 Find roles that best fit your team.
