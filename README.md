@@ -74,3 +74,13 @@ Drive Link : https://drive.google.com/file/d/1GpJw_OaU6UlatL0f_VDhI92a-H3aKf9b/v
 - Firestore Database
 - Firebase Storage
 - Material Design 3
+
+  ## Upcoming Features in Campus TeamUp
+
+Competitive Programming Teams – Users can form or join teams for coding contests like ICPC, Google Code Jam, and more.
+
+Founder’s Hub – Early-stage founders can connect with potential co-founders, developers, and designers to grow their startups.
+
+Post Reporting – Users can report posts they find irrelevant or inappropriate, ensuring a safe and meaningful community.
+
+Account Deletion – Users will have the option to permanently delete their accounts, giving them full control of their data.
