@@ -49,14 +49,17 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.AsyncImage
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.Dimensions
+import com.example.new_campus_teamup.helper.NameFirstAndLastCharacter
 import com.example.new_campus_teamup.helper.TimeAndDate
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
 import com.example.new_campus_teamup.roleprofile.screens.DetailItem
 import com.example.new_campus_teamup.ui.theme.BluePrimary
 import com.example.new_campus_teamup.ui.theme.BorderColor
 import com.example.new_campus_teamup.ui.theme.LightTextColor
+import com.example.new_campus_teamup.ui.theme.RoleCardGradient
 import com.example.new_campus_teamup.ui.theme.RoleCardTextColor
 import com.example.new_campus_teamup.ui.theme.White
+import com.example.new_campus_teamup.ui.theme.WhiteGradient
 
 
 @Composable
@@ -98,23 +101,32 @@ fun YourSingleVacancy(vacancy: VacancyDetails, onVacancyDelete: (String) -> Unit
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+
                     Box(
                         modifier = Modifier
                             .size(56.dp)
                             .background(
-                                Color.White,
-                                RoundedCornerShape(16.dp)
-                            ),
+                                if(vacancy.teamLogo.isEmpty()) RoleCardGradient else WhiteGradient,
+                                RoundedCornerShape(12.dp)
+                            )
+                            .padding(3.dp)
+                        ,
                         contentAlignment = Alignment.Center
                     ) {
-                        AsyncImage(model = vacancy.teamLogo.ifBlank { R.drawable.vacancies },
-                            contentDescription = null ,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(100.dp)
-                                .clip(CircleShape)
-                                .border(0.5.dp , Color.LightGray , CircleShape)
-                        )
+
+                        if(vacancy.teamLogo.isEmpty()){
+                            Text(NameFirstAndLastCharacter.firstAndLastCharacter(vacancy.teamName) , color = White, fontWeight = FontWeight.Bold)
+                        }
+                        else {
+                            AsyncImage(model = vacancy.teamLogo.ifBlank { R.drawable.vacancies },
+                                contentDescription = null ,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .clip(CircleShape)
+                                    .border(0.5.dp , Color.LightGray , CircleShape)
+                            )
+                        }
                     }
 
 
@@ -133,7 +145,8 @@ fun YourSingleVacancy(vacancy: VacancyDetails, onVacancyDelete: (String) -> Unit
                     Icon(
                         painter = painterResource(R.drawable.delete),
                         contentDescription = "Delete",
-                        tint = Color.Red
+                        tint = Color.Red,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }

@@ -189,24 +189,25 @@ fun ViewVacancyDetails(
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFF7FAFC)
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(
-                        text = "Role Description: ${vacancy.roleDescription}",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = Color(0xFF718096)
+                if(vacancy.roleDescription.isNotEmpty()){
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFFF7FAFC)
                         ),
-                        modifier = Modifier.padding(16.dp)
-                    )
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = "Role Description: ${vacancy.roleDescription}",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = Color(0xFF718096)
+                            ),
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -217,7 +218,7 @@ fun ViewVacancyDetails(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Home,
+                            painter = painterResource(R.drawable.clock),
                             contentDescription = "Time",
                             tint = Color(0xFF718096),
                             modifier = Modifier.size(16.dp)

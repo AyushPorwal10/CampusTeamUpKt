@@ -3,6 +3,7 @@ package com.example.new_campus_teamup.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.new_campus_teamup.UiState
 import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
 import com.example.new_campus_teamup.myactivities.UserData
 import com.example.new_campus_teamup.myactivities.UserManager
@@ -10,13 +11,16 @@ import com.example.new_campus_teamup.mydataclass.ProjectDetails
 import com.example.new_campus_teamup.mydataclass.RoleDetails
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
 import com.example.new_campus_teamup.myrepository.HomeScreenRepository
+import com.example.new_campus_teamup.room.ProjectEntity
+import com.example.new_campus_teamup.room.RoleEntity
+import com.example.new_campus_teamup.room.VacancyEntity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -25,10 +29,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,67 +46,53 @@ class HomeScreenViewModel @Inject constructor(
     val userData: StateFlow<UserData?> get() = _userData.asStateFlow()
 
 
-
     private val _FCMToken = MutableStateFlow<String>("")
     val FCMToken: StateFlow<String> get() = _FCMToken.asStateFlow()
 
-
     // role
-    private val _rolesStateFlow = MutableStateFlow<List<RoleDetails>>(emptyList())
-    val rolesStateFlow: StateFlow<List<RoleDetails>> get() = _rolesStateFlow
+    private val _rolesUiState = MutableStateFlow<UiState<List<RoleDetails>>>(UiState.Idle)
+    val rolesUiState: StateFlow<UiState<List<RoleDetails>>> get() = _rolesUiState
 
     private var lastVisibleRole: DocumentSnapshot? = null
     private var lastRolePostedOn: String = ""
 
 
-    private val _isRoleRefreshing = MutableStateFlow<Boolean>(false)
-    val isRoleRefreshing: StateFlow<Boolean> = _isRoleRefreshing
-
-    private val _isRoleLoading = MutableStateFlow(false)
-    val isRoleLoading: StateFlow<Boolean> = _isRoleLoading.asStateFlow()
+    init {
+        Log.d("HomeScreenViewModel", "HomeScreenViewModel init called")
+    }
 
 
     private val _isVacancyLoading = MutableStateFlow(false)
     val isVacancyLoading: StateFlow<Boolean> = _isVacancyLoading.asStateFlow()
 
     // vacancy
-    private val _vacancyStateFlow = MutableStateFlow<List<VacancyDetails>>(emptyList())
-    val vacancyStateFlow: StateFlow<List<VacancyDetails>> get() = _vacancyStateFlow .asStateFlow()
-
-    private val _isVacancyRefreshing = MutableStateFlow<Boolean>(false)
-    val isVacancyRefreshing: StateFlow<Boolean> = _isVacancyRefreshing
+    private val _vacancyUiState = MutableStateFlow<UiState<List<VacancyDetails>>>(UiState.Idle)
+    val vacancyUiState: StateFlow<UiState<List<VacancyDetails>>> get() = _vacancyUiState.asStateFlow()
 
     // projects
 
     private val _listOfAllProjects = MutableStateFlow<List<ProjectDetails>>(emptyList())
     val listOfAllProjects: StateFlow<List<ProjectDetails>> = _listOfAllProjects
 
-    private val _isProjectRefreshing = MutableStateFlow<Boolean>(false)
-    val isProjectRefreshing: StateFlow<Boolean> = _isProjectRefreshing
 
     private val _isProjectLoading = MutableStateFlow(false)
     val isProjectLoading: StateFlow<Boolean> = _isProjectLoading
 
+
     private var lastProject: DocumentSnapshot? = null
     private var lastFetchedUserId: String? = null
-    private var lastVisibleVacancy: DocumentSnapshot? = null
-    private var lastVacancyPostedOn: String = ""
 
-    private val _listOfSavedPost = MutableStateFlow<List<String>>(emptyList())
-    val listOfSavedPost: StateFlow<List<String>> get() = _listOfSavedPost.asStateFlow()
+
 
     private val _currentUserImage = MutableStateFlow("")
     val currentUserImage: StateFlow<String> = _currentUserImage.asStateFlow()
 
 
-    private val _listOfSavedRoles = MutableStateFlow<List<String>>(emptyList())
-    val listOfSavedRoles: StateFlow<List<String>> get() = _listOfSavedRoles.asStateFlow()
-
-    private val _listOfSavedVacancy = MutableStateFlow<List<String>>(emptyList())
-    val listOfSavedVacancy: StateFlow<List<String>> get() = _listOfSavedVacancy.asStateFlow()
-
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
+
+    private val _reportPostUiState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
+    val reportPostUiState: StateFlow<UiState<Unit>> = _reportPostUiState.asStateFlow()
 
     // this is to fetch initial projects when screen loads
 
@@ -112,7 +101,29 @@ class HomeScreenViewModel @Inject constructor(
         observeUserData()
     }
 
-    fun startOperation(block : suspend () -> Unit  ){
+
+    val idsOfSavedRoles: StateFlow<List<RoleEntity>> = homeScreenRepository.fetchSavedRoleIds()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    val listOfSavedVacancy: StateFlow<List<VacancyEntity>> = homeScreenRepository.fetchSavedVacancyIds()
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList()
+        )
+
+    val listOfSavedProjects : StateFlow<List<ProjectEntity>> = homeScreenRepository.fetchSavedProjectIds()
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList()
+        )
+
+    fun startOperation(block: suspend () -> Unit) {
         viewModelScope.launch {
 
             if (!networkMonitor.isConnectedNow()) {
@@ -134,13 +145,16 @@ class HomeScreenViewModel @Inject constructor(
         _errorMessage.value = null
     }
 
-    private fun observeUserData(){
-        startOperation{
+    private fun observeUserData() {
+        startOperation {
             userData.filterNotNull().collectLatest { data ->
-                val userId  = data.userId
+                val userId = data.userId
                 if (userId != lastFetchedUserId) {
                     lastFetchedUserId = userId
-                    Log.d("HomeScreenVM", "User: ${data.userId} (${data.phoneNumber}) ${data.userName}")
+                    Log.d(
+                        "HomeScreenVM",
+                        "User: ${data.userId} (${data.phoneNumber}) ${data.userName}"
+                    )
                     fetchSavedData(userId)
                 }
             }
@@ -150,34 +164,20 @@ class HomeScreenViewModel @Inject constructor(
     private fun fetchSavedData(userId: String) {
         viewModelScope.launch {
             launch {
-                homeScreenRepository.fetchCurrentUserSavedPost(userId).catch {
-                    Log.d("SavedList", "Error fetching saved list ${it}")
-                }.collect {
-                    _listOfSavedPost.value = it
-                    Log.d("SavedList", " fetched  saved list viewmodel")
-                }
+                homeScreenRepository.fetchSavedItems(userId, "project_saved", "FetchedProject")
             }
 
             launch {
-                homeScreenRepository.fetchCurrentUserSavedRole(userId).catch {
-                    Log.d("FetchedRole", "Error fetching saved list ${it}")
-                }.collect {
-                    _listOfSavedRoles.value = it
-
-                    Log.d("FetchedRole", " fetched  saved list viewmodel")
-                }
+                homeScreenRepository.fetchSavedItems(userId, "saved_roles", "FetchedRole")
             }
             launch {
-                homeScreenRepository.fetchCurrentUserSavedVacancy(userId).catch {
-                    Log.d("FetchedVacancy", "Error fetching saved list $it")
-                }.collect {
-                    _listOfSavedVacancy.value = it
 
-                    Log.d("FetchedVacancy", " fetched  saved list viewmodel")
-                }
+                homeScreenRepository.fetchSavedItems(userId , "saved_vacancy" , "FetchedVacancy")
             }
         }
     }
+
+
     private fun fetchProjects() {
         startOperation {
             _isProjectLoading.value = true
@@ -189,8 +189,7 @@ class HomeScreenViewModel @Inject constructor(
                     current + initialProject.toObjects(ProjectDetails::class.java)
                 }
                 _isProjectLoading.value = false
-            }
-            else {
+            } else {
                 _isProjectLoading.value = false
             }
         }
@@ -207,16 +206,16 @@ class HomeScreenViewModel @Inject constructor(
 
         startOperation {
             userData.filterNotNull().collectLatest { data ->
-                    homeScreenRepository.saveProject(
-                        data.userId,
-                        projectDetails,
-                        onProjectSaved = {
-                            Log.d("ProjectSaved", "ViewModel Role saved ")
-                            onProjectSaved()
-                        },
-                        onError = {
-                            onError(it)
-                        })
+                homeScreenRepository.saveProject(
+                    data.userId,
+                    projectDetails,
+                    onProjectSaved = {
+                        Log.d("ProjectSaved", "ViewModel Role saved ")
+                        onProjectSaved()
+                    },
+                    onError = {
+                        onError(it)
+                    })
             }
         }
     }
@@ -224,21 +223,40 @@ class HomeScreenViewModel @Inject constructor(
 
     fun saveRole(roleDetails: RoleDetails, onRoleSaved: () -> Unit, onError: (Exception) -> Unit) {
 
-        startOperation{
+        startOperation {
             userData.filterNotNull().collectLatest { data ->
 
-                    homeScreenRepository.saveRole( data.userId , roleDetails, onRoleSaved = {
-                        Log.d("SaveRole", "Viewmodel Role saved ")
-                        onRoleSaved()
-                    }, onError = {
-                        Log.d("SaveRole","Error saving role")
-                        onError(it)
-                    })
+                homeScreenRepository.saveRole(data.userId, roleDetails, onRoleSaved = {
+                    Log.d("SaveRole", "Viewmodel Role saved ")
+                    onRoleSaved()
+                }, onError = {
+                    Log.d("SaveRole", "Error saving role")
+                    onError(it)
+                })
 
             }
         }
     }
 
+    fun reportPost(tag: String, roleId: String) {
+        viewModelScope.launch {
+            userManager.userData.collect {
+                if (it.userId.isNotEmpty()) {
+                    homeScreenRepository.reportPost(
+                        tag,
+                        roleId,
+                        it.userId,
+                        onStateChange = { state ->
+                            _reportPostUiState.value = state
+                        })
+                }
+            }
+        }
+    }
+
+    fun resetReportPostState() {
+        _reportPostUiState.value = UiState.Idle
+    }
 
     fun saveVacancy(
         vacancyDetails: VacancyDetails,
@@ -249,51 +267,29 @@ class HomeScreenViewModel @Inject constructor(
         startOperation {
             userData.filterNotNull().collectLatest { data ->
 
-                    homeScreenRepository.saveVacancy(
-                        data.userId,
-                        vacancyDetails,
-                        onVacancySaved = {
-                            Log.d("Vacancy", "ViewModel vacancy saved ")
-                            onVacancySaved()
-                        },
-                        onError = {
-                            onError(it)
-                        })
+                homeScreenRepository.saveVacancy(
+                    data.userId,
+                    vacancyDetails,
+                    onVacancySaved = {
+                        Log.d("Vacancy", "ViewModel vacancy saved ")
+                        onVacancySaved()
+                    },
+                    onError = {
+                        onError(it)
+                    })
 
             }
         }
     }
 
 
-
-
     fun observeRolesInRealTime() {
         Log.d("Roles", "ViewModel Observing roles in real-time")
-        startOperation {
-            _isRoleLoading.value = true
-            delay(700)
-            try {
 
-                homeScreenRepository.observeRoles(
-                    lastVisible = null,
-                    onUpdate = { roles, newLastVisible ->
-                        if (roles.isNotEmpty()) {
-                            lastVisibleRole = newLastVisible
-                            lastRolePostedOn = roles.first().postedOn
-                            _rolesStateFlow.value = roles
-                        } else {
-                            _rolesStateFlow.value = emptyList()
-                        }
-                    },
-                    onError = { error ->
-                        Log.e("Roles", "Error observing real-time roles: $error")
-                    })
-
-            } finally {
-                _isRoleLoading.value = false
+        viewModelScope.launch {
+            homeScreenRepository.observeRoles().collect {
+                _rolesUiState.value = it
             }
-
-
         }
     }
 
@@ -301,29 +297,15 @@ class HomeScreenViewModel @Inject constructor(
     // vacancy section
 
 
-
     fun observeVacancyInRealTime() {
-       startOperation {
+        startOperation {
             _isVacancyLoading.value = true
             delay(700)
             Log.d("Vacancy", "ViewModel Observing new roles user refresh")
-            homeScreenRepository.observeVacancy(lastVisible = null,
-                onUpdate = { vacancy, newLastVisible ->
-                    if (vacancy.isNotEmpty()) {
-                        lastVisibleVacancy = newLastVisible
-                        lastRolePostedOn = vacancy.first().postedOn
-                        _vacancyStateFlow.value = vacancy
-                    } else {
-                        _vacancyStateFlow.value = emptyList()
-                        Log.d("Vacancy", "ViewModel Observing new roles got empty on  refresh")
-                    }
-                    _isVacancyLoading.value = false
-                },
-                onError = { error ->
-                    _isVacancyLoading.value = false
-                    Log.e("Vacancy", "$error")
-                })
-
+            homeScreenRepository.observeVacancy()
+                .collect {
+                    _vacancyUiState.value = it
+                }
         }
 
     }
@@ -344,7 +326,7 @@ class HomeScreenViewModel @Inject constructor(
             _userData.value = userManager.userData.first()
             _FCMToken.value = userManager.fcmToken.first()
             Log.d("FCM", "FCM fetched in viewmodel ${_FCMToken.value} <-")
-           // getUserImageUrl()
+            // getUserImageUrl()
         }
     }
 

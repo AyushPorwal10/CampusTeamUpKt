@@ -1,6 +1,8 @@
 package com.example.new_campus_teamup.screens.homescreens
 
+import android.app.Notification.Action
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -46,7 +47,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,8 +54,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.new_campus_teamup.R
-import com.example.new_campus_teamup.email_pass_login.LoginSignUp
-import com.example.new_campus_teamup.helper.HandleLogoutDialog
 import com.example.new_campus_teamup.myactivities.DrawerItemActivity
 import com.example.new_campus_teamup.myactivities.UserProfile
 import com.example.new_campus_teamup.screens.Identifier
@@ -71,6 +69,7 @@ import com.example.new_campus_teamup.ui.theme.White
 import com.example.new_campus_teamup.viewmodels.HomeScreenViewModel
 import com.example.new_campus_teamup.viewmodels.SearchRoleVacancy
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,7 +83,6 @@ fun HomeScreen(
 ) {
 
 
-
     val currentUserImageUrl = homeScreenViewModel.currentUserImage.collectAsState()
 
     // fetching just one time
@@ -94,14 +92,11 @@ fun HomeScreen(
 
     Log.d("Saving", "currentUserId in homescreen is $userId <-")
 
-    val bgColor = BackGroundColor
     val textColor = White
-    val userEmailId = remember {
-        mutableStateOf("")
-    }
+
     val userData = homeScreenViewModel.userData.collectAsState()
 
-        // val bottomAppBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
+    // val bottomAppBarScrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -155,8 +150,8 @@ fun HomeScreen(
                         .height(150.dp)
                         .clickable {
                             val intent = Intent(context, UserProfile::class.java).apply {
-                                putExtra("userName",homeScreenViewModel.userData.value?.userName)
-                                putExtra("userEmail",homeScreenViewModel.userData.value?.email)
+                                putExtra("userName", homeScreenViewModel.userData.value?.userName)
+                                putExtra("userEmail", homeScreenViewModel.userData.value?.email)
                             }
                             context.startActivity(intent)
                         },
@@ -186,7 +181,7 @@ fun HomeScreen(
                                 top.linkTo(userImage.bottom, margin = 10.dp)
 
                             },
-                            color = Color.Black ,
+                            color = Color.Black,
                             fontWeight = FontWeight.Bold
                         )
 
@@ -205,74 +200,92 @@ fun HomeScreen(
 
                 // Notifications menu item
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                ) {
-                    NavItem(
-                        coroutineScope,
-                        drawerState,
-                        R.drawable.notifications,
-                        stringResource(id = R.string.notifications)
+                Box(modifier = Modifier.fillMaxHeight()) {
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight()
                     ) {
-                        val intent = Intent(context, DrawerItemActivity::class.java)
-                        intent.putExtra("DrawerItem", "notifications")
-                        context.startActivity(intent)
+                        NavItem(
+                            coroutineScope,
+                            drawerState,
+                            R.drawable.notifications,
+                            stringResource(id = R.string.notifications)
+                        ) {
+                            val intent = Intent(context, DrawerItemActivity::class.java)
+                            intent.putExtra("DrawerItem", "notifications")
+                            context.startActivity(intent)
+                        }
+
+
+                        // recents chats
+
+                        NavItem(
+                            coroutineScope,
+                            drawerState,
+                            R.drawable.chats,
+                            stringResource(id = R.string.chats)
+                        ) {
+                            val intent = Intent(context, DrawerItemActivity::class.java)
+                            intent.putExtra("DrawerItem", "recentchats")
+                            context.startActivity(intent)
+                        }
+
+
+                        NavItem(
+                            coroutineScope,
+                            drawerState,
+                            R.drawable.saveproject,
+                            stringResource(id = R.string.your_posts)
+                        ) {
+                            val intent = Intent(context, DrawerItemActivity::class.java)
+                            intent.putExtra("DrawerItem", "yourposts")
+                            context.startActivity(intent)
+                        }
+                        // saved items
+
+                        NavItem(
+                            coroutineScope,
+                            drawerState,
+                            R.drawable.saved_item,
+                            stringResource(id = R.string.saved_items)
+                        ) {
+                            val intent = Intent(context, DrawerItemActivity::class.java)
+                            intent.putExtra("DrawerItem", "savedItems")
+                            context.startActivity(intent)
+                        }
+
+                        // logout button
+
+                        HandleLogoutButton(homeScreenViewModel)
+
+                        NavItem(
+                            coroutineScope,
+                            drawerState,
+                            R.drawable.feedback,
+                            stringResource(id = R.string.feedback)
+                        ) {
+                            val intent = Intent(context, DrawerItemActivity::class.java)
+                            intent.putExtra("DrawerItem", "feedback")
+                            context.startActivity(intent)
+                        }
+                    }
+
+                    Box(modifier = Modifier.align(Alignment.BottomCenter)){
+                        NavItem(
+                            coroutineScope,
+                            drawerState,
+                            R.drawable.privacy_policy,
+                            stringResource(R.string.privacy_policy)
+                        ) {
+                            val intent = Intent(Intent.ACTION_VIEW,
+                                "https://ayushporwal10.github.io/Campus_TeamUp_Privacy_Policy/".toUri())
+
+                            context.startActivity(intent)
+                        }
                     }
 
 
-
-                    // recents chats
-
-                    NavItem(
-                        coroutineScope,
-                        drawerState,
-                        R.drawable.chats,
-                        stringResource(id = R.string.chats)
-                    ) {
-                        val intent = Intent(context, DrawerItemActivity::class.java)
-                        intent.putExtra("DrawerItem", "recentchats")
-                        context.startActivity(intent)
-                    }
-
-
-                    NavItem(
-                        coroutineScope,
-                        drawerState,
-                        R.drawable.saveproject,
-                        stringResource(id = R.string.your_posts)
-                    ) {
-                        val intent = Intent(context, DrawerItemActivity::class.java)
-                        intent.putExtra("DrawerItem", "yourposts")
-                        context.startActivity(intent)
-                    }
-                    // saved items
-
-                    NavItem(
-                        coroutineScope,
-                        drawerState,
-                        R.drawable.saved_item,
-                        stringResource(id = R.string.saved_items)
-                    ) {
-                        val intent = Intent(context, DrawerItemActivity::class.java)
-                        intent.putExtra("DrawerItem", "savedItems")
-                        context.startActivity(intent)
-                    }
-
-                    // logout button
-
-                    HandleLogoutButton(homeScreenViewModel)
-
-                    NavItem(
-                        coroutineScope,
-                        drawerState,
-                        R.drawable.feedback,
-                        stringResource(id = R.string.feedback)
-                    ) {
-                        val intent = Intent(context, DrawerItemActivity::class.java)
-                        intent.putExtra("DrawerItem", "feedback")
-                        context.startActivity(intent)
-                    }
 
                 }
 
@@ -285,7 +298,13 @@ fun HomeScreen(
             },
             topBar = {
                 TopAppBar(
-                    title = { Text(text = "Campus TeamUp", color = Black, fontWeight = FontWeight.Bold) },
+                    title = {
+                        Text(
+                            text = "Campus TeamUp",
+                            color = Black,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
                     colors = topAppBarColors(
                         containerColor = Color(0xFFEFEEFF),
                         titleContentColor = textColor,
@@ -316,7 +335,11 @@ fun HomeScreen(
             }
         ) { paddingValues ->
 
-            HomeScreenContent(modifier = Modifier.padding(paddingValues),navController , userData.value?.userName ?: "")
+            HomeScreenContent(
+                modifier = Modifier.padding(paddingValues),
+                navController,
+                userData.value?.userName ?: ""
+            )
         }
     }
 }

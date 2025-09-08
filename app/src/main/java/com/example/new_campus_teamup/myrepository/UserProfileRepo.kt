@@ -2,10 +2,16 @@ package com.example.new_campus_teamup.myrepository
 
 import android.net.Uri
 import android.util.Log
+import com.example.new_campus_teamup.UiState
 import com.example.new_campus_teamup.myactivities.UserManager
 import com.example.new_campus_teamup.mydataclass.EducationDetails
+import com.google.firebase.Firebase
+import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -16,7 +22,9 @@ import javax.inject.Inject
 class UserProfileRepo @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
     private val storageReference: StorageReference,
-    private val userManager: UserManager
+    private val userManager: UserManager,
+    private val firebaseAuth: FirebaseAuth,
+    private val firebaseFunctions: FirebaseFunctions
 ) {
     // college Details
 
@@ -124,5 +132,48 @@ class UserProfileRepo @Inject constructor(
     suspend fun fetchSkills(userId: String): DocumentSnapshot {
         return firebaseFirestore.collection("all_user_id").document(userId)
             .collection("all_user_details").document("user_skills").get().await()
+    }
+     fun deleteUserAccount(userEmail : String, onStateChange : (UiState<Unit>) -> Unit ){
+
+         onStateChange(UiState.Loading)
+
+         val tag = "Firebase_Function_Testing"
+         try {
+             firebaseFunctions.getHttpsCallable("deleteUserData")
+                 .call(mapOf("email" to userEmail))
+                 .addOnSuccessListener { result ->
+
+                     Log.d(tag , "Raw result is $result")
+                     val data = result.data as? Map<*, *>
+                     val success = data?.get("success") as Boolean
+                     val message = data["message"] as String
+                     Log.d(tag , "On Success -> IsSuccess -> $success , Message -> $message")
+
+                     if(success){
+                         onStateChange(UiState.Success(Unit))
+                     }
+                     else {
+                         onStateChange(UiState.Error("Something went wrong\nPlease try again later"))
+                     }
+                 }
+                 .addOnFailureListener {
+                     Log.d(tag , "On Failure -> ${it.message}")
+                     onStateChange(UiState.Error("Something went wrong\nPlease try again later"))
+                 }
+         }
+         catch (exception : Exception){
+             Log.d(tag , "Exception -> ${exception.message}")
+             onStateChange(UiState.Error("Something went wrong\nPlease try again later"))
+         }
+    }
+
+    suspend fun deleteAllData(){
+        try {
+            firebaseFirestore.collection("all_user_id").document("ayushporwal3002").delete().await()
+            Log.d("DeleteUserData","Data deleted")
+        }
+        catch (e : Exception){
+            e.localizedMessage?.let { Log.d("DeletingUserData", it) }
+        }
     }
 }

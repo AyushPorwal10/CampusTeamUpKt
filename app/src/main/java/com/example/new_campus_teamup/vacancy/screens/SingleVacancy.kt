@@ -73,6 +73,7 @@ fun SingleVacancyCard(
     modifier: Modifier = Modifier,
     vacancy: VacancyDetails,
     onSaveVacancy: (VacancyDetails) -> Unit,
+    onReportVacancyBtnClick : () -> Unit = {} ,
     isSaved: Boolean
 ) {
 
@@ -138,8 +139,6 @@ fun SingleVacancyCard(
                                     .border(0.5.dp , Color.LightGray , CircleShape)
                             )
                         }
-
-
                     }
 
 
@@ -151,14 +150,25 @@ fun SingleVacancyCard(
                         )
                     )
                 }
+                Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.CenterVertically){
+                    IconButton(onClick = {
+                        onReportVacancyBtnClick()
+                    }, modifier = Modifier.size(28.dp)) {
+                        Icon(
+                            painter = painterResource(R.drawable.report_post),
+                            contentDescription = null,
+                            tint = Color.Red,
+                        )
+                    }
 
-                IconButton(
-                    onClick = { onSaveVacancy(vacancy) }
-                ) {
-                    Icon(
-                        painter = painterResource(if (isSaved) R.drawable.saved_item else R.drawable.saveproject),
-                        contentDescription = "Save",
-                    )
+                    IconButton(
+                        onClick = { onSaveVacancy(vacancy) }
+                    ) {
+                        Icon(
+                            painter = painterResource(if (isSaved) R.drawable.saved_item else R.drawable.saveproject),
+                            contentDescription = "Save",
+                        )
+                    }
                 }
             }
 

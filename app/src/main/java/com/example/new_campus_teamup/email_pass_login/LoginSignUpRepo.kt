@@ -44,7 +44,7 @@ class LoginSignUpRepo @Inject constructor(
 
                             is FirebaseAuthInvalidCredentialsException -> {
                                 Log.e(tag, "Wrong password")
-                                continuation.resume(Result.failure(Exception("Entered password is incorrect")))
+                                continuation.resume(Result.failure(Exception("Email or password is incorrect")))
                             }
 
                             else -> {

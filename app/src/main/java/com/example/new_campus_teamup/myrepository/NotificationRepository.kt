@@ -2,8 +2,8 @@ package com.example.new_campus_teamup.myrepository
 
 import android.util.Log
 import com.example.new_campus_teamup.helper.ChatRoomId
-import com.example.new_campus_teamup.notification.FCMApiService
-import com.example.new_campus_teamup.notification.FcmMessage
+import com.example.new_campus_teamup.remote.FCMApiService
+import com.example.new_campus_teamup.remote.FcmMessage
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -57,7 +57,7 @@ class NotificationRepository @Inject constructor(
             coroutineScope {
                 Log.d("FCM", "Fcm in notification repo is ${fcmMessage.message.token}")
 
-                // Launch concurrent operations
+                //  concurrent operations
                 launch {
                    fcmApiService.sendNotification(fcmMessage)
 

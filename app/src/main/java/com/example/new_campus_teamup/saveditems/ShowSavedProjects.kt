@@ -22,6 +22,7 @@ import com.example.new_campus_teamup.project.screens.SingleProject
 fun ShowSavedProjects(
     savedProjectList: State<List<ProjectDetails>>,
     onProjectUnsave: (String) -> Unit,
+    onReportProjectBtnClick: (String) -> Unit
 ) {
     Log.d("FetchingProjects", "In lazy it is ${savedProjectList.value.size}")
     LazyColumn(
@@ -33,6 +34,8 @@ fun ShowSavedProjects(
             SingleProject(it, onSaveProjectClicked = {
                 // this is to unsave projects
                 onProjectUnsave(it)
+            }, onReportProjectBtnClick = {
+                onReportProjectBtnClick(it.projectId)
             }, true)
         }
 

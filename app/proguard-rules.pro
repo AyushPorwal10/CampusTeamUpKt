@@ -48,7 +48,7 @@
  -keepattributes Signature
  -keepattributes *Annotation*
  -keep class com.example.new_campus_teamup.model.** { *; }
- -keep class com.example.new_campus_teamup.notification.FcmMessage { *; }
+ -keep class com.example.new_campus_teamup.remote.FcmMessage { *; }
 
  # Firebase Firestore - keep Firestore models
  -keep class com.google.firebase.firestore.** { *; }
@@ -56,7 +56,7 @@
  -keepattributes *Annotation*
 
  # Keep your FCM service & models
- -keep class com.example.new_campus_teamup.notification.FCMApiService { *; }
- -keep class com.example.new_campus_teamup.notification.FcmMessage { *; }
+ -keep class com.example.new_campus_teamup.remote.FCMApiService { *; }
+ -keep class com.example.new_campus_teamup.remote.FcmMessage { *; }
 
 

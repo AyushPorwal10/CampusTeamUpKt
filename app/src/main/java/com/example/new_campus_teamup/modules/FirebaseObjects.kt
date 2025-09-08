@@ -1,9 +1,11 @@
 package com.example.new_campus_teamup.modules
 
 import android.content.Context
-import com.example.new_campus_teamup.notification.FCMApiService
+import com.example.new_campus_teamup.remote.FCMApiService
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -45,7 +47,7 @@ object FirebaseObjects {
 
     @Singleton
     @Provides
-    fun getFCMApiService(retrofit: Retrofit) : FCMApiService{
+    fun getFCMApiService(retrofit: Retrofit) : FCMApiService {
         return retrofit.create(FCMApiService::class.java)
     }
 
@@ -66,6 +68,12 @@ object FirebaseObjects {
     @Singleton
     fun provideApplicationContext(@ApplicationContext context: Context): Context {
         return context
+    }
+
+    @Provides
+    @Singleton
+    fun providesFirebaseFunction() : FirebaseFunctions{
+        return FirebaseFunctions.getInstance()
     }
 
 

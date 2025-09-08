@@ -23,7 +23,8 @@ import com.example.new_campus_teamup.vacancy.screens.SingleVacancyCard
 @Composable
 fun ShowSavedVacancies(
     savedVacancy: State<List<VacancyDetails>>,
-    onVacancyUnsave: (String) -> Unit
+    onVacancyUnsave: (String) -> Unit,
+    onReportVacancyBtnClick: (String) -> Unit
 ) {
     Log.d("FetchingVacancy", "In lazy it is ${savedVacancy.value.size}")
 
@@ -38,6 +39,8 @@ fun ShowSavedVacancies(
             Log.d("FetchingVacancy", "Single Vacancy loads")
             SingleVacancyCard(modifier = Modifier, vacancy, onSaveVacancy = {
                 onVacancyUnsave(it.vacancyId)
+            }, onReportVacancyBtnClick = {
+                onReportVacancyBtnClick(vacancy.vacancyId)
             }, true)
         }
 

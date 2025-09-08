@@ -99,6 +99,7 @@ fun FeedbackScreen(onSubmit: (FeedbackData) -> Unit , userDataSharedViewModel: U
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(paddingValues)
                 .background(
                     brush = Brush.verticalGradient(
                         colors = BackgroundGradientColor
@@ -139,18 +140,13 @@ fun FeedbackScreen(onSubmit: (FeedbackData) -> Unit , userDataSharedViewModel: U
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("How would you rate your experience?", color = Black)
 
-                    Row(modifier = Modifier.padding(vertical = 8.dp)) {
-                        repeat(5) { index ->
-                            Icon(
-                                painter = painterResource(if (index < rating) R.drawable.filledstar else R.drawable.star),
-                                contentDescription = "Star ${index + 1}",
-                                tint = Color(0xFF4D00E7),
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .clickable { rating = index + 1 }
-                            )
-                        }
-                    }
+
+                    RatingStars(
+                        rating = rating,
+                        onRatingChange = { rating = it },
+                        unRatedStarIcon = painterResource(id = R.drawable.star),
+                        ratedStarIcon = painterResource(id = R.drawable.filledstar),
+                    )
 
                     Spacer(modifier = Modifier.height(8.dp))
 

@@ -16,6 +16,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -33,11 +34,11 @@ fun FeedbackThanksDialog(
         confirmButton = {
             TextButton(onClick = onDismiss,
                ) {
-                Text("OK" , color = White)
+                Text("OK" , color = Color.Black)
             }
         },
         title = {
-            Text("Thank you!", style = MaterialTheme.typography.titleLarge,  color = White)
+            Text("Thank you!", style = MaterialTheme.typography.titleLarge,  color = Color.Black)
         },
         text = {
             Column(
@@ -50,15 +51,17 @@ fun FeedbackThanksDialog(
                         .background(Color.LightGray, shape = RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    LoadAnimation(animation = R.raw.feedback, playAnimation = true)
+                    LoadAnimation(modifier = Modifier.background(Color.Transparent), animation = R.raw.feedback, playAnimation = true)
                 }
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text("We appreciate your feedback!", textAlign = TextAlign.Center , color = White)
+                Text("We appreciate your feedback!", textAlign = TextAlign.Center , color = Color.Black)
             }
         },
         shape = RoundedCornerShape(16.dp),
-         containerColor = BackGroundColor , modifier = Modifier
+         containerColor = Color(0xFFbce3f6) , modifier = Modifier.clip(
+            RoundedCornerShape(30.dp)
+        )
             .border(1.dp, BorderColor, RoundedCornerShape(30.dp))
     )
 }

@@ -3,11 +3,14 @@ package com.example.new_campus_teamup.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.new_campus_teamup.UiState
 import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
+import com.example.new_campus_teamup.myactivities.UserManager
 import com.example.new_campus_teamup.mydataclass.ProjectDetails
 import com.example.new_campus_teamup.mydataclass.RoleDetails
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
 import com.example.new_campus_teamup.myrepository.SavedItemsRepository
+import com.example.new_campus_teamup.room.RoleEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,30 +19,32 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import java.lang.Thread.State
 import javax.inject.Inject
 
 
 @HiltViewModel
 class SavedItemsViewModel @Inject constructor(
     private val savedItemsRepository: SavedItemsRepository,
+    private val userManager: UserManager,
     private val networkMonitor: CheckNetworkConnectivity
 ) : ViewModel() {
 
     private val _savedProjectList = MutableStateFlow<List<ProjectDetails>>(emptyList())
-
     val showProjectList: StateFlow<List<ProjectDetails>> get() = _savedProjectList.asStateFlow()
 
     private val _savedRolesList = MutableStateFlow<List<RoleDetails>>(emptyList())
-
     val savedRolesList: StateFlow<List<RoleDetails>> get() = _savedRolesList.asStateFlow()
 
     private val _savedVacancyList = MutableStateFlow<List<VacancyDetails>>(emptyList())
-
     val savedVacancyList: StateFlow<List<VacancyDetails>> get() = _savedVacancyList.asStateFlow()
+
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
+    private val _reportPostUiState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
+    val reportPostUiState : StateFlow<UiState<Unit>> = _reportPostUiState.asStateFlow()
 
     private fun startOperation(block : suspend  () -> Unit){
         viewModelScope.launch {
@@ -162,6 +167,21 @@ class SavedItemsViewModel @Inject constructor(
         }
     }
 
+    fun reportPost(tag : String , roleId : String ){
+        viewModelScope.launch {
+            userManager.userData.collect{
+                if(it.userId.isNotEmpty()){
+                    savedItemsRepository.reportPost(tag , roleId , it.userId, onStateChange = {state->
+                        _reportPostUiState.value = state
+                    })
+                }
+            }
+        }
+    }
+
+    fun resetReportPostState(){
+        _reportPostUiState.value = UiState.Idle
+    }
 
 
 }

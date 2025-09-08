@@ -6,10 +6,10 @@ import androidx.annotation.RequiresApi
 import com.example.new_campus_teamup.helper.TimeAndDate
 import com.example.new_campus_teamup.mydataclass.LastMessage
 import com.example.new_campus_teamup.mydataclass.RecentChats
-import com.example.new_campus_teamup.notification.FCMApiService
-import com.example.new_campus_teamup.notification.FcmMessage
-import com.example.new_campus_teamup.notification.Message
-import com.example.new_campus_teamup.notification.Notification
+import com.example.new_campus_teamup.remote.FCMApiService
+import com.example.new_campus_teamup.remote.FcmMessage
+import com.example.new_campus_teamup.remote.Message
+import com.example.new_campus_teamup.remote.Notification
 import com.example.new_campus_teamup.viewnotifications.NotificationItems
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -26,7 +26,8 @@ import kotlin.coroutines.suspendCoroutine
 
 class ViewNotificationRepository @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
-   val  fcmApiService: FCMApiService) {
+   val  fcmApiService: FCMApiService
+) {
 
 
     // if user deny request than remove that request from notification section of receiver
@@ -283,7 +284,6 @@ class ViewNotificationRepository @Inject constructor(
     // this are invites from team leader or member because this member founds interest in user profile so they request
     private fun fetchTeamInviteNotifications(userId: String): Flow<List<NotificationItems.TeamInviteNotification>> =
         callbackFlow {
-            Log.d("ShowNotification", "Team invite fetching for userId $userId")
             val teamInviteCollection =
                 firebaseFirestore.collection("all_user_id").document(userId)
                     .collection("team_invites")
@@ -298,12 +298,10 @@ class ViewNotificationRepository @Inject constructor(
                     snapshot?.documents?.mapNotNull { document ->
                         document.toObject(NotificationItems.TeamInviteNotification::class.java)
                             ?.apply {
-                                Log.d("UserNotification", "Document id is ${document.id} <-")
                                 this.teamRequestId = document.id
                             }
                     } ?: emptyList()
 
-                Log.d("ShowNotification", "Size of listOfTeamInvite is ${listOfNotifications.size}")
                 trySend(listOfNotifications)
 
             }

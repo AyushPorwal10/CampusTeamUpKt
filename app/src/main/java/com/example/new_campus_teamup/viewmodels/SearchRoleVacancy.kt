@@ -3,6 +3,7 @@ package com.example.new_campus_teamup.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.new_campus_teamup.UiState
 import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
 import com.example.new_campus_teamup.mydataclass.RoleDetails
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
@@ -24,10 +25,8 @@ class SearchRoleVacancy @Inject constructor(
 
     private val _searchRoleText = MutableStateFlow("")
     val searchRoleText = _searchRoleText.asStateFlow()
-    private val _isRoleSearching = MutableStateFlow(false)
-    val isRoleSearching: StateFlow<Boolean> = _isRoleSearching
-    private val _searchedRoles = MutableStateFlow<List<RoleDetails>>(emptyList())
-    val searchedRoles: StateFlow<List<RoleDetails>> get() = _searchedRoles
+    private val _searchedRolesUiState = MutableStateFlow<UiState<List<RoleDetails>>>(UiState.Idle)
+    val searchedRolesUiState: StateFlow<UiState<List<RoleDetails>>> get() = _searchedRolesUiState
 
 
     private val _searchVacancyText = MutableStateFlow("")
@@ -36,8 +35,8 @@ class SearchRoleVacancy @Inject constructor(
     private val _isVacancySearching = MutableStateFlow(false)
     val isVacancySearching = _isVacancySearching.asStateFlow()
 
-    private val _searchedVacancies = MutableStateFlow<List<VacancyDetails>>(emptyList())
-    val searchedVacancies: StateFlow<List<VacancyDetails>> get() = _searchedVacancies
+    private val _searchedVacanciesUiState = MutableStateFlow<UiState<List<VacancyDetails>>>(UiState.Idle)
+    val searchedVacanciesUiState: StateFlow<UiState<List<VacancyDetails>>> get() = _searchedVacanciesUiState
 
 
     init {
@@ -53,34 +52,22 @@ class SearchRoleVacancy @Inject constructor(
                     if (query.isNotBlank()) {
                         fetchRolesFromFirebase(query)
                     } else {
-                        _searchedRoles.value = emptyList()
+                        _searchedRolesUiState.value = UiState.Success(emptyList())
                     }
                 }
         }
     }
 
     private fun fetchRolesFromFirebase(query: String) {
-        _isRoleSearching.value = true
 
         viewModelScope.launch {
-            searchRoleVacancyRepository.fetchRolesFromFirebase(query, onSearched = { filteredRole ->
-                if (filteredRole.isNotEmpty()) {
-                    _searchedRoles.value = filteredRole
-                } else {
-                    _searchedRoles.value = emptyList()
-                }
-
-                _isRoleSearching.value = false
-            },
-                onError = { exception ->
-                    _isRoleSearching.value = false
-                    Log.e("SearchRoleVacancy", "Error fetching roles", exception)
-                })
+            searchRoleVacancyRepository.fetchRolesFromFirebase(query , onStateChange = {
+              _searchedRolesUiState.value = it
+            })
         }
     }
 
     fun onSearchRoleTextChange(text: String) {
-        _isRoleSearching.value = true
         _searchRoleText.value = text
     }
 
@@ -92,7 +79,7 @@ class SearchRoleVacancy @Inject constructor(
                     if (query.isNotEmpty()) {
                         fetchVacancyFromFirebase(query)
                     } else {
-                        _searchedVacancies.value = emptyList()
+                        _searchedVacanciesUiState.value = UiState.Success(emptyList())
                     }
                 }
         }
@@ -101,19 +88,9 @@ class SearchRoleVacancy @Inject constructor(
     private fun fetchVacancyFromFirebase(query: String) {
         viewModelScope.launch {
 
-            searchRoleVacancyRepository.fetchVacancyFromFirebase(query,
-                onSearched = { filteredVacancies ->
-
-                    if (filteredVacancies.isNotEmpty())
-                        _searchedVacancies.value = filteredVacancies
-                    else
-                        _searchedVacancies.value = emptyList()
-
-                    _isVacancySearching.value = false
-                },
-                onError = { exception ->
-                    Log.d("SearchRoleVacancy", exception.toString())
-                })
+            searchRoleVacancyRepository.fetchVacancyFromFirebase(query, onStateChange = {
+                _searchedVacanciesUiState.value = it
+            })
         }
     }
 

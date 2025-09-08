@@ -30,6 +30,16 @@ android {
     }
 
     buildTypes {
+
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -81,6 +91,10 @@ dependencies {
     implementation("com.google.firebase:firebase-crashlytics:20.0.0")
     implementation("androidx.activity:activity:1.10.1")
     implementation("com.google.firebase:firebase-database:22.0.0")
+    implementation("com.google.firebase:firebase-functions:22.0.0")
+
+
+
     testImplementation("junit:junit:4.13.2")
 
 
@@ -90,8 +104,8 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.1")
 
     // animated text
-    implementation(platform("androidx.compose:compose-bom:2024.10.01"))
-    implementation("androidx.compose.material3:material3:1.3.1")
+    implementation(platform("androidx.compose:compose-bom:2025.08.01"))
+    implementation("androidx.compose.material3:material3:1.3.2")
 
 
     // google fonts
@@ -99,6 +113,13 @@ dependencies {
 
 
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+
+    // app check
+    implementation("com.google.firebase:firebase-appcheck-playintegrity:19.0.0")
+
+    // app check debug
+    implementation("com.google.firebase:firebase-appcheck-debug:19.0.0")
 
 
     // status bar color
@@ -120,6 +141,11 @@ dependencies {
 
     implementation("io.coil-kt:coil-compose:2.6.0")
 
+
+    // room
+
+    implementation("androidx.room:room-runtime:2.7.2")
+    kapt("androidx.room:room-compiler:2.7.2")
 
     // hilt
     implementation("com.google.dagger:hilt-android:2.57")

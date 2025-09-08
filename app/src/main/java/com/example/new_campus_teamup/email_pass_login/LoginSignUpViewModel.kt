@@ -137,10 +137,10 @@ class LoginSignUpViewModel @Inject constructor(
                         "Saving user data email is $email \n name is $name , collegeName is $collegeName"
                     )
                     userManager.saveUserData(
-                        getUserId(email),
-                        name,
-                        email,
-                        collegeName,
+                        userId = getUserId(email),
+                        userName = name,
+                        email = email,
+                        college = collegeName,
                         "0123456789",
                         "Signup"
                     )

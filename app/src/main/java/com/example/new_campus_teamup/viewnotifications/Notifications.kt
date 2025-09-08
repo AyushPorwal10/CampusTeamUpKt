@@ -3,6 +3,7 @@ package com.example.new_campus_teamup.viewnotifications
 import android.app.Activity
 import android.os.Build
 import android.util.Log
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -54,7 +55,7 @@ fun NotificationsScreen(
     val bgColor = BackGroundColor
     val textColor = White
 
-    val activity = LocalContext.current as? Activity
+    val activity = LocalActivity.current as? Activity
     val snackbarHostState = remember { SnackbarHostState() }
 
     Log.d("UserData", "Notification Screen UserId from datastore is ${currentUserData?.userId} ")
@@ -83,7 +84,7 @@ fun NotificationsScreen(
                         )
                     }
                 },
-                )
+            )
         }, content = { paddingValues ->
             HorizontalDivider(
                 modifier = Modifier

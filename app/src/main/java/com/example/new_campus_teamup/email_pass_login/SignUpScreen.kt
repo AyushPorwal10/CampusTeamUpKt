@@ -238,7 +238,7 @@ fun SignUpScreen(
                     Button(
                         onClick = {
                             if (name.value.isEmpty()) {
-                                ToastHelper.showToast(context, "Please Enter Name")
+                                ToastHelper.showToast(context, "Please Enter Your Name")
                             } else if (collegeName.value.isEmpty()) {
                                 ToastHelper.showToast(context, "Please Enter College Name")
                             } else if (!CheckEmptyFields.isValidEmail(email.value)) {

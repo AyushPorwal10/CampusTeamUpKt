@@ -69,6 +69,7 @@ import androidx.navigation.NavHostController
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.CheckEmptyFields
 import com.example.new_campus_teamup.helper.ToastHelper
+import com.example.new_campus_teamup.helper.show
 import com.example.new_campus_teamup.myAnimation.FloatingBubbles
 import com.example.new_campus_teamup.myAnimation.TextAnimation
 import com.example.new_campus_teamup.myThemes.TextFieldStyle
@@ -218,7 +219,6 @@ fun LoginScreen(
 
                  UserPasswordField(
                      modifier = Modifier
-
                          .fillMaxWidth(), password, showPassword
                  )
 
@@ -376,7 +376,8 @@ fun UserEmailField(modifier: Modifier, email: MutableState<String>) {
 fun UserPasswordField(
     modifier: Modifier,
     password: MutableState<String>,
-    showPassword: MutableState<Boolean>
+    showPassword: MutableState<Boolean>,
+    showPlaceHolder : Boolean = true ,
 ) {
     OutlinedTextField(
         value = password.value,
@@ -385,6 +386,7 @@ fun UserPasswordField(
         shape = TextFieldStyle.defaultShape,
         maxLines = 2,
         label = {
+            if(showPlaceHolder)
             Text(text = stringResource(id = R.string.enter_password))
         },
         leadingIcon = {

@@ -90,4 +90,9 @@
     <string name="find_team_members">Find your team members.</string>
     <string name="find_your_team">Find your team.</string>
     <string name="collaborate_on_projects">Collaborate on Projects.</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="report_description">Thanks for helping keep Campus TeamUp safe! We\'ll review your report and remove the post if it breaks our guidelines.</string>
+    <string name="something_went_wrong_try_again">Something went wrong\nPlease try again later</string>
+    <string name="captcha">Enter Captcha</string>
+    <string name="invalid_captcha">Invalid Captcha</string>
 </resources>

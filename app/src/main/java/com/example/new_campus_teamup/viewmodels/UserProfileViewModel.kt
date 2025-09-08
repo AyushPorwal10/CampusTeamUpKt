@@ -4,10 +4,12 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.new_campus_teamup.UiState
 import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
 import com.example.new_campus_teamup.myactivities.UserManager
 import com.example.new_campus_teamup.mydataclass.EducationDetails
 import com.example.new_campus_teamup.myrepository.UserProfileRepo
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
@@ -27,7 +29,8 @@ import javax.inject.Inject
 class UserProfileViewModel @Inject constructor(
     private val userProfileRepo: UserProfileRepo,
     private val userManager: UserManager,
-    private val networkMonitor: CheckNetworkConnectivity
+    private val networkMonitor: CheckNetworkConnectivity,
+    private val firebaseAuth: FirebaseAuth,
 ) : ViewModel() {
 
     private lateinit var userId: String
@@ -52,6 +55,9 @@ class UserProfileViewModel @Inject constructor(
 
     private val _codingProfiles = MutableStateFlow<List<String>>(emptyList())
     val codingProfiles: StateFlow<List<String>> get() = _codingProfiles.asStateFlow()
+
+    private val _deleteUserAccountUiState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
+    val deleteUserAccountUiState: StateFlow<UiState<Unit>> get() = _deleteUserAccountUiState.asStateFlow()
 
 
     init {
@@ -123,6 +129,7 @@ class UserProfileViewModel @Inject constructor(
         collegeName = userData.collegeName
         userName = userData.userName
         phoneNumber = userData.phoneNumber
+        userEmail = userData.email
         Log.d("UserProfile", "Updated User Id: $userId")
         Log.d("UserProfile", "Fetched User Id $collegeName")
         Log.d("UserProfile", "Fetched phoneNumber is  $phoneNumber")
@@ -227,7 +234,11 @@ class UserProfileViewModel @Inject constructor(
                 Log.d("Learning", "User id is empty")
             }
         }
-
+    }
+    fun delete(){
+        viewModelScope.launch {
+            userProfileRepo.deleteAllData()
+        }
     }
 
     fun saveSkills(listOfSkills: List<String>, onSuccess: () -> Unit) {
@@ -246,4 +257,29 @@ class UserProfileViewModel @Inject constructor(
             _skills.value = list
         }
     }
+
+    fun deleteUserAccount(){
+        viewModelScope.launch {
+            Log.d("Firebase_Function_Testing","User email is $userEmail")
+
+            userProfileRepo.deleteUserAccount(userEmail, onStateChange = {
+                _deleteUserAccountUiState.value = it
+            })
+        }
+    }
+
+    fun logoutUser(onLogoutSuccess: () -> Unit) {
+        startOperation {
+            userManager.clearUserData()
+            firebaseAuth.signOut()
+            onLogoutSuccess()
+        }
+    }
+
+
+    fun clearDeleteAccountUiState(){
+        _deleteUserAccountUiState.value = UiState.Idle
+    }
+
+
 }

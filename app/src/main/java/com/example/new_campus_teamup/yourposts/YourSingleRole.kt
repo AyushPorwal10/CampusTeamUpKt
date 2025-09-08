@@ -50,6 +50,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.AsyncImage
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.Dimensions
+import com.example.new_campus_teamup.helper.NameFirstAndLastCharacter
 import com.example.new_campus_teamup.helper.TimeAndDate
 import com.example.new_campus_teamup.myactivities.ViewUserProfile
 import com.example.new_campus_teamup.mydataclass.RoleDetails
@@ -59,6 +60,7 @@ import com.example.new_campus_teamup.ui.theme.LightTextColor
 import com.example.new_campus_teamup.ui.theme.RoleCardGradient
 import com.example.new_campus_teamup.ui.theme.RoleCardTextColor
 import com.example.new_campus_teamup.ui.theme.White
+import com.example.new_campus_teamup.ui.theme.WhiteGradient
 
 
 @Composable
@@ -92,8 +94,6 @@ fun YourSingleRole(
         Column(
             modifier = Modifier.padding(24.dp)
         ) {
-
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -107,20 +107,28 @@ fun YourSingleRole(
                         modifier = Modifier
                             .size(56.dp)
                             .background(
-                                Color.White,
-                                RoundedCornerShape(16.dp)
-                            ),
+                                if(roleDetails.userImageUrl.isEmpty()) RoleCardGradient else WhiteGradient,
+                                RoundedCornerShape(12.dp)
+                            )
+                            .padding(3.dp)
+                        ,
                         contentAlignment = Alignment.Center
                     ) {
-                        AsyncImage(model = R.drawable.profile,
-                            contentDescription = null ,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(100.dp)
-                                .clip(CircleShape)
-                        )
-                    }
 
+                        if(roleDetails.userImageUrl.isEmpty()){
+                            Text(NameFirstAndLastCharacter.firstAndLastCharacter(roleDetails.role) , color = White, fontWeight = FontWeight.Bold)
+                        }
+                        else {
+                            AsyncImage(model = roleDetails.userImageUrl.ifBlank { R.drawable.vacancies },
+                                contentDescription = null ,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .clip(CircleShape)
+                                    .border(0.5.dp , Color.LightGray , CircleShape)
+                            )
+                        }
+                    }
 
                     Text(
                         text = roleDetails.userName,
@@ -136,7 +144,8 @@ fun YourSingleRole(
                     Icon(
                         painter = painterResource(R.drawable.delete),
                         contentDescription = "Delete",
-                        tint = Color.Red
+                        tint = Color.Red,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
 

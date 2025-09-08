@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -88,7 +89,8 @@ fun YourSingleProject(projectDetails: ProjectDetails, onProjectDelete: (String) 
                     Icon(
                         painter = painterResource(R.drawable.delete),
                         contentDescription = "Delete",
-                        tint = Color.Red
+                        tint = Color.Red,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }

@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.new_campus_teamup.R
@@ -59,9 +60,10 @@ import okhttp3.internal.userAgent
 
 @Composable
 fun SingleRoleCard(
-    roleDetails: RoleDetails,
-    onSaveRoleClicked: (RoleDetails) -> Unit,
-    isSaved: Boolean
+    roleDetails: RoleDetails = RoleDetails(),
+    onSaveRoleClicked: (RoleDetails) -> Unit = {},
+    onReportRoleBtnClick : () -> Unit = {},
+    isSaved: Boolean = false
 ) {
 
     val context = LocalContext.current
@@ -72,9 +74,7 @@ fun SingleRoleCard(
         animationSpec = tween(300),
         label = "scale"
     )
-
-
-
+    
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -124,9 +124,7 @@ fun SingleRoleCard(
                                     .clip(CircleShape)
                             )
                         }
-
                     }
-
 
                     Text(
                         text = roleDetails.userName,
@@ -137,14 +135,27 @@ fun SingleRoleCard(
                     )
                 }
 
-                IconButton(
-                    onClick = { onSaveRoleClicked(roleDetails) }
-                ) {
-                    Icon(
-                        painter = painterResource(if (isSaved) R.drawable.saved_item else R.drawable.saveproject),
-                        contentDescription = "Save",
-                    )
+                Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.CenterVertically){
+                    IconButton(onClick = {
+                        onReportRoleBtnClick()
+                    }, modifier = Modifier.size(28.dp)) {
+                        Icon(
+                            painter = painterResource(R.drawable.report_post),
+                            contentDescription = null,
+                            tint = Color.Red,
+                        )
+                    }
+
+                    IconButton(
+                        onClick = { onSaveRoleClicked(roleDetails) }
+                    ) {
+                        Icon(
+                            painter = painterResource(if (isSaved) R.drawable.saved_item else R.drawable.saveproject),
+                            contentDescription = "Save",
+                        )
+                    }
                 }
+
             }
 
             Spacer(modifier = Modifier.height(16.dp))

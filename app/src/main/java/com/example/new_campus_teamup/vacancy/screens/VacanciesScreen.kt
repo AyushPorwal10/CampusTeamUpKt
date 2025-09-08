@@ -18,9 +18,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -41,19 +43,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.example.new_campus_teamup.R
+import com.example.new_campus_teamup.UiState
 import com.example.new_campus_teamup.helper.LoadAnimation
+import com.example.new_campus_teamup.helper.ReportPostDialog
 import com.example.new_campus_teamup.helper.ShimmerEffect
+import com.example.new_campus_teamup.helper.ToastHelper
 import com.example.new_campus_teamup.myThemes.TextFieldStyle
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
+import com.example.new_campus_teamup.room.VacancyEntity
 import com.example.new_campus_teamup.screens.homescreens.CustomRoundedCorner
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
 import com.example.new_campus_teamup.ui.theme.BackgroundGradientColor
+import com.example.new_campus_teamup.ui.theme.Black
 import com.example.new_campus_teamup.ui.theme.BorderColor
 import com.example.new_campus_teamup.ui.theme.RoleCardSurfaceVariant
 import com.example.new_campus_teamup.ui.theme.RoleOnCardSurfaceVariant
@@ -67,14 +77,43 @@ import kotlinx.coroutines.delay
 fun VacanciesScreen(
     homeScreenViewModel: HomeScreenViewModel,
     searchRoleVacancy: SearchRoleVacancy,
+    navController: NavController,
     saveVacancy: (VacancyDetails) -> Unit
 ) {
-    val textColor = White
-    val bgColor = BackGroundColor
     var isFocused by remember { mutableStateOf(false) }
 
-    val idOfSavedVacancy by homeScreenViewModel.listOfSavedVacancy.collectAsState()
-    val searchText by searchRoleVacancy.searchVacancyText.collectAsState()
+    val searchText by searchRoleVacancy.searchVacancyText.collectAsStateWithLifecycle()
+
+    var vacancyIdToReport by remember { mutableStateOf<String?>(null) }
+    val reportPostUiState by homeScreenViewModel.reportPostUiState.collectAsStateWithLifecycle()
+    var showReportDialog by remember { mutableStateOf(false) }
+
+
+    val idsOfSavedVacancy by homeScreenViewModel.listOfSavedVacancy.collectAsStateWithLifecycle()
+
+    val context = LocalContext.current
+    if(reportPostUiState is UiState.Success){
+        showReportDialog = false
+        homeScreenViewModel.resetReportPostState()
+    }
+    else if(reportPostUiState is UiState.Error){
+        showReportDialog = false
+        homeScreenViewModel.resetReportPostState()
+        ToastHelper.showToast(context, stringResource(R.string.something_went_wrong_try_again))
+    }
+
+
+    ReportPostDialog(showReportDialog,isLoading = reportPostUiState is UiState.Loading, onDismiss = {
+        showReportDialog = false
+    }, onConfirm = {
+        homeScreenViewModel.reportPost("vacancies" , vacancyIdToReport!!)
+        vacancyIdToReport = null
+    })
+
+
+    LaunchedEffect(Unit) {
+        homeScreenViewModel.observeVacancyInRealTime()
+    }
 
     val searchOption = listOf(
         "Search by Team Name",
@@ -87,9 +126,9 @@ fun VacanciesScreen(
     var placeHolderIndex by remember { mutableIntStateOf(0) }
 
     val vacancies by if (searchText.isNotEmpty()) {
-        searchRoleVacancy.searchedVacancies.collectAsState()
+        searchRoleVacancy.searchedVacanciesUiState.collectAsState()
     } else {
-        homeScreenViewModel.vacancyStateFlow.collectAsState()
+        homeScreenViewModel.vacancyUiState.collectAsState()
     }
 
     LaunchedEffect(Unit) {
@@ -106,7 +145,18 @@ fun VacanciesScreen(
             },
             colors = topAppBarColors(
                 containerColor = Color(0xFFEFEEFF),
-            )
+            ),
+            navigationIcon = {
+                IconButton(onClick = {
+                    navController.popBackStack()
+                }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.browseback),
+                        contentDescription = null,
+                        tint = Black
+                    )
+                }
+            }
         )
     }) { paddingValues ->
 
@@ -174,10 +224,14 @@ fun VacanciesScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(5.dp),
-                    vacancies = vacancies,
+                    vacanciesUiState = vacancies,
                     homeScreenViewModel = homeScreenViewModel,
                     saveVacancy = saveVacancy,
-                    idOfSavedVacancy = idOfSavedVacancy
+                    idsOfSavedVacancy = idsOfSavedVacancy,
+                    onVacancyReportBtnClick = {
+                        showReportDialog = true
+                        vacancyIdToReport = it
+                    }
                 )
             }
         }
@@ -186,29 +240,33 @@ fun VacanciesScreen(
 @Composable
 fun ShowListOfVacancies(
     modifier: Modifier,
-    vacancies: List<VacancyDetails>,
+    vacanciesUiState: UiState<List<VacancyDetails>>,
     homeScreenViewModel: HomeScreenViewModel,
     saveVacancy: (VacancyDetails) -> Unit,
-    idOfSavedVacancy: List<String>,
+    idsOfSavedVacancy: List<VacancyEntity>,
+    onVacancyReportBtnClick: (String) -> Unit = {}
 ) {
 
-    val isVacancyLoading = homeScreenViewModel.isVacancyLoading.collectAsState()
-
-    LaunchedEffect(Unit) {
-        Log.d("Vacancy", "Composable Fetching When composable loads")
-        homeScreenViewModel.observeVacancyInRealTime()
-    }
 
 
 
-    val filteredVacancy = vacancies.filter { !idOfSavedVacancy.contains(it.vacancyId) }
-        LazyColumn(
-            modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+    when(vacanciesUiState){
+        is UiState.Success -> {
+            val vacancies = vacanciesUiState.data
 
-        ) {
-            items(filteredVacancy) { vacancy ->
-                ShimmerEffect(modifier = modifier, isLoading = isVacancyLoading.value) {
+            val vacancyIdSet = idsOfSavedVacancy.map { it.vacancyId }
+
+            val filteredVacancy = vacancies.filter { !vacancyIdSet.contains(it.vacancyId) }
+
+
+            Log.d("VacancyDebugging","Success ")
+
+            LazyColumn(
+                modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+
+                ) {
+                items(filteredVacancy) { vacancy ->
                         SingleVacancyCard(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -217,23 +275,48 @@ fun ShowListOfVacancies(
                             vacancy,
                             onSaveVacancy = {
                                 saveVacancy(it)
-                            },false
+                            }, onReportVacancyBtnClick = {
+                                onVacancyReportBtnClick(vacancy.vacancyId)
+                            }, isSaved = false
                         )
                 }
-
-
-        }
-
-            item {
-                if(vacancies.isEmpty() || (vacancies.size-idOfSavedVacancy.size)==0) {
-                    Box( contentAlignment = Alignment.Center) {
-                        LoadAnimation(
-                            modifier = Modifier.size(200.dp),
-                            animation = R.raw.noresult,
-                            playAnimation = true
-                        )
+                item {
+                    if(vacancies.isEmpty() || (vacancies.size-idsOfSavedVacancy.size)==0) {
+                        Box( contentAlignment = Alignment.Center) {
+                            LoadAnimation(
+                                modifier = Modifier.size(200.dp),
+                                animation = R.raw.noresult,
+                                playAnimation = true
+                            )
+                        }
                     }
                 }
             }
+
+        }
+        is UiState.Error -> {
+            Log.d("VacancyDebugging","Error ")
+
+            Box(contentAlignment = Alignment.Center) {
+                LoadAnimation(
+                    modifier = Modifier.size(200.dp),
+                    animation = R.raw.noresult,
+                    playAnimation = true
+                )
+            }
+        }
+        is UiState.Loading -> {
+            Log.d("VacancyDebugging","Loading ")
+
+            Box(modifier = modifier, contentAlignment = Alignment.TopCenter) {
+                CircularProgressIndicator(modifier = Modifier.size(36.dp), color = Color.Black)
+            }
+        }
+        is UiState.Idle -> {
+            Log.d("VacancyDebugging","Loading ")
+
+        }
     }
+
+
 }

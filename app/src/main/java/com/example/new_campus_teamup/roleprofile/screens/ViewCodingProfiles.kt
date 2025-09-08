@@ -89,7 +89,7 @@ fun ViewCodingProfiles(
             .fillMaxWidth(0.9f)
             .padding(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF7EEBBE)
+            containerColor = Color(0xFFEDF9FE)
         ),
         elevation = CardDefaults.cardElevation(6.dp)
     ) {
@@ -111,7 +111,8 @@ fun ViewCodingProfiles(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 70.dp ,max = 300.dp),
+                    .heightIn(max = 240.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
 
@@ -158,7 +159,7 @@ fun ShowCodingProfiles(profileUrl: String, context : Context, showVisitButton : 
                     painter = painterResource(platformNameAndIcon.platformIcon),
                     tint = IconColor,
                     contentDescription = null,
-                    modifier = Modifier.padding(end = 6.dp).size(38.dp)
+                    modifier = Modifier.padding(end = 6.dp).size(24.dp)
                 )
 
                 Text(
@@ -190,16 +191,9 @@ fun ShowCodingProfiles(profileUrl: String, context : Context, showVisitButton : 
                         "Visit",
                         fontWeight = FontWeight.Medium,
                         color = Color.White,
-                        modifier = Modifier.padding(start = 10.dp, end = 2.dp)
+                        modifier = Modifier.padding(horizontal = 10.dp , vertical = 6.dp)
                     )
-                    Icon(
-                        painter = painterResource(R.drawable.college),
-                        tint = Color.White,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .padding(start = 2.dp, end = 10.dp)
-                            .size(26.dp)
-                    )
+
                 }
             }
 

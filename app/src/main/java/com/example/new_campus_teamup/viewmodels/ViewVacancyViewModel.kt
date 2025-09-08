@@ -9,9 +9,9 @@ import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
 import com.example.new_campus_teamup.helper.TimeAndDate
 import com.example.new_campus_teamup.myinterface.RequestSendingState
 import com.example.new_campus_teamup.myrepository.ViewVacancyRepository
-import com.example.new_campus_teamup.notification.FcmMessage
-import com.example.new_campus_teamup.notification.Message
-import com.example.new_campus_teamup.notification.Notification
+import com.example.new_campus_teamup.remote.FcmMessage
+import com.example.new_campus_teamup.remote.Message
+import com.example.new_campus_teamup.remote.Notification
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
 @HiltViewModel

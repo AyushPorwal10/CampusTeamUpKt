@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,9 +20,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -41,21 +42,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.example.new_campus_teamup.R
+import com.example.new_campus_teamup.UiState
 import com.example.new_campus_teamup.helper.LoadAnimation
-import com.example.new_campus_teamup.helper.ShimmerEffect
+import com.example.new_campus_teamup.helper.ReportPostDialog
+import com.example.new_campus_teamup.helper.ToastHelper
+import com.example.new_campus_teamup.helper.show
 import com.example.new_campus_teamup.mydataclass.RoleDetails
+import com.example.new_campus_teamup.room.RoleEntity
 import com.example.new_campus_teamup.screens.homescreens.CustomRoundedCorner
 import com.example.new_campus_teamup.ui.theme.BackgroundGradientColor
+import com.example.new_campus_teamup.ui.theme.Black
 import com.example.new_campus_teamup.ui.theme.RoleCardSurfaceVariant
 import com.example.new_campus_teamup.ui.theme.RoleOnCardSurfaceVariant
 import com.example.new_campus_teamup.viewmodels.HomeScreenViewModel
@@ -66,18 +73,58 @@ import com.example.new_campus_teamup.viewmodels.SearchRoleVacancy
 fun RolesScreen(
     homeScreenViewModel: HomeScreenViewModel,
     searchRoleVacancy: SearchRoleVacancy,
+    navController: NavController,
     saveRole: (RoleDetails) -> Unit
 ) {
 
+
     var isFocused by remember { mutableStateOf(false) }
-    val searchText by searchRoleVacancy.searchRoleText.collectAsState()
-    val idOfSavedRoles by homeScreenViewModel.listOfSavedRoles.collectAsState()
+    val searchText by searchRoleVacancy.searchRoleText.collectAsStateWithLifecycle()
+
+    val idOfSavedRoles by homeScreenViewModel.idsOfSavedRoles.collectAsStateWithLifecycle()
+
+//    Log.d("RoleScreen","Saved id from room ${idOfSavedRoles.size}")
+
+
+    var roleIdToReport by remember { mutableStateOf<String?>(null) }
+    val reportPostUiState by homeScreenViewModel.reportPostUiState.collectAsStateWithLifecycle()
+    var showReportDialog by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+
+    if(reportPostUiState is UiState.Success){
+        showReportDialog = false
+        homeScreenViewModel.resetReportPostState()
+    }
+    else if(reportPostUiState is UiState.Error){
+        showReportDialog = false
+        homeScreenViewModel.resetReportPostState()
+        ToastHelper.showToast(context, stringResource(R.string.something_went_wrong_try_again))
+    }
+
+
+        ReportPostDialog(showReportDialog,isLoading = reportPostUiState is UiState.Loading, onDismiss = {
+            showReportDialog = false
+        }, onConfirm = {
+            homeScreenViewModel.reportPost("roles" , roleIdToReport!!)
+            roleIdToReport = null
+        })
+
+    LaunchedEffect(Unit) {
+        homeScreenViewModel.observeRolesInRealTime()
+    }
+
+
+
+
 
     val roles by if (searchText.isNotEmpty()) {
-        searchRoleVacancy.searchedRoles.collectAsState()
+        searchRoleVacancy.searchedRolesUiState.collectAsState()
     } else {
-        homeScreenViewModel.rolesStateFlow.collectAsState()
+        homeScreenViewModel.rolesUiState.collectAsState()
     }
+
+
 
     val placeholders = listOf("Search by Role", "Search by Name", "Search by College Name")
     var currentPlaceholderIndex by remember { mutableIntStateOf(0) }
@@ -92,12 +139,24 @@ fun RolesScreen(
 
 
     Scaffold(topBar = {
-        TopAppBar(title = {
-            Text(stringResource(R.string.app_name), fontWeight = FontWeight.Bold)
-        },
+        TopAppBar(
+            title = {
+                Text(stringResource(R.string.app_name), fontWeight = FontWeight.Bold)
+            },
             colors = topAppBarColors(
                 containerColor = Color(0xFFEFEEFF),
-            )
+            ),
+            navigationIcon = {
+                IconButton(onClick = {
+                    navController.popBackStack()
+                }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.browseback),
+                        contentDescription = null,
+                        tint = Black
+                    )
+                }
+            }
         )
     }) { paddingValues ->
 
@@ -115,7 +174,7 @@ fun RolesScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            HorizontalDivider(modifier = Modifier.height(1.dp) , color = Color.LightGray)
+            HorizontalDivider(modifier = Modifier.height(1.dp), color = Color.LightGray)
 
             CustomRoundedCorner(stringResource(R.string.find_team_members))
             Card(
@@ -169,10 +228,13 @@ fun RolesScreen(
             ) {
                 ShowListOfRoles(
                     modifier = Modifier.fillMaxSize(),
-                    roles = roles,
-                    homeScreenViewModel = homeScreenViewModel,
+                    rolesUiState = roles,
                     saveRole = saveRole,
-                    idOfSavedRoles = idOfSavedRoles
+                    idOfSavedRoles = idOfSavedRoles,
+                    onReportRoleBtnClick = {
+                        showReportDialog = true
+                        roleIdToReport = it
+                    }
                 )
             }
         }
@@ -182,51 +244,71 @@ fun RolesScreen(
 @Composable
 fun ShowListOfRoles(
     modifier: Modifier,
-    roles: List<RoleDetails>,
-    homeScreenViewModel: HomeScreenViewModel,
+    rolesUiState: UiState<List<RoleDetails>>,
     saveRole: (RoleDetails) -> Unit,
-    idOfSavedRoles: List<String>,
+    idOfSavedRoles: List<RoleEntity>,
+    onReportRoleBtnClick: (String) -> Unit = {}
 ) {
 
-    val isLoading by homeScreenViewModel.isRoleLoading.collectAsState()
-
-    LaunchedEffect(Unit) {
-        homeScreenViewModel.observeRolesInRealTime()
-    }
 
 
-    val filteredRoles = roles.filter { !idOfSavedRoles.contains(it.roleId) }
+    when (rolesUiState) {
+        is UiState.Success -> {
 
-    LazyColumn(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(filteredRoles) { role ->
-            ShimmerEffect(modifier, isLoading, contentAfterLoading = {
-                Log.d("FetchedRole", "Showing unsaved role")
-                SingleRoleCard(role, onSaveRoleClicked = {
-                    saveRole(it)
-                }, false)
-            })
-        }
+            val savedRoleIdsSet = idOfSavedRoles.map { it.roleId }.toSet()
 
+            val filteredRoles = rolesUiState.data.filter { !savedRoleIdsSet.contains(it.roleId) }
 
-        item {
-
-            if (roles.isEmpty() || (roles.size - idOfSavedRoles.size) == 0) {
-                Box(contentAlignment = Alignment.Center) {
-                    LoadAnimation(
-                        modifier = Modifier.size(200.dp),
-                        animation = R.raw.noresult,
-                        playAnimation = true
-                    )
+            LazyColumn(
+                modifier = modifier,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if(filteredRoles.isEmpty() || rolesUiState.data.size - idOfSavedRoles.size == 0){
+                    item {
+                        Box(contentAlignment = Alignment.Center) {
+                            LoadAnimation(
+                                modifier = Modifier.size(200.dp),
+                                animation = R.raw.noresult,
+                                playAnimation = true
+                            )
+                        }
+                    }
                 }
+                else {
+                    items(filteredRoles) { role ->
+                        Log.d("FetchedRole", "Showing unsaved role")
+                        SingleRoleCard(role, onSaveRoleClicked = {
+                            saveRole(it)
+                        }, onReportRoleBtnClick = {
+                            onReportRoleBtnClick(role.roleId)
+                        }, isSaved = false)
+                    }
+                }
+
             }
         }
 
-    }
+        is UiState.Error -> {
+            Box(contentAlignment = Alignment.Center) {
+                LoadAnimation(
+                    modifier = Modifier.size(200.dp),
+                    animation = R.raw.noresult,
+                    playAnimation = true
+                )
+            }
+        }
 
+        is UiState.Loading -> {
+            Box(modifier = modifier, contentAlignment = Alignment.TopCenter) {
+                CircularProgressIndicator(modifier = Modifier.size(36.dp), color = Color.Black)
+            }
+        }
+
+        is UiState.Idle -> {
+
+        }
+    }
 }
 
 

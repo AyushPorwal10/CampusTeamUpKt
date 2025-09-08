@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.new_campus_teamup.helper.HandleNotificationPermission
 import com.example.new_campus_teamup.helper.ToastHelper
 import com.example.new_campus_teamup.mysealedClass.BottomNavScreens
 import com.example.new_campus_teamup.project.screens.ProjectsScreen
@@ -44,35 +45,21 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        
-        checkGooglePlayServices()
         setupComposeContent()
     }
 
 
-    private fun checkGooglePlayServices(): Boolean {
-        Log.e("GooglePlayServices", "Checking Google Play Services")
-        val googleApiAvailability = GoogleApiAvailability.getInstance()
-        val resultCode = googleApiAvailability.isGooglePlayServicesAvailable(this)
 
-        return if (resultCode != ConnectionResult.SUCCESS) {
-            if (googleApiAvailability.isUserResolvableError(resultCode)) {
-                Log.e("GooglePlayServices", "Google Play Services are available on this device.")
-                googleApiAvailability.getErrorDialog(this, resultCode, 2404)?.show()
-            } else {
-                Log.e("GooglePlayServices", "Google Play Services not available on this device.")
-                finish()
-            }
-            false
-        } else {
-            Log.e("GooglePlayServices", "Else part is executed")
-            true
-        }
-    }
 
     private fun setupComposeContent() {
         setContent {
 
+            HandleNotificationPermission(onGranted = {
+
+            },
+                onDenied ={
+
+                })
             val context = LocalContext.current
             val userData = userDataSharedViewModel.userData.collectAsState()
             val navController = rememberNavController()
@@ -90,19 +77,10 @@ class MainActivity : ComponentActivity() {
 
             NavHost(navController = navController , startDestination = BottomNavScreens.Home.screen){
                 composable(BottomNavScreens.Roles.screen) {
-                    Log.d("UpdateUiTesting","Inside Navhost")
-                        RolesScreen(homeScreenViewModel, searchRoleVacancy) { roleDetails ->
+                        RolesScreen(homeScreenViewModel, searchRoleVacancy, navController) { roleDetails ->
                             homeScreenViewModel.saveRole(roleDetails, onRoleSaved = {
-//                                scope.launch {
-//                                    snackbarHostState.showSnackbar(
-//                                        message = "Role Saved Successfully.",
-//                                        actionLabel = "Ok"
-//                                    )
-//                                }
                                 ToastHelper.showToast(context, "Role Saved Successfully.")
-
                             }, onError = {
-                                Log.e("SaveRole", "Error is $it")
                                 ToastHelper.showToast(context, "Something went wrong.")
                             })
                         }
@@ -111,20 +89,14 @@ class MainActivity : ComponentActivity() {
                 composable(BottomNavScreens.Projects.screen) {
                         ProjectsScreen(
                             homeScreenViewModel,
+                            navController,
                             saveProject = {
                                 homeScreenViewModel.saveProject(it, onProjectSaved = {
-//                                    scope.launch {
-//                                        snackbarHostState.showSnackbar(
-//                                            message = "Project Saved Successfully.",
-//                                            actionLabel = "Ok"
-//                                        )
-//                                    }
+
                                     ToastHelper.showToast(context, "Project Saved Successfully")
                                 },
                                     onError = {
-//                                        scope.launch {
-//                                            snackbarHostState.showSnackbar(message = "Something went wrong.")
-//                                        }
+
                                         ToastHelper.showToast(context, "Something went wrong.")
                                     })
                             }
@@ -134,14 +106,10 @@ class MainActivity : ComponentActivity() {
                 composable(BottomNavScreens.Vacancies.screen) {
                         VacanciesScreen(
                             homeScreenViewModel, searchRoleVacancy,
+                            navController,
                             saveVacancy = {
                                 homeScreenViewModel.saveVacancy(it, onVacancySaved = {
-//                                    scope.launch {
-//                                        snackbarHostState.showSnackbar(
-//                                            message = "Vacancy Saved Successfully.",
-//                                            actionLabel = "Ok"
-//                                        )
-//                                    }
+
                                     ToastHelper.showToast(context, "Vacancy Saved Successfully.")
 
                                 },
@@ -152,15 +120,10 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-
-
-
-
                 composable(BottomNavScreens.Home.screen){
                     HomeScreen(homeScreenViewModel, navController , searchRoleVacancy, userData.value?.userId)
                 }
             }
-
 
             }
 
@@ -182,8 +145,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        Log.d("Navigation", "MainActivity is on Resumed")
-        checkGooglePlayServices()
     }
 }
 

@@ -1,4 +1,4 @@
-package com.example.new_campus_teamup.notification
+package com.example.new_campus_teamup.remote
 
 import androidx.annotation.Keep
 import retrofit2.http.Body

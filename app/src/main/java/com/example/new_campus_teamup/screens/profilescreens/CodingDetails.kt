@@ -34,6 +34,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -53,6 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
@@ -102,7 +104,7 @@ fun CodingProfilesCard(userProfileViewModel: UserProfileViewModel) {
             .fillMaxWidth(0.9f)
             .padding(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF7EEBBE)
+            containerColor = Color(0xFFEDF9FE)
         ),
         elevation = CardDefaults.cardElevation(6.dp)
     ) {
@@ -124,7 +126,8 @@ fun CodingProfilesCard(userProfileViewModel: UserProfileViewModel) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 20.dp ,max = 300.dp),
+                    .heightIn(max = 240.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 items(codingProfiles.value) { profileUrl ->
@@ -137,6 +140,7 @@ fun CodingProfilesCard(userProfileViewModel: UserProfileViewModel) {
         }
     }
 }
+
 
 @Composable
 fun ShowCodingProfiles(profileUrl: String) {
@@ -164,7 +168,7 @@ fun ShowCodingProfiles(profileUrl: String) {
                     painter = painterResource(platformNameAndIcon.platformIcon),
                     tint = IconColor,
                     contentDescription = null,
-                    modifier = Modifier.padding(end = 6.dp).size(38.dp)
+                    modifier = Modifier.padding(end = 6.dp).size(24.dp)
                 )
 
                 Text(
@@ -191,20 +195,14 @@ fun ShowCodingProfiles(profileUrl: String) {
                         }
                     }
             ) {
+
                 Text(
                     "Visit",
                     fontWeight = FontWeight.Medium,
                     color = Color.White,
-                    modifier = Modifier.padding(start = 10.dp, end = 2.dp)
+                    modifier = Modifier.padding(horizontal = 10.dp  , vertical = 6.dp)
                 )
-                Icon(
-                    painter = painterResource(R.drawable.visit),
-                    tint = Color.White,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(start = 2.dp, end = 10.dp)
-                        .size(26.dp)
-                )
+
             }
 
         }

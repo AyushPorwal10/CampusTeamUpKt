@@ -14,7 +14,10 @@ import coil.util.DebugLogger
 import com.google.firebase.BuildConfig
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.FirebaseAppCheck
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
+import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import dagger.hilt.android.HiltAndroidApp
+
 
 @HiltAndroidApp
 class MyApplication : Application() ,ImageLoaderFactory {
@@ -27,10 +30,21 @@ class MyApplication : Application() ,ImageLoaderFactory {
 
         FirebaseApp.initializeApp(this)
 
+        val firebaseAppCheck = FirebaseAppCheck.getInstance()
 
-        if (BuildConfig.DEBUG) {
-            Log.d("AppCheck", "Debug build detected. App Check using Debug provider.")
-        }
+
+       // if (BuildConfig.DEBUG) { // Only use debug provider in debug builds
+       //     Log.d("AppCheck", "Using DEBUG App Check Provider")
+            firebaseAppCheck.installAppCheckProviderFactory(
+                DebugAppCheckProviderFactory.getInstance()
+            )
+      //  } else {
+//            Log.d("AppCheck", "Using Play Integrity App Check Provider")
+//            firebaseAppCheck.installAppCheckProviderFactory(
+//                PlayIntegrityAppCheckProviderFactory.getInstance()
+//            )
+//        }
+
 
         // only night mode
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)

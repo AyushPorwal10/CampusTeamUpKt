@@ -1,6 +1,5 @@
-package com.example.new_campus_teamup.screens.homescreens
+package com.example.new_campus_teamup.helper
 
-import android.content.Intent
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -22,9 +21,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,7 +38,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,72 +47,26 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.new_campus_teamup.R
-import com.example.new_campus_teamup.email_pass_login.LoginSignUp
-import com.example.new_campus_teamup.ui.theme.Black
-import com.example.new_campus_teamup.viewmodels.HomeScreenViewModel
 import kotlinx.coroutines.delay
 
 
 @Composable
-fun HandleLogoutButton(homeScreenViewModel: HomeScreenViewModel) {
-
-    val context = LocalContext.current
-    var showDialog by remember { mutableStateOf(false) }
-
-    NavigationDrawerItem(
-        label = { Text(text = stringResource(id = R.string.logout), color = Black , fontWeight = FontWeight.Medium) },
-        selected = false,
-        icon = {
-            Icon(
-                painter = painterResource(id = R.drawable.logout),
-                contentDescription = null,
-                tint = Black,
-                modifier = Modifier.size(26.dp)
-            )
-        },
-        onClick = {
-            showDialog = true
-        }
-    )
-
-
-
-    if(showDialog){
-        LogOutDialog(
-            showDialog = showDialog,
-            onDismiss = { showDialog = false },
-            onConfirm = {
-                showDialog = false
-                homeScreenViewModel.logoutUser(onLogoutSuccess = {
-                    val navigateToLogin = Intent(context, LoginSignUp::class.java)
-                    navigateToLogin.flags =
-                        Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    context.startActivity(navigateToLogin)
-                })
-            }
-        )
-    }
-
-}
-
-
-
-
-@Composable
-fun LogOutDialog(
+fun ReportPostDialog(
     showDialog: Boolean,
+    isLoading : Boolean ,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
     if (showDialog) {
         Dialog(
-            onDismissRequest = onDismiss,
+            onDismissRequest = {},
             properties = DialogProperties(
                 dismissOnBackPress = true,
                 dismissOnClickOutside = true
             )
         ) {
-            LogoutDialogContent(
+            ReportDialogContent(
+                isLoading ,
                 onDismiss = onDismiss,
                 onConfirm = onConfirm
             )
@@ -123,7 +75,8 @@ fun LogOutDialog(
 }
 
 @Composable
-private fun LogoutDialogContent(
+ fun ReportDialogContent(
+    isLoading : Boolean ,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
@@ -168,12 +121,12 @@ private fun LogoutDialogContent(
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AnimatedIcon(R.drawable.logout)
+                com.example.new_campus_teamup.screens.homescreens.AnimatedIcon(R.drawable.report_post)
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Log Out",
+                    text = "Report Post",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -182,7 +135,7 @@ private fun LogoutDialogContent(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Are you sure you want to log out of your account?",
+                    text = stringResource(R.string.report_description),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -204,7 +157,8 @@ private fun LogoutDialogContent(
                         border = BorderStroke(
                             1.dp,
                             MaterialTheme.colorScheme.outline
-                        )
+                        ),
+                        enabled = !isLoading
                     ) {
                         Text(
                             text = "Cancel",
@@ -212,7 +166,6 @@ private fun LogoutDialogContent(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-
                     Button(
                         onClick = onConfirm,
                         modifier = Modifier
@@ -223,64 +176,19 @@ private fun LogoutDialogContent(
                             containerColor = Color(0xFF4D00E7)
                         )
                     ) {
-                        Text(
-                            text = "Log Out",
-                            fontWeight = FontWeight.Medium
-                        )
+                        if(isLoading){
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
+                        }
+                        else{
+                            Text(
+                                text = "Report",
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+
                     }
                 }
             }
         }
     }
 }
-
-@Composable
- fun AnimatedIcon(icon : Int ) {
-    var isRotated by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        delay(200)
-        isRotated = true
-    }
-
-    val rotation by animateFloatAsState(
-        targetValue = if (isRotated) 360f else 0f,
-        animationSpec = tween(
-            durationMillis = 800,
-            easing = FastOutSlowInEasing
-        ), label = "rotation"
-    )
-
-    val iconScale by animateFloatAsState(
-        targetValue = if (isRotated) 1f else 0.8f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ), label = "iconScale"
-    )
-
-    Box(
-        modifier = Modifier
-            .size(80.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(
-                Color(0xFFFF4444).copy(alpha = 0.1f)
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = "Logout",
-            modifier = Modifier
-                .size(32.dp)
-                .scale(iconScale)
-                .graphicsLayer(rotationZ = rotation),
-            tint = MaterialTheme.colorScheme.error
-        )
-    }
-}
-
-
-
-
-

@@ -22,8 +22,9 @@ import com.example.new_campus_teamup.ui.theme.BackGroundColor
 
 
 @Composable
-fun ShowSavedRoles(savedRoleList: State<List<RoleDetails>>, onRoleUnsave: (String) -> Unit) {
-    Log.d("FetchingRoles", "In lazy it is ${savedRoleList.value.size}")
+fun ShowSavedRoles(savedRoleList: State<List<RoleDetails>>, onRoleUnsave: (String) -> Unit, onReportRoleBtnClick : (String) -> Unit) {
+
+
 
     LazyColumn(
         modifier = Modifier
@@ -35,9 +36,10 @@ fun ShowSavedRoles(savedRoleList: State<List<RoleDetails>>, onRoleUnsave: (Strin
         items(savedRoleList.value) {
             Log.d("FetchingRoles", "Single Role loads")
             SingleRoleCard(it, onSaveRoleClicked = {
-                // this is to unsave projects
                 onRoleUnsave(it.roleId)
-            }, true)
+            } , onReportRoleBtnClick = {
+                onReportRoleBtnClick(it.roleId)
+            }, isSaved = true)
         }
         item {
             if(savedRoleList.value.isEmpty()){

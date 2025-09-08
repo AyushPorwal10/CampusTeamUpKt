@@ -2,6 +2,7 @@ package com.example.new_campus_teamup.saveditems
 
 import android.app.Activity
 import android.util.Log
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +26,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -42,7 +46,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.new_campus_teamup.R
+import com.example.new_campus_teamup.UiState
 import com.example.new_campus_teamup.helper.LoadAnimation
+import com.example.new_campus_teamup.helper.ReportPostDialog
 import com.example.new_campus_teamup.helper.ToastHelper
 import com.example.new_campus_teamup.myactivities.UserData
 import com.example.new_campus_teamup.ui.theme.BackGroundColor
@@ -65,9 +71,8 @@ fun ShowSavedItems(
 
     val bgColor = BackGroundColor
     val textColor = White
-    val activity = LocalContext.current as? Activity
+    val activity = LocalActivity.current
 
-    val snackbarHostState = remember { SnackbarHostState() }
 
     val savedProjectList = savedItemsViewModel.showProjectList.collectAsState()
     val savedRolesList = savedItemsViewModel.savedRolesList.collectAsState()
@@ -77,6 +82,29 @@ fun ShowSavedItems(
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
 
+    var postIdToReport by remember { mutableStateOf<String?>(null) }
+    val reportPostUiState by savedItemsViewModel.reportPostUiState.collectAsState()
+    var showReportDialog by remember { mutableStateOf(false) }
+    var reportPostTag by remember { mutableStateOf("") }
+
+
+    if(reportPostUiState is UiState.Success){
+        showReportDialog = false
+        savedItemsViewModel.resetReportPostState()
+    }
+    else if(reportPostUiState is UiState.Error){
+        showReportDialog = false
+        savedItemsViewModel.resetReportPostState()
+        ToastHelper.showToast(context, stringResource(R.string.something_went_wrong_try_again))
+    }
+
+
+    ReportPostDialog(showReportDialog,isLoading = reportPostUiState is UiState.Loading, onDismiss = {
+        showReportDialog = false
+    }, onConfirm = {
+        savedItemsViewModel.reportPost(reportPostTag , postIdToReport!!)
+        postIdToReport = null
+    })
 
     LaunchedEffect(Unit){
         savedItemsViewModel.errorMessage.collect{error->
@@ -204,6 +232,11 @@ fun ShowSavedItems(
                                         roleId,
                                         currentUserData?.userId
                                     )
+                                },
+                                onReportRoleBtnClick = {roleId ->
+                                    postIdToReport = roleId
+                                    reportPostTag = "roles"
+                                    showReportDialog = true
                                 }
                             )
                         }
@@ -215,6 +248,11 @@ fun ShowSavedItems(
                                         vacancyId,
                                         currentUserData?.userId
                                     )
+                                },
+                                onReportVacancyBtnClick = {vacancyId ->
+                                    postIdToReport = vacancyId
+                                    reportPostTag = "vacancies"
+                                    showReportDialog = true
                                 }
                             )
                         }
@@ -226,6 +264,10 @@ fun ShowSavedItems(
                                         it,
                                         currentUserData?.userId
                                     )
+                                }, onReportProjectBtnClick = {projectId->
+                                    postIdToReport = projectId
+                                    reportPostTag = "projects"
+                                    showReportDialog = true
                                 }
                             )
                         }

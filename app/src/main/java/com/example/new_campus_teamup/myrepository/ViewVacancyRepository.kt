@@ -2,8 +2,8 @@ package com.example.new_campus_teamup.myrepository
 
 import android.util.Log
 import com.example.new_campus_teamup.helper.ChatRoomId
-import com.example.new_campus_teamup.notification.FCMApiService
-import com.example.new_campus_teamup.notification.FcmMessage
+import com.example.new_campus_teamup.remote.FCMApiService
+import com.example.new_campus_teamup.remote.FcmMessage
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Transaction
 import kotlinx.coroutines.channels.awaitClose
@@ -101,8 +101,8 @@ class ViewVacancyRepository @Inject constructor(
 
 
     suspend fun sendNotification(
-        currentUserPhoneNumber : String ,
-        userIdWhoPosted : String ,
+        currentUserPhoneNumber : String,
+        userIdWhoPosted : String,
         fcmMessage: FcmMessage,
         onNotificationSent: () -> Unit,
         onNotificationError: () -> Unit,

@@ -1,6 +1,7 @@
 package com.example.new_campus_teamup.myrepository
 
 import android.util.Log
+import com.example.new_campus_teamup.UiState
 import com.example.new_campus_teamup.mydataclass.ProjectDetails
 import com.example.new_campus_teamup.mydataclass.RoleDetails
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
@@ -46,8 +47,8 @@ class SavedItemsRepository @Inject constructor(
     fun fetchSavedProjects(currentUserId: String): Flow<List<ProjectDetails>> =
         fetchSavedData(currentUserId, "project_saved")
 
-    fun fetchSavedVacancies(currentUserId: String) : Flow<List<VacancyDetails>> =
-        fetchSavedData(currentUserId , "saved_vacancy")
+    fun fetchSavedVacancies(currentUserId: String): Flow<List<VacancyDetails>> =
+        fetchSavedData(currentUserId, "saved_vacancy")
 
     private inline fun <reified T> fetchSavedData(
         currentUserId: String,
@@ -70,7 +71,24 @@ class SavedItemsRepository @Inject constructor(
         awaitClose { listener.remove() }
     }
 
-
+    fun reportPost(
+        tag: String,
+        postId: String,
+        userId: String,
+        onStateChange: (UiState<Unit>) -> Unit
+    ) {
+        try {
+            onStateChange(UiState.Loading)
+            firebaseFirestore.collection("reported_posts").document(userId).collection(tag)
+                .document(postId).set(mapOf("post_id" to postId)).addOnSuccessListener {
+                    onStateChange(UiState.Success(Unit))
+                }.addOnFailureListener {
+                    onStateChange(UiState.Error(it.message ?: "Unexpected error"))
+                }
+        } catch (exception: Exception) {
+            onStateChange(UiState.Error(exception.message ?: "Unexpected error"))
+        }
+    }
 
 
 }

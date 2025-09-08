@@ -1,78 +1,68 @@
 package com.example.new_campus_teamup.myrepository
 
 import android.util.Log
-import com.example.new_campus_teamup.myactivities.UserManager
+import com.example.new_campus_teamup.UiState
 import com.example.new_campus_teamup.mydataclass.ProjectDetails
 import com.example.new_campus_teamup.mydataclass.RoleDetails
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
+import com.example.new_campus_teamup.room.PostDao
+import com.example.new_campus_teamup.room.ProjectEntity
+import com.example.new_campus_teamup.room.RoleEntity
+import com.example.new_campus_teamup.room.VacancyEntity
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.SetOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.util.concurrent.ExecutionException
 import javax.inject.Inject
 
 class HomeScreenRepository @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
-    private val userManager: UserManager
+    private val postDao: PostDao
 ) {
 
-    suspend fun fetchInitialOrPaginatedRoles(lastVisible: DocumentSnapshot?): QuerySnapshot {
-
-        return if (lastVisible == null) {
-            Log.d("Roles", "HomeScreenRepository Going to Paginated roles first time")
-            firebaseFirestore.collection("all_roles")
-                .orderBy("postedOn", Query.Direction.DESCENDING)
-                .limit(15)
-                .get()
-                .await()
-        } else {
-            Log.d("Roles", "HomeScreenRepository Going to Paginated second time")
-            firebaseFirestore.collection("all_roles")
-                .orderBy("postedOn", Query.Direction.DESCENDING)
-                .startAfter(lastVisible)
-                .limit(15)
-                .get()
-                .await()
-        }
-    }
 
 
-    fun observeRoles(
-        lastVisible: DocumentSnapshot?,
-        onUpdate: (List<RoleDetails>, DocumentSnapshot?) -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        val query = if (lastVisible == null) {
-            firebaseFirestore.collection("all_roles")
-                .orderBy("postedOn", Query.Direction.DESCENDING)
-                .limit(15)
-        } else {
-            firebaseFirestore.collection("all_roles")
-                .orderBy("postedOn", Query.Direction.DESCENDING)
-                .startAfter(lastVisible)
-                .limit(15)
-        }
+    fun observeRoles(): Flow<UiState<List<RoleDetails>>> = callbackFlow {
 
-        query.addSnapshotListener { querySnapshot, error ->
-            if (error != null) {
-                onError(error)
-                return@addSnapshotListener
+        trySend(UiState.Loading)
+
+        val listenerRegistration = try {
+            val reference = firebaseFirestore
+                .collection("all_roles")
+                .orderBy("postedOn", Query.Direction.DESCENDING)
+
+            reference.addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(UiState.Error(error.message ?: "Unknown Firestore error"))
+                    return@addSnapshotListener
+                }
+
+                val roles = snapshot?.documents?.mapNotNull { doc ->
+                    doc.toObject(RoleDetails::class.java)
+                } ?: emptyList()
+
+                trySend(UiState.Success(roles))
             }
-
-            val roles = querySnapshot?.documents?.mapNotNull { doc ->
-                doc.toObject(RoleDetails::class.java)
-            } ?: emptyList()
-
-            Log.d("Roles", "Repository On Refresh getting new roles ${roles.size}")
-
-            val newLastVisible = querySnapshot?.documents?.lastOrNull()
-            onUpdate(roles, newLastVisible)
+        } catch (e: Exception) {
+            trySend(UiState.Error(e.message ?: "Unexpected error"))
+            close(e)
+            null
         }
+
+        awaitClose {
+            listenerRegistration?.remove()
+        }
+
     }
 
     // Vacancy Section for observing and fetching initial and paginated vacancy
@@ -97,36 +87,36 @@ class HomeScreenRepository @Inject constructor(
     }
 
     fun observeVacancy(
-        lastVisible: DocumentSnapshot?,
-        onUpdate: (List<VacancyDetails>, DocumentSnapshot?) -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        val query = if (lastVisible == null) {
-            firebaseFirestore.collection("all_vacancy")
+    ) = callbackFlow {
+        trySend(UiState.Loading)
+
+        val listenerRegistration = try {
+            val reference = firebaseFirestore
+                .collection("all_vacancy")
                 .orderBy("postedOn", Query.Direction.DESCENDING)
-                .limit(15)
 
+            reference.addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(UiState.Error(error.message ?: "Unknown Firestore error"))
+                    return@addSnapshotListener
+                }
 
-        } else {
-            firebaseFirestore.collection("all_vacancy")
-                .orderBy("postedOn", Query.Direction.DESCENDING)
-                .startAfter(lastVisible)
-        }
+                val vacancies = snapshot?.documents?.mapNotNull { doc ->
+                    doc.toObject(VacancyDetails::class.java)
+                } ?: emptyList()
 
-        query.addSnapshotListener { querySnapshot, error ->
-
-            if (error != null) {
-                onError(error)
-                return@addSnapshotListener
+                trySend(UiState.Success(vacancies))
             }
-
-            val vacancy = querySnapshot?.documents?.mapNotNull { doc ->
-                doc.toObject(VacancyDetails::class.java)
-            } ?: emptyList()
-
-            val newLastVisible = querySnapshot?.documents?.lastOrNull()
-            onUpdate(vacancy, newLastVisible)
+        } catch (e: Exception) {
+            trySend(UiState.Error(e.message ?: "Unexpected error"))
+            close(e)
+            null
         }
+
+        awaitClose {
+            listenerRegistration?.remove()
+        }
+
     }
 
     suspend fun fetchProjects(lastProject: DocumentSnapshot?): QuerySnapshot {
@@ -152,7 +142,7 @@ class HomeScreenRepository @Inject constructor(
     }
 
     suspend fun saveProject(
-        currentUserId : String ,
+        currentUserId: String,
         projectDetails: ProjectDetails,
         onProjectSaved: () -> Unit,
         onError: (Exception) -> Unit
@@ -183,19 +173,45 @@ class HomeScreenRepository @Inject constructor(
             onError(it)
         })
     }
+
     suspend fun saveVacancy(
         currentUserId: String,
         vacancyDetails: VacancyDetails,
         onVacancySaved: () -> Unit,
         onError: (Exception) -> Unit
     ) {
-        savedItem(currentUserId, "saved_vacancy", vacancyDetails.vacancyId, vacancyDetails, "SavingVacancies", {
-            onVacancySaved()
-        }, {
-            onError(it)
-        })
+        savedItem(
+            currentUserId,
+            "saved_vacancy",
+            vacancyDetails.vacancyId,
+            vacancyDetails,
+            "SavingVacancies",
+            {
+                onVacancySaved()
+            },
+            {
+                onError(it)
+            })
     }
 
+    fun reportPost(
+        tag: String,
+        postId: String,
+        userId: String,
+        onStateChange: (UiState<Unit>) -> Unit
+    ) {
+        try {
+            onStateChange(UiState.Loading)
+            firebaseFirestore.collection("reported_posts").document(userId).collection(tag)
+                .document(postId).set(mapOf("post_id" to postId)).addOnSuccessListener {
+                    onStateChange(UiState.Success(Unit))
+                }.addOnFailureListener {
+                    onStateChange(UiState.Error(it.message ?: "Unexpected error"))
+                }
+        } catch (exception: Exception) {
+            onStateChange(UiState.Error(exception.message ?: "Unexpected error"))
+        }
+    }
 
     private suspend inline fun <T : Any> savedItem(
         userId: String,
@@ -220,59 +236,85 @@ class HomeScreenRepository @Inject constructor(
     }
 
 
-    fun fetchCurrentUserSavedPost(userId: String): Flow<List<String>> =
-        fetchSavedItems(userId, "project_saved", "Saving")
-
-    fun fetchCurrentUserSavedRole(userId: String): Flow<List<String>> =
-        fetchSavedItems(userId, "saved_roles", "FetchedRole")
-
-    fun fetchCurrentUserSavedVacancy(userId: String): Flow<List<String>> =
-        fetchSavedItems(userId, "saved_vacancy", "FetchedVacancy")
-
 
     // this can be projects , roles , vacancies
-    private fun fetchSavedItems(
+     fun fetchSavedItems(
         userId: String,
         subCollection: String,
         logTag: String
-    ): Flow<List<String>> = callbackFlow {
+    ) {
 
-        val collectionReference =
-            firebaseFirestore.collection("all_user_id").document(userId)
-                .collection(subCollection)
-        val listener = collectionReference.addSnapshotListener { snapshot, error ->
-            if (error != null) {
-                Log.d(logTag, "Error fetching data: $error")
-                close(error)
-                return@addSnapshotListener
-            }
-            val savedIds = snapshot?.documents?.map { it.id } ?: emptyList()
-            Log.d(logTag, "Fetched size: ${savedIds.size} <-")
-            trySend(savedIds).isSuccess // Ensure safe sending
-        }
-        awaitClose { listener.remove() }
+         try {
+             val collectionReference = firebaseFirestore.collection("all_user_id").document(userId).collection(subCollection)
+             collectionReference.addSnapshotListener { snapshot, error ->
+                 if (error != null) {
+                     Log.d(logTag, "Error fetching data: $error")
+                     return@addSnapshotListener
+                 }
+                 val savedIds = snapshot?.documents?.map { it.id } ?: emptyList()
+
+                 CoroutineScope(Dispatchers.IO).launch{
+                     savePostIdsToRoom(subCollection, savedIds)
+                 }
+                 Log.d(logTag, "Fetched size: ${savedIds.size} <-")
+             }
+         }
+         catch (exception : Exception){
+             Log.d("FetchingSavedIds","Error fetching saved ids $exception")
+         }
+
     }
 
-    fun observeCurrentUserImage(currentUserId : String) : Flow<String?> = callbackFlow{
-        Log.d("CollegeDetails","Current User id is $currentUserId")
+
+    private suspend fun savePostIdsToRoom(subCollection: String , postIds: List<String>){
+        try {
+            when(subCollection){
+                "project_saved" -> {
+                    val ids = postIds.map { ProjectEntity(it) }
+                    postDao.syncProjectIds(ids)
+                    Log.d("SavedPostIdToRoom","Saving projectIds to room ${ids.size}")
+                }
+                "saved_roles" -> {
+                    val ids = postIds.map { RoleEntity(it) }
+                    postDao.syncRoleIds(ids)
+                }
+                "saved_vacancy" ->{
+                    val ids = postIds.map { VacancyEntity(it) }
+                    postDao.syncVacancyIds(ids)
+                }
+            }
+        }
+        catch (exception : Exception){
+            Log.d("SavedPostIdToRoom","Error syncing for subcollection $subCollection with exception $exception")
+        }
+
+    }
+    fun fetchSavedRoleIds() : Flow<List<RoleEntity>> = postDao.fetchRoleIds()
+
+    fun fetchSavedVacancyIds() : Flow<List<VacancyEntity>> = postDao.fetchVacancyIds()
+
+    fun fetchSavedProjectIds() : Flow<List<ProjectEntity>> = postDao.fetchProjectIds()
+
+    fun observeCurrentUserImage(currentUserId: String): Flow<String?> = callbackFlow {
+        Log.d("CollegeDetails", "Current User id is $currentUserId")
         val documentReference = firebaseFirestore.collection("user_images").document(currentUserId)
 
-        val realTimeImageFetching = documentReference.addSnapshotListener{snapshot , error->
-            if(error != null){
+        val realTimeImageFetching = documentReference.addSnapshotListener { snapshot, error ->
+            if (error != null) {
                 close(error)
                 return@addSnapshotListener
             }
 
-            if(snapshot != null && snapshot.exists()) {
+            if (snapshot != null && snapshot.exists()) {
                 val imageUrl = snapshot.getString("user_image") as? String
-                Log.d("CollegeDetails","Current user image loaded : $imageUrl")
+                Log.d("CollegeDetails", "Current user image loaded : $imageUrl")
                 trySend(imageUrl)
-            }
-            else {
-                Log.d("CollegeDetails","Snapshot is null")
+            } else {
+                Log.d("CollegeDetails", "Snapshot is null")
             }
         }
-        awaitClose{realTimeImageFetching.remove()}
+        awaitClose { realTimeImageFetching.remove() }
     }
+
 
 }
