@@ -78,11 +78,14 @@ Drive Link : https://drive.google.com/file/d/1GpJw_OaU6UlatL0f_VDhI92a-H3aKf9b/v
 
 ## 📦 Tech Stack
 
-- Android (Kotlin/Java)
-- Firebase Authentication
-- Firestore Database
-- Firebase Storage
-- Material Design 3
+- **Languages:** Kotlin
+- **Android:** Jetpack Compose, Material Design 3, ViewModel 
+- **Architecture:** MVVM
+- **Libraries:** Hilt (Dependency Injection), Coroutines & Flow, Firebase Cloud Messaging  
+- **Database:** Room Database, Firestore Database
+- **Firebase Services:** Authentication, Storage 
+- **Tools:** Git & GitHub, Android Studio. 
+
 
   ## Upcoming Features in Campus TeamUp
 
