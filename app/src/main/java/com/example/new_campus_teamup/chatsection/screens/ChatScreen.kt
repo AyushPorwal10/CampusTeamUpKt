@@ -3,6 +3,7 @@ package com.example.new_campus_teamup.chatsection.screens
 import android.app.Activity
 import android.os.Build
 import android.util.Log
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -64,7 +65,11 @@ fun ChatScreen(senderName: String? ,chatRoomId : String? ,  currentUserId : Stri
     val chatHistory = chatViewModel.chatHistory.collectAsState()
 
     val chatHistoryState = rememberLazyListState()
-    val activity = LocalContext.current as? Activity
+
+//    Log.d("ChatHistoryDebugging","Chat history is ${chatHistory.value}")
+
+
+    val activity = LocalActivity.current
     LaunchedEffect(chatHistory.value){
         chatViewModel.fetchChatHistory(chatRoomId!!)
     }
@@ -180,7 +185,7 @@ fun ChatScreen(senderName: String? ,chatRoomId : String? ,  currentUserId : Stri
                         if (chatRoomId != null) {
                             chatViewModel.sendMessage(SendMessage(
                                 currentUserId!!,
-                                TimeAndDate.formatDate(System.currentTimeMillis()),
+                                System.currentTimeMillis(),
                                 messageText,
                             ),chatRoomId , onMessageSent = {
                             },

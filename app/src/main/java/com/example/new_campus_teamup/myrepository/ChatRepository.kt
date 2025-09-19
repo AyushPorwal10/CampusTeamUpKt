@@ -1,11 +1,8 @@
 package com.example.new_campus_teamup.myrepository
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import com.example.new_campus_teamup.mydataclass.LastMessage
 import com.example.new_campus_teamup.mydataclass.SendMessage
-import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose
@@ -31,12 +28,14 @@ class ChatRepository @Inject constructor(
                 .document(chatRoomId)
 
             batch.set(sendMessageDocumentRef, sendMessage)
-            batch.set(lastMessageDocumentRef, LastMessage(
-                sendMessage.message,
-                sendMessage.senderId,
-                sendMessage.timeStamp,
-                chatRoomId
-            ))
+            batch.set(
+                lastMessageDocumentRef, LastMessage(
+                    sendMessage.message,
+                    sendMessage.senderId,
+                    "" + sendMessage.messageEpochTime,
+                    chatRoomId
+                )
+            )
 
             batch.commit()
             Result.success(Unit)
@@ -47,12 +46,11 @@ class ChatRepository @Inject constructor(
     }
 
 
-
     fun fetchChatHistory(chatRoomId: String): Flow<List<SendMessage>> = callbackFlow {
         val chatReference = firestore.collection("chat_rooms")
             .document(chatRoomId)
             .collection("chats")
-            .orderBy("timeStamp", Query.Direction.ASCENDING)
+            .orderBy("messageEpochTime", Query.Direction.ASCENDING)
 
         val listenerRegistration = chatReference.addSnapshotListener { snapshot, error ->
             if (error != null) {
@@ -63,6 +61,8 @@ class ChatRepository @Inject constructor(
             val allMessages = snapshot?.documents?.mapNotNull { doc ->
                 doc.toObject(SendMessage::class.java)
             } ?: emptyList()
+
+
 
             trySend(allMessages)
         }

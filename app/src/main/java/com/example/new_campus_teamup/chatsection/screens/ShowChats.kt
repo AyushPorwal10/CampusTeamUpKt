@@ -24,7 +24,6 @@ import com.example.new_campus_teamup.ui.theme.White
 fun ShowChats(messageDetails: SendMessage?, currentUserId: String?) {
 
 
-
     Row(
         modifier = Modifier.fillMaxWidth(0.9f),
         verticalAlignment = Alignment.CenterVertically,

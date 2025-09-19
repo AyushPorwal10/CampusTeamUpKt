@@ -55,7 +55,7 @@ class ChatViewModel @Inject constructor(
     fun sendMessage(sendMessage: SendMessage, chatRoomId: String , onMessageSent : () -> Unit , errorSendingMessage : () -> Unit) {
         Log.d(
             "ChatHistory",
-            "Going to send message with 3 data \n currentuserid ${sendMessage.senderId} <-  time ${sendMessage.timeStamp} message ${sendMessage.message}"
+            "Going to send message with 3 data \n currentuserid ${sendMessage.senderId} <-  time ${sendMessage.messageEpochTime} message ${sendMessage.message}"
         )
         startOperation {
             val isMessageSent = chatRepository.sendMessage(sendMessage, chatRoomId)

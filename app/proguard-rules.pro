@@ -15,10 +15,10 @@
 -keep class javax.inject.** { *; }
 -keep class dagger.hilt.** { *; }
 
-
 -keep class com.example.new_campus_teamup.modules.** { *; }
 
 
+-dontwarn com.google.firebase.ktx.Firebase
 
 -keep class com.google.firebase.** { *; }
 
