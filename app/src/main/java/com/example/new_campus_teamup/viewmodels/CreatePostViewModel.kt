@@ -3,9 +3,13 @@ package com.example.new_campus_teamup.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.new_campus_teamup.clean_code.BasePostHandler
+import com.example.new_campus_teamup.clean_code.PostHandlerFactory
+import com.example.new_campus_teamup.clean_code.PostType
 import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
 import com.example.new_campus_teamup.myactivities.UserManager
 import com.example.new_campus_teamup.mydataclass.EducationDetails
+import com.example.new_campus_teamup.mydataclass.RoleDetails
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
 import com.example.new_campus_teamup.myrepository.CreatePostRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +24,9 @@ import javax.inject.Inject
 class CreatePostViewModel @Inject constructor(
     private val userManager: UserManager,
     private val createPostRepository: CreatePostRepository,
-    private val networkMonitor: CheckNetworkConnectivity
+    private val networkMonitor: CheckNetworkConnectivity,
+
+    private val postHandlerFactory: PostHandlerFactory
 ) : ViewModel() {
 
 
@@ -76,25 +82,25 @@ class CreatePostViewModel @Inject constructor(
         Log.d("PostRole", "Updated User Id: $userId")
     }
 
-    fun postRole(role: String, datePosted: String, canPostRole: (Boolean) -> Unit) {
+    fun postRole(role: String, datePosted: String, canPostRole: (Boolean) -> Unit) { // this callback should be removed
 
         launchWithLoading {
             val snapshot = createPostRepository.fetchImageUrlFromUserDetails(userId)
-            var userImageUrl = snapshot.get("user_image")
+            val userImageUrl = snapshot.get("user_image")
 
-            createPostRepository.postRole(
-                collegeName,
-                userId,
-                userName,
-                userImageUrl?.toString() ?: "",
-                role,
-                datePosted, canPostRole = {
-                    _isLoading.value = false
-                    canPostRole(it)
-                }
-            )
+            val result = postHandlerFactory.getHandler(PostType.ROLE)
+                .post(
+                    RoleDetails(
+                        collegeName = collegeName,
+                        postedBy = userId,
+                        userName = userName,
+                        userImageUrl = userImageUrl?.toString() ?: "",
+                        role = role,
+                        postedOn = datePosted
+                    )
+                )
+            canPostRole(result)
         }
-
     }
 
     fun uploadTeamLogo(teamLogoUri: String, onResult: (Boolean, String?) -> Unit) {

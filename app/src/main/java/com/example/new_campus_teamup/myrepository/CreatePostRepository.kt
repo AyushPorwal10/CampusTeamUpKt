@@ -16,50 +16,6 @@ class CreatePostRepository @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
     private val storageReference: StorageReference
 ) {
-
-
-    suspend fun postRole(
-        collegeName : String ,
-        userId: String,
-        userName: String,
-        userImage: String,
-        role: String,
-        datePosted: String,
-        canPostRole: (Boolean) -> Unit,
-    ) {
-
-        // checking if total role posted is less than 3
-
-        if(!canPost("roles_posted" , userId , 3))
-            return canPostRole(false)
-
-        val generatedRoleId = firebaseFirestore.collection("all_roles").document().id
-        Log.d("SavedRoles", "Normal id i am getting is $generatedRoleId")
-
-        val roleDetails = RoleDetails(
-            "123456",
-            collegeName,
-            generatedRoleId,
-            userId,
-            userName,
-            userImage,
-            role,
-            datePosted
-        )
-
-
-
-        firebaseFirestore.collection("all_user_id").document(userId).collection("roles_posted")
-            .document(generatedRoleId).set(roleDetails).await()
-
-        firebaseFirestore.collection("all_roles").document(generatedRoleId).set(roleDetails).await()
-
-
-        canPostRole(true)
-
-        Log.d("PostRole", "Role posted successfully")
-    }
-
     suspend fun fetchImageUrlFromUserDetails(userId: String): DocumentSnapshot {
         return firebaseFirestore.collection("user_images").document(userId).get().await()
     }
@@ -137,7 +93,7 @@ class CreatePostRepository @Inject constructor(
             hackathonOrPersonal,
             problemStatement,
             githubUrl,
-            projectLikes
+            projectLikes = projectLikes
         )
 
         // adding project
@@ -158,11 +114,10 @@ class CreatePostRepository @Inject constructor(
         val snapshot =
             firebaseFirestore.collection("all_user_id").document(userId).collection(subCollection)
                 .get()
-                .await()  // suspend function — this is KEY to linear flow
+                .await()
 
         val count = snapshot.size()
 
         return count < limit
-
     }
 }
