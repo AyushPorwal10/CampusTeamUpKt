@@ -11,11 +11,11 @@ class ProjectRepository @Inject constructor(
     private val storageReference: StorageReference
 ){
   suspend  fun postProject(
-        projectDetails: ProjectDetails
+        details: ProjectDetails
     )  {
          try {
             val batch = firebaseFirestore.batch()
-            projectDetails.postId = generateProjectId()
+           val  projectDetails = details.copy(postId = generateProjectId())
 
             val addProject =
                 firebaseFirestore.collection("all_projects")
@@ -32,6 +32,23 @@ class ProjectRepository @Inject constructor(
             batch.set(addProject, projectDetails)
 
             batch.commit().await()
+        }
+        catch (e : Exception){
+            throw e
+        }
+    }
+    suspend fun deleteProject(config: DeletePostConfig ){
+        try{
+            val batch = firebaseFirestore.batch()
+
+            val allPostReference  = firebaseFirestore.collection("all_projects").document(config.postId)
+            val userPostReference = firebaseFirestore.collection("all_user_id").document(config.userId).collection("project_posted").document(config.postId)
+
+            batch.delete(allPostReference)
+            batch.delete(userPostReference)
+
+            batch.commit().await()
+
         }
         catch (e : Exception){
             throw e

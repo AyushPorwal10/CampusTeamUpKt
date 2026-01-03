@@ -150,7 +150,7 @@ class HomeScreenRepository @Inject constructor(
         savedItem(
             currentUserId,
             "project_saved",
-            projectDetails.projectId,
+            projectDetails.postId,
             projectDetails,
             "SavingProject",
             {
@@ -167,7 +167,7 @@ class HomeScreenRepository @Inject constructor(
         onRoleSaved: () -> Unit,
         onError: (Exception) -> Unit
     ) {
-        savedItem(currentUserId, "saved_roles", roleDetails.roleId, roleDetails, "SaveRole", {
+        savedItem(currentUserId, "saved_roles", roleDetails.postId, roleDetails, "SaveRole", {
             onRoleSaved()
         }, {
             onError(it)
@@ -183,7 +183,7 @@ class HomeScreenRepository @Inject constructor(
         savedItem(
             currentUserId,
             "saved_vacancy",
-            vacancyDetails.vacancyId,
+            vacancyDetails.postId,
             vacancyDetails,
             "SavingVacancies",
             {

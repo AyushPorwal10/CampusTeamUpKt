@@ -2,6 +2,7 @@ package com.example.new_campus_teamup.myrepository
 
 import android.util.Log
 import com.example.new_campus_teamup.UiState
+import com.example.new_campus_teamup.clean_code_1.SaveUnsaveConfig
 import com.example.new_campus_teamup.mydataclass.ProjectDetails
 import com.example.new_campus_teamup.mydataclass.RoleDetails
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
@@ -16,28 +17,50 @@ class SavedItemsRepository @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore
 ) {
 
-    suspend fun unSaveProject(currentUserId: String, projectId: String) {
-        firebaseFirestore.collection("all_user_id").document(currentUserId)
-            .collection("project_saved").document(projectId).delete()
-            .addOnFailureListener {
-                Log.d("FetchingProjects", "Error Unsaving project")
-            }.await()
+
+
+
+
+    suspend fun deleteSavedProject(config: SaveUnsaveConfig) {
+        try {
+            firebaseFirestore.collection("all_user_id")
+                .document(config.userId!!) // already check not null in handler
+                .collection("project_saved")
+                .document(config.postId)
+                .delete()
+                .await()
+        }
+        catch (e : Exception){
+            throw e
+        }
     }
 
-    suspend fun unSaveRole(currentUserId: String, roleId: String) {
-        firebaseFirestore.collection("all_user_id").document(currentUserId)
-            .collection("saved_roles").document(roleId).delete()
-            .addOnFailureListener {
-                Log.d("UnsaveRole", "Error Unsaving roles")
-            }.await()
+    suspend fun deleteSavedRole(config: SaveUnsaveConfig) {
+        try {
+            firebaseFirestore.collection("all_user_id")
+                .document(config.userId!!) // already check not null in handler
+                .collection("saved_roles")
+                .document(config.postId)
+                .delete()
+                .await()
+        }
+        catch (e : Exception){
+            throw e
+        }
     }
 
-    suspend fun unSaveVacancy(currentUserId: String, vacancyId: String) {
-        firebaseFirestore.collection("all_user_id").document(currentUserId)
-            .collection("saved_vacancy").document(vacancyId).delete()
-            .addOnFailureListener {
-                Log.d("UnsaveVacancy", "Error Unsaving vacancy")
-            }.await()
+    suspend fun deleteSavedVacancy(config: SaveUnsaveConfig) {
+        try {
+            firebaseFirestore.collection("all_user_id")
+                .document(config.userId!!) // already check not null in handler
+                .collection("saved_vacancy")
+                .document(config.postId)
+                .delete()
+                .await()
+        }
+        catch (e : Exception){
+            throw e
+        }
     }
 
 

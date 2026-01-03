@@ -103,7 +103,7 @@ fun SingleProject(
                     }
 
                     IconButton(
-                        onClick = { onSaveProjectClicked(projectDetails.projectId) }
+                        onClick = { onSaveProjectClicked(projectDetails.postId) }
                     ) {
                         Icon(
                             painter = painterResource(if (isSaved) R.drawable.saved_item else R.drawable.saveproject),

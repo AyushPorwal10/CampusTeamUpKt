@@ -38,7 +38,7 @@ import com.example.new_campus_teamup.ui.theme.RoleCardTextColor
 
 
 @Composable
-fun YourSingleProject(projectDetails: ProjectDetails, onProjectDelete: (String) -> Unit) {
+fun YourSingleProject(projectDetails: ProjectDetails, onProjectDelete: () -> Unit) {
 
     var isHovered by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
@@ -84,7 +84,7 @@ fun YourSingleProject(projectDetails: ProjectDetails, onProjectDelete: (String) 
                 }
 
                 IconButton(
-                    onClick = { onProjectDelete(projectDetails.projectId) }
+                    onClick = { onProjectDelete() }
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.delete),

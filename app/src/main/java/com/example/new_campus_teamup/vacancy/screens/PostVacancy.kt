@@ -49,7 +49,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.CheckEmptyFields
@@ -84,7 +83,7 @@ fun PostVacancy(
     var selectedTeamLogo by remember { mutableStateOf<String>("") }
 
     LaunchedEffect(Unit) {
-        createPostViewModel.postUiEvent.collect { message->
+        createPostViewModel.postUiEvent.collect { message ->
             teamName.value = ""
             hackathonName.value = ""
             roleDescription.value = ""
@@ -303,26 +302,15 @@ fun PostVacancy(
                             )
 
                             if (isAllRequiredFieldsCorrect) {
-
-                                createPostViewModel.uploadTeamLogo(selectedTeamLogo) { canPost, url ->
-
-                                    if (canPost) {
-                                        val downloadImageUrl = url ?: ""
-                                        createPostViewModel.postVacancy(
-                                            LocalDate.now().toString(),
-                                            downloadImageUrl,
-                                            teamName.value,
-                                            hackathonName.value,
-                                            roleLookingFor.value,
-                                            skills.value,
-                                            roleDescription.value)
-                                    } else
-                                        ToastHelper.showToast(
-                                            context,
-                                            "You can post only 4 vacancy"
-                                        )
-
-                                }
+                                createPostViewModel.postVacancy(
+                                    LocalDate.now().toString(),
+                                    teamLogo = selectedTeamLogo,// this is uri
+                                    teamName.value,
+                                    hackathonName.value,
+                                    roleLookingFor.value,
+                                    skills.value,
+                                    roleDescription.value
+                                )
                             } else {
                                 ToastHelper.showToast(context, "All * marked fields are required")
                             }

@@ -257,7 +257,7 @@ fun ShowListOfRoles(
 
             val savedRoleIdsSet = idOfSavedRoles.map { it.roleId }.toSet()
 
-            val filteredRoles = rolesUiState.data.filter { !savedRoleIdsSet.contains(it.roleId) }
+            val filteredRoles = rolesUiState.data.filter { !savedRoleIdsSet.contains(it.postId) }
 
             LazyColumn(
                 modifier = modifier,
@@ -281,7 +281,7 @@ fun ShowListOfRoles(
                         SingleRoleCard(role, onSaveRoleClicked = {
                             saveRole(it)
                         }, onReportRoleBtnClick = {
-                            onReportRoleBtnClick(role.roleId)
+                            onReportRoleBtnClick(role.postId)
                         }, isSaved = false)
                     }
                 }

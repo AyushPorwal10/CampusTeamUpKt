@@ -139,7 +139,7 @@ fun YourSingleRole(
                     )
                 }
                 IconButton(
-                    onClick = { onRoleDelete(roleDetails.roleId) }
+                    onClick = { onRoleDelete(roleDetails.postId) }
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.delete),

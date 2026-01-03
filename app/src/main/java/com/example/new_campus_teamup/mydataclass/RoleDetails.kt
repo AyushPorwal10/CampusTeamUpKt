@@ -5,13 +5,12 @@ import com.example.new_campus_teamup.clean_code.BasePostDto
 
 @Keep
 data class RoleDetails(
-    override var postId: String = "",
+    override val postId: String = "",
     override val postedBy: String = "",
     override val postedOn: String = "",
 
     val phoneNumber: String = "",
     val collegeName: String = "",
-    val roleId: String = "",
     val userName: String = "",
     val userImageUrl: String = "",
     val role: String = "",

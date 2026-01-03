@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,7 +23,11 @@ fun ShowPostedVacancy(yourPostViewModel: YourPostViewModel ) {
 
     val vacancyList = yourPostViewModel.postedVacancy.collectAsState()
     val context = LocalContext.current
-
+    LaunchedEffect(Unit) {
+        yourPostViewModel.deletePostEvent.collect { message->
+            ToastHelper.showToast(context , message)
+        }
+    }
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth(),
@@ -31,12 +36,8 @@ fun ShowPostedVacancy(yourPostViewModel: YourPostViewModel ) {
     ) {
 
         items(vacancyList.value){
-            YourSingleVacancy(vacancy = it, onVacancyDelete = {vacancyId->
-                yourPostViewModel.deleteVacancy(vacancyId, onDelete = {
-                    ToastHelper.showToast(context,"Deleted Successfully")
-                }, onError = {
-                    ToastHelper.showToast(context,"Something went wrong !")
-                })
+            YourSingleVacancy(vacancy = it, onVacancyDelete = {
+                yourPostViewModel.deleteVacancy(it.postId)
             })
         }
         item {

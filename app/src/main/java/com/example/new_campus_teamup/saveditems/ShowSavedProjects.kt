@@ -35,7 +35,7 @@ fun ShowSavedProjects(
                 // this is to unsave projects
                 onProjectUnsave(it)
             }, onReportProjectBtnClick = {
-                onReportProjectBtnClick(it.projectId)
+                onReportProjectBtnClick(it.postId)
             }, true)
         }
 

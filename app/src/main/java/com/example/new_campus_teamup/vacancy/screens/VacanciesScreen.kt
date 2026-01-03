@@ -256,7 +256,7 @@ fun ShowListOfVacancies(
 
             val vacancyIdSet = idsOfSavedVacancy.map { it.vacancyId }
 
-            val filteredVacancy = vacancies.filter { !vacancyIdSet.contains(it.vacancyId) }
+            val filteredVacancy = vacancies.filter { !vacancyIdSet.contains(it.postId) }
 
 
             Log.d("VacancyDebugging","Success ")
@@ -276,7 +276,7 @@ fun ShowListOfVacancies(
                             onSaveVacancy = {
                                 saveVacancy(it)
                             }, onReportVacancyBtnClick = {
-                                onVacancyReportBtnClick(vacancy.vacancyId)
+                                onVacancyReportBtnClick(vacancy.postId)
                             }, isSaved = false
                         )
                 }

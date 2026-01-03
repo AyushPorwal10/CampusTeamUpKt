@@ -1,6 +1,7 @@
 package com.example.new_campus_teamup.clean_code
 
 import com.example.new_campus_teamup.mydataclass.ProjectDetails
+import com.example.new_campus_teamup.viewmodels.DeletePostResult
 import com.example.new_campus_teamup.viewmodels.PostResult
 import javax.inject.Inject
 
@@ -23,8 +24,14 @@ class ProjectHandler @Inject constructor(
     }
 
 
-    override suspend fun delete(config: DeletePostConfig): Boolean {
-        return true
+    override suspend fun delete(config: DeletePostConfig): DeletePostResult {
+        return try {
+            projectRepository.deleteProject(config)
+            DeletePostResult.PostDeleted
+        }
+        catch (exception : Exception){
+            DeletePostResult.Failure("Something went wrong")
+        }
     }
 
 }

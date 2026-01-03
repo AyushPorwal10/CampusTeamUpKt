@@ -63,7 +63,7 @@ import com.example.new_campus_teamup.ui.theme.WhiteGradient
 
 
 @Composable
-fun YourSingleVacancy(vacancy: VacancyDetails, onVacancyDelete: (String) -> Unit) {
+fun YourSingleVacancy(vacancy: VacancyDetails, onVacancyDelete: () -> Unit) {
     val isExpanded = remember { mutableStateOf(false) }
 
     val context = LocalContext.current
@@ -140,7 +140,7 @@ fun YourSingleVacancy(vacancy: VacancyDetails, onVacancyDelete: (String) -> Unit
                 }
 
                 IconButton(
-                    onClick = { onVacancyDelete(vacancy.vacancyId) }
+                    onClick = { onVacancyDelete() }
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.delete),

@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.new_campus_teamup.clean_code.PostHandlerFactory
 import com.example.new_campus_teamup.clean_code.PostType
+import com.example.new_campus_teamup.clean_code.RoleHandler
 import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
 import com.example.new_campus_teamup.myactivities.UserManager
 import com.example.new_campus_teamup.mydataclass.ProjectDetails
 import com.example.new_campus_teamup.mydataclass.RoleDetails
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
-import com.example.new_campus_teamup.myrepository.CreatePostRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,7 +24,6 @@ import javax.inject.Inject
 @HiltViewModel
 class CreatePostViewModel @Inject constructor(
     private val userManager: UserManager,
-    private val createPostRepository: CreatePostRepository,
     private val networkMonitor: CheckNetworkConnectivity,
 
     private val postHandlerFactory: PostHandlerFactory
@@ -90,16 +89,12 @@ class CreatePostViewModel @Inject constructor(
     fun postRole(role: String, datePosted: String) {
 
         launchWithLoading {
-            val snapshot = createPostRepository.fetchImageUrlFromUserDetails(userId)
-            val userImageUrl = snapshot.get("user_image")
-
             val result = postHandlerFactory.getHandler(PostType.ROLE)
                 .post(
                     RoleDetails(
                         collegeName = collegeName,
                         postedBy = userId,
                         userName = userName,
-                        userImageUrl = userImageUrl?.toString() ?: "",
                         role = role,
                         postedOn = datePosted
                     )
@@ -111,18 +106,6 @@ class CreatePostViewModel @Inject constructor(
             }
         }
     }
-
-    fun uploadTeamLogo(teamLogoUri: String, onResult: (Boolean, String?) -> Unit) {
-        launchWithLoading {
-            createPostRepository.uploadTeamLogo(
-                userId,
-                teamLogoUri,
-                canPostVacancy = { canPost, url ->
-                    onResult(canPost, url)
-                })
-        }
-    }
-
 
     fun postVacancy(
         postedOn: String,
@@ -141,16 +124,16 @@ class CreatePostViewModel @Inject constructor(
             val result = postHandlerFactory.getHandler(PostType.VACANCY).post(
                 postDto = VacancyDetails(
                     "",   // this will be generated in repo class
-                    userId,
-                    postedOn,
-                    collegeName,
-                    teamLogo,
-                    teamName,
-                    hackathonName,
-                    roleLookingFor,
-                    skill,
-                    roleDescription,
-                    "123456"
+                    postedOn = postedOn,
+                    postedBy = userId,
+                    collegeName = collegeName,
+                    teamLogo = teamLogo, // this is uri
+                    teamName = teamName,
+                    hackathonName = hackathonName,
+                    roleLookingFor = roleLookingFor,
+                    skills = skill,
+                    roleDescription = roleDescription,
+                    phoneNumber = "123456" // not supported
                 )
             )
 
@@ -170,7 +153,6 @@ class CreatePostViewModel @Inject constructor(
         githubUrl: String,
         projectLikes: Int,
     ) {
-
 
         launchWithLoading {
             val result = postHandlerFactory.getHandler(PostType.PROJECT).post(
@@ -197,4 +179,8 @@ sealed class PostResult {
     data object Success : PostResult()
     data object PostLimitReached : PostResult()
     data class Failure(val reason: String) : PostResult()
+}
+sealed class DeletePostResult {
+    data object PostDeleted : DeletePostResult()
+    data class Failure(val reason : String) : DeletePostResult()
 }

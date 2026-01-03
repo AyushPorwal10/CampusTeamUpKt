@@ -147,13 +147,13 @@ fun ProjectsScreen(
                             val savedProjectIdSet = listOfSavedProjects.map { it.projectId }
 
                             // this means user saved this and no need to show this project again
-                            if (!savedProjectIdSet.contains(project.projectId)) {
+                            if (!savedProjectIdSet.contains(project.postId)) {
                                 Log.d("ProjectId", "Showing Project")
                                 SingleProject(project, onSaveProjectClicked = { projectId ->
                                     saveProject(project)
                                 }, onReportProjectBtnClick = {
                                     showReportDialog= true
-                                    postIdToReport = project.projectId
+                                    postIdToReport = project.postId
                                 }, isSaved = false)
                             }
 

@@ -10,11 +10,10 @@ import com.example.new_campus_teamup.clean_code.BasePostDto
 @Keep
 @Parcelize
 data class VacancyDetails(
-    override var postId: String = "",
+    override val postId: String = "",
     override val postedOn: String = "",
     override val postedBy: String = "",
 
-    var vacancyId : String = "",
     val collegeName : String = "",
     val teamLogo: String = "",
     val teamName: String = "",

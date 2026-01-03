@@ -4,13 +4,15 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.new_campus_teamup.UiState
+import com.example.new_campus_teamup.clean_code.PostType
+import com.example.new_campus_teamup.clean_code_1.SaveUnsaveConfig
+import com.example.new_campus_teamup.clean_code_1.ViewPostHandlerFactory
 import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
 import com.example.new_campus_teamup.myactivities.UserManager
 import com.example.new_campus_teamup.mydataclass.ProjectDetails
 import com.example.new_campus_teamup.mydataclass.RoleDetails
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
 import com.example.new_campus_teamup.myrepository.SavedItemsRepository
-import com.example.new_campus_teamup.room.RoleEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,8 +20,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
-import java.lang.Thread.State
 import javax.inject.Inject
 
 
@@ -27,6 +27,7 @@ import javax.inject.Inject
 class SavedItemsViewModel @Inject constructor(
     private val savedItemsRepository: SavedItemsRepository,
     private val userManager: UserManager,
+    private val viewPostHandlerFactory: ViewPostHandlerFactory,
     private val networkMonitor: CheckNetworkConnectivity
 ) : ViewModel() {
 
@@ -131,39 +132,24 @@ class SavedItemsViewModel @Inject constructor(
     }
 
 
-    fun unSaveProject(projectId: String, currentUserId: String?) {
-
-        if (currentUserId != null) {
-            Log.d("Unsave", "current user id is $currentUserId")
-            startOperation {
-                savedItemsRepository.unSaveProject(currentUserId, projectId)
-            }
-        } else {
-            Log.d("Unsave", "current user id in unsave is null")
+    fun deleteSavedProject(projectId: String, currentUserId: String?) {
+        startOperation {
+            viewPostHandlerFactory.getHandler(PostType.PROJECT)
+                .deleteSavedPost(config = SaveUnsaveConfig(userId = currentUserId, postId = projectId))
         }
     }
 
-    fun unSaveRole(roleId: String, currentUserId: String?) {
-        if (currentUserId != null) {
-            Log.d("UnsaveRole", "current user id is $currentUserId")
+    fun deleteSavedRole(roleId: String, currentUserId: String?) {
             startOperation {
-                savedItemsRepository.unSaveRole(currentUserId, roleId)
-                Log.d("UnsaveRole", "Role unsaved")
+                viewPostHandlerFactory.getHandler(PostType.ROLE)
+                    .deleteSavedPost(config = SaveUnsaveConfig(userId = currentUserId, postId = roleId))
             }
-        } else {
-            Log.d("UnsaveRole", "current user id is null")
-        }
     }
 
-    fun unSaveVacancy(vacancyId : String , currentUserId: String?){
-        if (currentUserId != null) {
-            Log.d("UnsaveVacancy", "current user id is $currentUserId")
-            startOperation {
-                savedItemsRepository.unSaveVacancy(currentUserId, vacancyId)
-                Log.d("UnsaveVacancy", "Role unsaved")
-            }
-        } else {
-            Log.d("UnsaveVacancy", "current user id is null")
+    fun deleteSavedVacancy(vacancyId : String, currentUserId: String?){
+        startOperation {
+            viewPostHandlerFactory.getHandler(PostType.VACANCY)
+                .deleteSavedPost(config = SaveUnsaveConfig(userId = currentUserId, postId = vacancyId))
         }
     }
 
