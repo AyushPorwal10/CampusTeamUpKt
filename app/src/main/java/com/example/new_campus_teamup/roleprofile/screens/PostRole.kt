@@ -72,8 +72,14 @@ fun PostRole(createPostViewModel: CreatePostViewModel) {
     val context = LocalContext.current
 
     val isLoading = createPostViewModel.isLoading.collectAsState()
+    var role by remember { mutableStateOf("") }
 
-
+    LaunchedEffect(Unit) {
+        createPostViewModel.postUiEvent.collect { message->
+            role = ""
+            ToastHelper.showToast(context , message)
+        }
+    }
     LaunchedEffect(Unit){
         createPostViewModel.errorMessage.collect{error->
             error?.let {
@@ -83,7 +89,6 @@ fun PostRole(createPostViewModel: CreatePostViewModel) {
         }
     }
 
-    var role by remember { mutableStateOf("") }
     val placeholders = listOf(
         "Android App Developer", "IOS App Developer",
         "Web Fronted Developer",
@@ -197,15 +202,7 @@ fun PostRole(createPostViewModel: CreatePostViewModel) {
                                 Log.d("PostRole", "Post Button Clicked ${LocalDate.now()}")
                                 createPostViewModel.postRole(
                                     role,
-                                    LocalDate.now().toString(),
-                                    canPostRole = {
-                                        // user is allowed to post only three roles
-                                        role = ""
-                                        if (it)
-                                            ToastHelper.showToast(context, "Role Posted Successfully")
-                                        else
-                                            ToastHelper.showToast(context, "You can post only 3 roles")
-                                    })
+                                    LocalDate.now().toString())
 
                             }
                         },

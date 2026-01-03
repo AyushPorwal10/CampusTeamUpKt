@@ -49,6 +49,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.helper.CheckEmptyFields
@@ -71,7 +72,7 @@ fun PostVacancy(
 
     val isLoading = createPostViewModel.isLoading.collectAsState()
 
-    val scrollState = rememberScrollState()
+
     val teamName = remember { mutableStateOf("") }
     val roleLookingFor = remember { mutableStateOf("") }
     val hackathonName = remember { mutableStateOf("") }
@@ -82,6 +83,17 @@ fun PostVacancy(
 
     var selectedTeamLogo by remember { mutableStateOf<String>("") }
 
+    LaunchedEffect(Unit) {
+        createPostViewModel.postUiEvent.collect { message->
+            teamName.value = ""
+            hackathonName.value = ""
+            roleDescription.value = ""
+            skills.value = ""
+            roleLookingFor.value = ""
+            roleDescription.value = ""
+            ToastHelper.showToast(context, message)
+        }
+    }
 
     LaunchedEffect(Unit) {
         createPostViewModel.errorMessage.collect { error ->
@@ -303,18 +315,7 @@ fun PostVacancy(
                                             hackathonName.value,
                                             roleLookingFor.value,
                                             skills.value,
-                                            roleDescription.value, onVacancyPosted = {
-                                                teamName.value = ""
-                                                hackathonName.value = ""
-                                                roleDescription.value = ""
-                                                skills.value = ""
-                                                roleLookingFor.value = ""
-                                                roleDescription.value = ""
-                                                ToastHelper.showToast(
-                                                    context,
-                                                    "Vacancy Posted Successfully"
-                                                )
-                                            })
+                                            roleDescription.value)
                                     } else
                                         ToastHelper.showToast(
                                             context,

@@ -24,20 +24,28 @@ class RoleRepository @Inject constructor(
     suspend fun postRole(
         roleDetails: RoleDetails
     ) {
-        firebaseFirestore
-            .collection("all_user_id")
-            .document(roleDetails.postedBy)
-            .collection("roles_posted")
-            .document(generateRoleId())
-            .set(roleDetails)
-            .await()
+        try {
+            val postId = generateRoleId()
+            roleDetails.postId = postId
 
-        firebaseFirestore
-            .collection("all_roles")
-            .document(generateRoleId())
-            .set(roleDetails)
-            .await()
+            firebaseFirestore
+                .collection("all_user_id")
+                .document(roleDetails.postedBy)
+                .collection("roles_posted")
+                .document(postId)
+                .set(roleDetails)
+                .await()
+
+            firebaseFirestore
+                .collection("all_roles")
+                .document(postId)
+                .set(roleDetails)
+                .await()
+        } catch (e: Exception) {
+            throw e
+        }
     }
+
 
 
     private fun generateRoleId(): String {

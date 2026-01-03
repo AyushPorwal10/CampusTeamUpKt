@@ -1,25 +1,32 @@
 package com.example.new_campus_teamup.clean_code
 
-import android.util.Log
+import androidx.compose.ui.geometry.Rect
 import com.example.new_campus_teamup.mydataclass.RoleDetails
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.StorageReference
-import kotlinx.coroutines.tasks.await
+import com.example.new_campus_teamup.viewmodels.PostResult
 import javax.inject.Inject
 
 class RoleHandler @Inject constructor(
     private val roleRepository: RoleRepository
 ): BasePostHandler {
 
-    override suspend fun post(postDto: BasePostDto): Boolean {
-        if(roleRepository.getPostedRoleCount(postDto.postedBy) == 3) return false
+    override suspend fun post(postDto: BasePostDto): PostResult {
+        val userId = postDto.postedBy
 
-        val roleDetails = postDto as RoleDetails
-        roleRepository.postRole(
-            roleDetails = roleDetails,
-        )
-        return true
+        if (roleRepository.getPostedRoleCount(userId) >= 3) {
+            return PostResult.PostLimitReached
+        }
+
+        val roleDetails = postDto as? RoleDetails
+            ?: return PostResult.Failure("Invalid role data")
+
+        return try {
+            roleRepository.postRole(roleDetails)
+            PostResult.Success
+        } catch (e: Exception) {
+            PostResult.Failure("Something went wrong")
+        }
     }
+
 
     override suspend fun delete(config: DeletePostConfig): Boolean {
         return true

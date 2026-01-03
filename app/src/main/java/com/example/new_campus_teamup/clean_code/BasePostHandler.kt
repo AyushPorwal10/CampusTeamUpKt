@@ -1,14 +1,16 @@
 package com.example.new_campus_teamup.clean_code
 
+import com.example.new_campus_teamup.viewmodels.PostResult
+
 interface BasePostHandler {
-    suspend fun post(postDto: BasePostDto): Boolean
+    suspend fun post(postDto: BasePostDto): PostResult
 
     suspend fun delete(config: DeletePostConfig): Boolean
 }
 
 
 interface BasePostDto {
-    val postId: String
+    var postId: String
     val postedOn: String
     val postedBy: String
 }
