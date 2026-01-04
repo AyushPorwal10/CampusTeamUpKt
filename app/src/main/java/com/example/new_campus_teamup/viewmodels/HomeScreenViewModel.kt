@@ -4,6 +4,11 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.new_campus_teamup.UiState
+import com.example.new_campus_teamup.clean_code.PostType
+import com.example.new_campus_teamup.clean_code_1.RepostPostConfig
+import com.example.new_campus_teamup.clean_code_1.SavePostConfig
+import com.example.new_campus_teamup.clean_code_1.ViewPostHandlerFactory
+import com.example.new_campus_teamup.clean_code_1.ViewPostResult
 import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
 import com.example.new_campus_teamup.myactivities.UserData
 import com.example.new_campus_teamup.myactivities.UserManager
@@ -19,9 +24,12 @@ import com.google.firebase.firestore.DocumentSnapshot
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
@@ -39,6 +47,7 @@ class HomeScreenViewModel @Inject constructor(
     private val homeScreenRepository: HomeScreenRepository,
     private val userManager: UserManager,
     private val firebaseAuth: FirebaseAuth,
+    private val viewPostHandlerFactory: ViewPostHandlerFactory,
     private val networkMonitor: CheckNetworkConnectivity
 ) : ViewModel() {
 
@@ -88,8 +97,8 @@ class HomeScreenViewModel @Inject constructor(
     val currentUserImage: StateFlow<String> = _currentUserImage.asStateFlow()
 
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage
+    private val _homeScreenUiEvent = MutableSharedFlow<String?>()
+    val homeScreenUiEvent: SharedFlow<String?> = _homeScreenUiEvent.asSharedFlow()
 
     private val _reportPostUiState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
     val reportPostUiState: StateFlow<UiState<Unit>> = _reportPostUiState.asStateFlow()
@@ -127,22 +136,18 @@ class HomeScreenViewModel @Inject constructor(
         viewModelScope.launch {
 
             if (!networkMonitor.isConnectedNow()) {
-                _errorMessage.value = "No internet connection. Please retry later."
+                _homeScreenUiEvent.emit("No internet connection. Please retry later.")
                 return@launch
             }
             try {
                 block()
             } catch (toe: TimeoutCancellationException) {
-                _errorMessage.value = "Request timed out. Check your connection."
+                _homeScreenUiEvent.emit( "Request timed out. Check your connection.")
             } catch (e: Exception) {
                 Log.e("HomeScreenVM", "Unexpected error", e)
-                _errorMessage.value = "Something went wrong. Please try again."
+                _homeScreenUiEvent.emit( "Something went wrong. Please try again.")
             }
         }
-    }
-
-    fun clearError() {
-        _errorMessage.value = null
     }
 
     private fun observeUserData() {
@@ -198,58 +203,58 @@ class HomeScreenViewModel @Inject constructor(
 
     // when current user wants to save a specific project
 
-    fun saveProject(
-        projectDetails: ProjectDetails,
-        onProjectSaved: () -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-
+    fun saveProject(projectDetails: ProjectDetails) {
         startOperation {
-            userData.filterNotNull().collectLatest { data ->
-                homeScreenRepository.saveProject(
-                    data.userId,
-                    projectDetails,
-                    onProjectSaved = {
-                        Log.d("ProjectSaved", "ViewModel Role saved ")
-                        onProjectSaved()
-                    },
-                    onError = {
-                        onError(it)
-                    })
+            val data = userData.filterNotNull().first()
+            val result = viewPostHandlerFactory.getHandler(PostType.PROJECT)
+                .savePost(config = SavePostConfig(
+                    postDto = projectDetails,
+                    savedBy = data.userId
+                ))
+            getSavePostMessage(result, PostType.PROJECT)?.let { message ->
+                _homeScreenUiEvent.emit(message)
             }
         }
     }
 
 
-    fun saveRole(roleDetails: RoleDetails, onRoleSaved: () -> Unit, onError: (Exception) -> Unit) {
-
+    fun saveRole(roleDetails: RoleDetails) {
         startOperation {
-            userData.filterNotNull().collectLatest { data ->
-
-                homeScreenRepository.saveRole(data.userId, roleDetails, onRoleSaved = {
-                    Log.d("SaveRole", "Viewmodel Role saved ")
-                    onRoleSaved()
-                }, onError = {
-                    Log.d("SaveRole", "Error saving role")
-                    onError(it)
-                })
-
+            val data = userData.filterNotNull().first()
+            val result = viewPostHandlerFactory.getHandler(PostType.ROLE)
+                .savePost(config = SavePostConfig(
+                    postDto = roleDetails,
+                    savedBy = data.userId
+                ))
+            getSavePostMessage(result, PostType.ROLE)?.let { message ->
+                _homeScreenUiEvent.emit(message)
             }
         }
     }
 
-    fun reportPost(tag: String, roleId: String) {
+    fun reportPost(postType: PostType, postId: String) {
         viewModelScope.launch {
-            userManager.userData.collect {
-                if (it.userId.isNotEmpty()) {
-                    homeScreenRepository.reportPost(
-                        tag,
-                        roleId,
-                        it.userId,
-                        onStateChange = { state ->
-                            _reportPostUiState.value = state
-                        })
+            _reportPostUiState.value = UiState.Loading
+            try {
+                val userData = userManager.userData
+                    .filter { it.userId.isNotEmpty() }
+                    .first()
+                
+                val result = viewPostHandlerFactory.getHandler(postType)
+                    .reportPost(
+                        config = RepostPostConfig(
+                            postType = postType,
+                            reportedBy = userData.userId,
+                            postId = postId
+                        )
+                    )
+                _reportPostUiState.value = when(result) {
+                    ViewPostResult.Failure -> UiState.Error("Something went wrong")
+                    ViewPostResult.Reported -> UiState.Success(Unit)
+                    else -> UiState.Idle
                 }
+            } catch (e: Exception) {
+                _reportPostUiState.value = UiState.Error("Something went wrong")
             }
         }
     }
@@ -258,26 +263,16 @@ class HomeScreenViewModel @Inject constructor(
         _reportPostUiState.value = UiState.Idle
     }
 
-    fun saveVacancy(
-        vacancyDetails: VacancyDetails,
-        onVacancySaved: () -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-
+    fun saveVacancy(vacancyDetails: VacancyDetails) {
         startOperation {
-            userData.filterNotNull().collectLatest { data ->
-
-                homeScreenRepository.saveVacancy(
-                    data.userId,
-                    vacancyDetails,
-                    onVacancySaved = {
-                        Log.d("Vacancy", "ViewModel vacancy saved ")
-                        onVacancySaved()
-                    },
-                    onError = {
-                        onError(it)
-                    })
-
+            val data = userData.filterNotNull().first()
+            val result = viewPostHandlerFactory.getHandler(PostType.VACANCY)
+                .savePost(config = SavePostConfig(
+                    postDto = vacancyDetails,
+                    savedBy = data.userId
+                ))
+            getSavePostMessage(result, PostType.VACANCY)?.let { message ->
+                _homeScreenUiEvent.emit(message)
             }
         }
     }
@@ -355,6 +350,22 @@ class HomeScreenViewModel @Inject constructor(
                     homeScreenRepository.saveFcmToken(token, userData.userId)
                     Log.d("FCM", "FCM token saved successfully")
                 }
+        }
+    }
+
+
+    private fun getSavePostMessage(result: ViewPostResult, postType: PostType): String? {
+        return when (result) {
+            ViewPostResult.Saved -> {
+                when (postType) {
+                    PostType.PROJECT -> "Project Saved Successfully"
+                    PostType.ROLE -> "Role Saved Successfully"
+                    PostType.VACANCY -> "Vacancy Saved Successfully"
+                }
+            }
+            ViewPostResult.Failure -> "Something went wrong"
+            ViewPostResult.Unsaved -> null // Here no message needed for unsaved
+            ViewPostResult.Reported -> null // Here no message needed for reported
         }
     }
 

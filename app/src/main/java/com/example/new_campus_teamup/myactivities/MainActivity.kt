@@ -1,7 +1,6 @@
 package com.example.new_campus_teamup.myactivities
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -23,15 +22,12 @@ import com.example.new_campus_teamup.mysealedClass.BottomNavScreens
 import com.example.new_campus_teamup.project.screens.ProjectsScreen
 import com.example.new_campus_teamup.roleprofile.screens.RolesScreen
 import com.example.new_campus_teamup.screens.homescreens.HomeScreen
-import com.example.new_campus_teamup.ui.theme.BackGroundColor
 import com.example.new_campus_teamup.ui.theme.BackgroundGradientColor
 import com.example.new_campus_teamup.vacancy.screens.VacanciesScreen
 
 import com.example.new_campus_teamup.viewmodels.HomeScreenViewModel
 import com.example.new_campus_teamup.viewmodels.SearchRoleVacancy
 import com.example.new_campus_teamup.viewmodels.UserDataSharedViewModel
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -77,46 +73,19 @@ class MainActivity : ComponentActivity() {
 
             NavHost(navController = navController , startDestination = BottomNavScreens.Home.screen){
                 composable(BottomNavScreens.Roles.screen) {
-                        RolesScreen(homeScreenViewModel, searchRoleVacancy, navController) { roleDetails ->
-                            homeScreenViewModel.saveRole(roleDetails, onRoleSaved = {
-                                ToastHelper.showToast(context, "Role Saved Successfully.")
-                            }, onError = {
-                                ToastHelper.showToast(context, "Something went wrong.")
-                            })
-                        }
+                        RolesScreen(homeScreenViewModel, searchRoleVacancy, navController)
                     }
 
                 composable(BottomNavScreens.Projects.screen) {
                         ProjectsScreen(
                             homeScreenViewModel,
-                            navController,
-                            saveProject = {
-                                homeScreenViewModel.saveProject(it, onProjectSaved = {
-
-                                    ToastHelper.showToast(context, "Project Saved Successfully")
-                                },
-                                    onError = {
-
-                                        ToastHelper.showToast(context, "Something went wrong.")
-                                    })
-                            }
-                        )
+                            navController)
                     }
 
                 composable(BottomNavScreens.Vacancies.screen) {
                         VacanciesScreen(
                             homeScreenViewModel, searchRoleVacancy,
-                            navController,
-                            saveVacancy = {
-                                homeScreenViewModel.saveVacancy(it, onVacancySaved = {
-
-                                    ToastHelper.showToast(context, "Vacancy Saved Successfully.")
-
-                                },
-                                    onError = {
-                                        ToastHelper.showToast(context, "Something went wrong.")
-                                    })
-                            }
+                            navController
                         )
                     }
 
@@ -133,10 +102,9 @@ class MainActivity : ComponentActivity() {
             }
 
             LaunchedEffect(Unit){
-                homeScreenViewModel.errorMessage.collect{error->
+                homeScreenViewModel.homeScreenUiEvent.collect{ error->
                     error?.let {
                         ToastHelper.showToast(context ,error)
-                        homeScreenViewModel.clearError()
                     }
                 }
             }

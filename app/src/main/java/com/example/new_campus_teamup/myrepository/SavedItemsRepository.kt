@@ -2,7 +2,7 @@ package com.example.new_campus_teamup.myrepository
 
 import android.util.Log
 import com.example.new_campus_teamup.UiState
-import com.example.new_campus_teamup.clean_code_1.SaveUnsaveConfig
+import com.example.new_campus_teamup.clean_code_1.DeletePostConfig
 import com.example.new_campus_teamup.mydataclass.ProjectDetails
 import com.example.new_campus_teamup.mydataclass.RoleDetails
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
@@ -16,12 +16,7 @@ import javax.inject.Inject
 class SavedItemsRepository @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore
 ) {
-
-
-
-
-
-    suspend fun deleteSavedProject(config: SaveUnsaveConfig) {
+    suspend fun deleteSavedProject(config: DeletePostConfig) {
         try {
             firebaseFirestore.collection("all_user_id")
                 .document(config.userId!!) // already check not null in handler
@@ -34,8 +29,7 @@ class SavedItemsRepository @Inject constructor(
             throw e
         }
     }
-
-    suspend fun deleteSavedRole(config: SaveUnsaveConfig) {
+    suspend fun deleteSavedRole(config: DeletePostConfig) {
         try {
             firebaseFirestore.collection("all_user_id")
                 .document(config.userId!!) // already check not null in handler
@@ -48,8 +42,7 @@ class SavedItemsRepository @Inject constructor(
             throw e
         }
     }
-
-    suspend fun deleteSavedVacancy(config: SaveUnsaveConfig) {
+    suspend fun deleteSavedVacancy(config: DeletePostConfig) {
         try {
             firebaseFirestore.collection("all_user_id")
                 .document(config.userId!!) // already check not null in handler
@@ -62,8 +55,6 @@ class SavedItemsRepository @Inject constructor(
             throw e
         }
     }
-
-
     fun fetchSavedRoles(currentUserId: String): Flow<List<RoleDetails>> =
         fetchSavedData(currentUserId, "saved_roles")
 
@@ -112,6 +103,5 @@ class SavedItemsRepository @Inject constructor(
             onStateChange(UiState.Error(exception.message ?: "Unexpected error"))
         }
     }
-
 
 }

@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.new_campus_teamup.UiState
 import com.example.new_campus_teamup.clean_code.PostType
-import com.example.new_campus_teamup.clean_code_1.SaveUnsaveConfig
+import com.example.new_campus_teamup.clean_code_1.DeletePostConfig
 import com.example.new_campus_teamup.clean_code_1.ViewPostHandlerFactory
 import com.example.new_campus_teamup.helper.CheckNetworkConnectivity
 import com.example.new_campus_teamup.myactivities.UserManager
@@ -135,21 +135,21 @@ class SavedItemsViewModel @Inject constructor(
     fun deleteSavedProject(projectId: String, currentUserId: String?) {
         startOperation {
             viewPostHandlerFactory.getHandler(PostType.PROJECT)
-                .deleteSavedPost(config = SaveUnsaveConfig(userId = currentUserId, postId = projectId))
+                .deleteSavedPost(config = DeletePostConfig(userId = currentUserId, postId = projectId))
         }
     }
 
     fun deleteSavedRole(roleId: String, currentUserId: String?) {
             startOperation {
                 viewPostHandlerFactory.getHandler(PostType.ROLE)
-                    .deleteSavedPost(config = SaveUnsaveConfig(userId = currentUserId, postId = roleId))
+                    .deleteSavedPost(config = DeletePostConfig(userId = currentUserId, postId = roleId))
             }
     }
 
     fun deleteSavedVacancy(vacancyId : String, currentUserId: String?){
         startOperation {
             viewPostHandlerFactory.getHandler(PostType.VACANCY)
-                .deleteSavedPost(config = SaveUnsaveConfig(userId = currentUserId, postId = vacancyId))
+                .deleteSavedPost(config = DeletePostConfig(userId = currentUserId, postId = vacancyId))
         }
     }
 

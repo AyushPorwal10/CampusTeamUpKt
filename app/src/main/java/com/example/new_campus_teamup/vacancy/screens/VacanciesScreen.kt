@@ -53,6 +53,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.UiState
+import com.example.new_campus_teamup.clean_code.PostType
 import com.example.new_campus_teamup.helper.LoadAnimation
 import com.example.new_campus_teamup.helper.ReportPostDialog
 import com.example.new_campus_teamup.helper.ShimmerEffect
@@ -78,13 +79,12 @@ fun VacanciesScreen(
     homeScreenViewModel: HomeScreenViewModel,
     searchRoleVacancy: SearchRoleVacancy,
     navController: NavController,
-    saveVacancy: (VacancyDetails) -> Unit
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
     val searchText by searchRoleVacancy.searchVacancyText.collectAsStateWithLifecycle()
 
-    var vacancyIdToReport by remember { mutableStateOf<String?>(null) }
+    var postId by remember { mutableStateOf<String?>(null) }
     val reportPostUiState by homeScreenViewModel.reportPostUiState.collectAsStateWithLifecycle()
     var showReportDialog by remember { mutableStateOf(false) }
 
@@ -106,8 +106,8 @@ fun VacanciesScreen(
     ReportPostDialog(showReportDialog,isLoading = reportPostUiState is UiState.Loading, onDismiss = {
         showReportDialog = false
     }, onConfirm = {
-        homeScreenViewModel.reportPost("vacancies" , vacancyIdToReport!!)
-        vacancyIdToReport = null
+        homeScreenViewModel.reportPost(PostType.VACANCY , postId!!)
+        postId = null
     })
 
 
@@ -226,11 +226,13 @@ fun VacanciesScreen(
                         .padding(5.dp),
                     vacanciesUiState = vacancies,
                     homeScreenViewModel = homeScreenViewModel,
-                    saveVacancy = saveVacancy,
+                    saveVacancy = {
+                        homeScreenViewModel.saveVacancy(vacancyDetails = it)
+                    },
                     idsOfSavedVacancy = idsOfSavedVacancy,
                     onVacancyReportBtnClick = {
                         showReportDialog = true
-                        vacancyIdToReport = it
+                        postId = it
                     }
                 )
             }
