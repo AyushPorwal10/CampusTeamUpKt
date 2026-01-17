@@ -36,9 +36,9 @@ fun ShowSavedRoles(savedRoleList: State<List<RoleDetails>>, onRoleUnsave: (Strin
         items(savedRoleList.value) {
             Log.d("FetchingRoles", "Single Role loads")
             SingleRoleCard(it, onSaveRoleClicked = {
-                onRoleUnsave(it.roleId)
+                onRoleUnsave(it.postId)
             } , onReportRoleBtnClick = {
-                onReportRoleBtnClick(it.roleId)
+                onReportRoleBtnClick(it.postId)
             }, isSaved = true)
         }
         item {

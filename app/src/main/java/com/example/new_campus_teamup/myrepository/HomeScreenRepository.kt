@@ -2,6 +2,9 @@ package com.example.new_campus_teamup.myrepository
 
 import android.util.Log
 import com.example.new_campus_teamup.UiState
+import com.example.new_campus_teamup.clean_code.PostType
+import com.example.new_campus_teamup.clean_code_1.RepostPostConfig
+import com.example.new_campus_teamup.clean_code_1.SavePostConfig
 import com.example.new_campus_teamup.mydataclass.ProjectDetails
 import com.example.new_campus_teamup.mydataclass.RoleDetails
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
@@ -19,10 +22,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.util.concurrent.ExecutionException
 import javax.inject.Inject
 
 class HomeScreenRepository @Inject constructor(
@@ -141,97 +142,76 @@ class HomeScreenRepository @Inject constructor(
             .set(mapOf("fcm_token" to fcmToken), SetOptions.merge()).await()
     }
 
-    suspend fun saveProject(
-        currentUserId: String,
-        projectDetails: ProjectDetails,
-        onProjectSaved: () -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        savedItem(
-            currentUserId,
+    suspend fun saveProject(savePostConfig: SavePostConfig) {
+        val projectDetails = savePostConfig.postDto as ProjectDetails
+        savePost(
+            savePostConfig.savedBy,
             "project_saved",
-            projectDetails.projectId,
+            projectDetails.postId,
             projectDetails,
-            "SavingProject",
-            {
-                onProjectSaved()
-            },
-            {
-                onError(it)
-            })
+            "SavingProject"
+        )
     }
 
-    suspend fun saveRole(
-        currentUserId: String,
-        roleDetails: RoleDetails,
-        onRoleSaved: () -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        savedItem(currentUserId, "saved_roles", roleDetails.roleId, roleDetails, "SaveRole", {
-            onRoleSaved()
-        }, {
-            onError(it)
-        })
+    suspend fun saveRole(savePostConfig: SavePostConfig) {
+        val roleDetails = savePostConfig.postDto as RoleDetails
+        savePost(
+            savePostConfig.savedBy,
+            "saved_roles",
+            roleDetails.postId,
+            roleDetails,
+            "SaveRole"
+        )
     }
 
-    suspend fun saveVacancy(
-        currentUserId: String,
-        vacancyDetails: VacancyDetails,
-        onVacancySaved: () -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        savedItem(
-            currentUserId,
+    suspend fun saveVacancy(savePostConfig: SavePostConfig) {
+        val vacancyDetails = savePostConfig.postDto as VacancyDetails
+        savePost(
+            savePostConfig.savedBy,
             "saved_vacancy",
-            vacancyDetails.vacancyId,
+            vacancyDetails.postId,
             vacancyDetails,
-            "SavingVacancies",
-            {
-                onVacancySaved()
-            },
-            {
-                onError(it)
-            })
+            "SavingVacancies"
+        )
     }
 
-    fun reportPost(
-        tag: String,
-        postId: String,
-        userId: String,
-        onStateChange: (UiState<Unit>) -> Unit
+    suspend fun reportPost(
+        repostPostConfig: RepostPostConfig,
     ) {
+        val tag = getFirebaseTagFromPostType(repostPostConfig.postType)
         try {
-            onStateChange(UiState.Loading)
-            firebaseFirestore.collection("reported_posts").document(userId).collection(tag)
-                .document(postId).set(mapOf("post_id" to postId)).addOnSuccessListener {
-                    onStateChange(UiState.Success(Unit))
-                }.addOnFailureListener {
-                    onStateChange(UiState.Error(it.message ?: "Unexpected error"))
-                }
+            firebaseFirestore.collection("reported_posts")
+                .document(repostPostConfig.reportedBy)
+                .collection(tag)
+                .document(repostPostConfig.postId).set(mapOf("post_id" to repostPostConfig.postId)).await()
         } catch (exception: Exception) {
-            onStateChange(UiState.Error(exception.message ?: "Unexpected error"))
+           throw exception
         }
     }
 
-    private suspend inline fun <T : Any> savedItem(
+    private fun getFirebaseTagFromPostType(postType: PostType)  : String {
+        return when(postType){
+            PostType.ROLE -> "roles"
+            PostType.VACANCY -> "vacancies"
+            PostType.PROJECT -> "projects"
+        }
+    }
+
+    private suspend inline fun <T : Any> savePost(
         userId: String,
         collection: String,
         itemId: String,
         item: T,
-        logTag: String,
-        onItemSaved: () -> Unit,
-        onError: (Exception) -> Unit
+        logTag: String
     ) {
-
         try {
             firebaseFirestore.collection("all_user_id").document(userId)
                 .collection(collection).document(itemId)
                 .set(item).await()
             Log.d(logTag, "Items saved success")
-            onItemSaved()
         } catch (e: Exception) {
             Log.d(logTag, "Repo error $e")
-            onError(e)
+            throw e
         }
     }
 

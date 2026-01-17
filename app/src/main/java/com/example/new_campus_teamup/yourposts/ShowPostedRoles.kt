@@ -25,7 +25,11 @@ fun ShowPostedRoles(yourPostViewModel: YourPostViewModel) {
 
     val roleList = yourPostViewModel.postedRoles.collectAsState()
     val context = LocalContext.current
-
+    LaunchedEffect(Unit) {
+        yourPostViewModel.deletePostEvent.collect { message->
+            ToastHelper.showToast(context , message)
+        }
+    }
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth(),
@@ -35,11 +39,7 @@ fun ShowPostedRoles(yourPostViewModel: YourPostViewModel) {
 
         items(roleList.value) {
             YourSingleRole(roleDetails = it, onRoleDelete = { roleId ->
-                yourPostViewModel.deleteRole(roleId, onDelete = {
-                    ToastHelper.showToast(context,"Deleted Successfully")
-                }, onError = {
-                    ToastHelper.showToast(context,"Something went wrong !")
-                })
+                yourPostViewModel.deleteRole(roleId)
             })
         }
         item {

@@ -14,9 +14,6 @@ class YourPostRepo @Inject constructor(private val firestore: FirebaseFirestore)
 
 
     val tag = "YourPost"
-
-
-
     // this is posted by user that user can delete
     fun observeUserPostedRoles(userId: String): Flow<List<RoleDetails>> = callbackFlow {
         val listener = firestore.collection("all_user_id")
@@ -52,9 +49,6 @@ class YourPostRepo @Inject constructor(private val firestore: FirebaseFirestore)
 
         awaitClose { listener.remove() }
     }
-
-
-
     fun observeUserPostedProjects(userId: String): Flow<List<ProjectDetails>> = callbackFlow {
         val listener = firestore
             .collection("all_user_id")
@@ -72,53 +66,4 @@ class YourPostRepo @Inject constructor(private val firestore: FirebaseFirestore)
 
         awaitClose { listener.remove() }
     }
-
-
-
-
-    fun deleteRole(roleId : String , userId : String , onRoleDelete : () -> Unit  , onError : () -> Unit ){
-        deletePost(roleId , userId , "all_roles","roles_posted", onPostDelete = {
-            onRoleDelete()
-        } , onError = {
-            onError()
-        })
-    }
-    fun deleteVacancy(vacancyId : String , userId : String , onVacancyDelete : () -> Unit  , onError : () -> Unit ){
-        deletePost(vacancyId , userId , "all_vacancy","vacancy_posted", onPostDelete = {
-            onVacancyDelete()
-        } , onError = {
-            onError()
-        })
-    }
-    fun deleteProject(projectId : String , userId : String , onProjectDelete : () -> Unit  , onError : () -> Unit ){
-        deletePost(projectId , userId , "all_projects","project_posted", onPostDelete = {
-            onProjectDelete()
-        } , onError = {
-            onError()
-        })
-    }
-
-    private fun deletePost(postId : String , userId : String , commonPostCollection : String , userPostCollection : String , onPostDelete : () -> Unit , onError : () -> Unit ){
-
-        try{
-            val batch = firestore.batch()
-
-            val allPostReference  = firestore.collection(commonPostCollection).document(postId)
-            val userPostReference = firestore.collection("all_user_id").document(userId).collection(userPostCollection).document(postId)
-
-            batch.delete(allPostReference)
-            batch.delete(userPostReference)
-
-            batch.commit()
-
-            onPostDelete()
-        }
-        catch (e : Exception){
-            Log.d(tag , "Error deleting $commonPostCollection  , $userPostCollection")
-            onError()
-        }
-
-    }
-
-
 }

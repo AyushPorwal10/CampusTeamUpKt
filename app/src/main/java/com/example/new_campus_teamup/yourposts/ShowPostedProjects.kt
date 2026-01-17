@@ -1,7 +1,5 @@
 package com.example.new_campus_teamup.yourposts
 
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +7,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +25,11 @@ fun ShowPostedProjects(yourPostViewModel: YourPostViewModel ) {
 
     val vacancyList = yourPostViewModel.postedProjects.collectAsState()
     val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        yourPostViewModel.deletePostEvent.collect { message->
+            ToastHelper.showToast(context , message)
+        }
+    }
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth(),
@@ -34,13 +38,8 @@ fun ShowPostedProjects(yourPostViewModel: YourPostViewModel ) {
     ) {
 
         items(vacancyList.value){
-            YourSingleProject(projectDetails =  it, onProjectDelete = {projectId->
-                Log.d("DeleteProject","Project id is $projectId")
-                yourPostViewModel.deleteProject(projectId, onDelete = {
-                    ToastHelper.showToast(context,"Deleted Successfully")
-                }, onError = {
-                    ToastHelper.showToast(context,"Something went wrong !")
-                })
+            YourSingleProject(projectDetails =  it, onProjectDelete = {
+                yourPostViewModel.deleteProject(it.postId)
             })
         }
         item {

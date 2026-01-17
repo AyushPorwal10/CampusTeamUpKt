@@ -61,15 +61,6 @@ import java.time.LocalDate
 fun PostProject(createPostViewModel: CreatePostViewModel) {
     val context = LocalContext.current
 
-
-    LaunchedEffect(Unit){
-        createPostViewModel.errorMessage.collect{error->
-            error?.let {
-                ToastHelper.showToast(context ,error)
-                createPostViewModel.clearError()
-            }
-        }
-    }
     val teamName = remember {
         mutableStateOf("")
     }
@@ -85,6 +76,24 @@ fun PostProject(createPostViewModel: CreatePostViewModel) {
     }
 
     val isLoading = createPostViewModel.isLoading.collectAsState()
+
+    LaunchedEffect(Unit) {
+        createPostViewModel.postUiEvent.collect { message->
+            teamName.value = ""
+            hackathonOrPersonal.value = ""
+            problemStatement.value = ""
+            githubUrl.value = ""
+            ToastHelper.showToast(context , message)
+        }
+    }
+    LaunchedEffect(Unit){
+        createPostViewModel.errorMessage.collect{error->
+            error?.let {
+                ToastHelper.showToast(context ,error)
+                createPostViewModel.clearError()
+            }
+        }
+    }
 
 
     Box(modifier = Modifier.fillMaxSize()
@@ -200,13 +209,7 @@ fun PostProject(createPostViewModel: CreatePostViewModel) {
                         }
                     )
 
-
-
-
                     Spacer(modifier = Modifier.height(16.dp))
-
-
-
 
                     Spacer(modifier = Modifier.size(20.dp))
                     Button(
@@ -228,14 +231,7 @@ fun PostProject(createPostViewModel: CreatePostViewModel) {
                                         hackathonOrPersonal.value,
                                         problemStatement.value,
                                         githubUrl.value,
-                                        0,
-                                        onProjectPosted = {
-                                            teamName.value = ""
-                                            hackathonOrPersonal.value = ""
-                                            problemStatement.value = ""
-                                            githubUrl.value = ""
-                                            ToastHelper.showToast(context , "Project Posted Successfully")
-                                        }
+                                        0
                                     )
                                 }
                                 else {
@@ -282,9 +278,7 @@ fun PostProject(createPostViewModel: CreatePostViewModel) {
                             }
                         }
                     }
-
                     Spacer(modifier = Modifier.height(24.dp))
-
                 }
             }
         }

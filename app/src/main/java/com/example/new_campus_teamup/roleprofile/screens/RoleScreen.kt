@@ -54,6 +54,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.UiState
+import com.example.new_campus_teamup.clean_code.PostType
 import com.example.new_campus_teamup.helper.LoadAnimation
 import com.example.new_campus_teamup.helper.ReportPostDialog
 import com.example.new_campus_teamup.helper.ToastHelper
@@ -74,7 +75,6 @@ fun RolesScreen(
     homeScreenViewModel: HomeScreenViewModel,
     searchRoleVacancy: SearchRoleVacancy,
     navController: NavController,
-    saveRole: (RoleDetails) -> Unit
 ) {
 
 
@@ -86,7 +86,7 @@ fun RolesScreen(
 //    Log.d("RoleScreen","Saved id from room ${idOfSavedRoles.size}")
 
 
-    var roleIdToReport by remember { mutableStateOf<String?>(null) }
+    var postId by remember { mutableStateOf<String?>(null) }
     val reportPostUiState by homeScreenViewModel.reportPostUiState.collectAsStateWithLifecycle()
     var showReportDialog by remember { mutableStateOf(false) }
 
@@ -106,8 +106,8 @@ fun RolesScreen(
         ReportPostDialog(showReportDialog,isLoading = reportPostUiState is UiState.Loading, onDismiss = {
             showReportDialog = false
         }, onConfirm = {
-            homeScreenViewModel.reportPost("roles" , roleIdToReport!!)
-            roleIdToReport = null
+            homeScreenViewModel.reportPost(PostType.ROLE , postId !!)
+            postId = null
         })
 
     LaunchedEffect(Unit) {
@@ -229,11 +229,13 @@ fun RolesScreen(
                 ShowListOfRoles(
                     modifier = Modifier.fillMaxSize(),
                     rolesUiState = roles,
-                    saveRole = saveRole,
+                    saveRole = {
+                        homeScreenViewModel.saveRole(roleDetails = it)
+                    },
                     idOfSavedRoles = idOfSavedRoles,
                     onReportRoleBtnClick = {
                         showReportDialog = true
-                        roleIdToReport = it
+                        postId = it
                     }
                 )
             }
@@ -257,7 +259,7 @@ fun ShowListOfRoles(
 
             val savedRoleIdsSet = idOfSavedRoles.map { it.roleId }.toSet()
 
-            val filteredRoles = rolesUiState.data.filter { !savedRoleIdsSet.contains(it.roleId) }
+            val filteredRoles = rolesUiState.data.filter { !savedRoleIdsSet.contains(it.postId) }
 
             LazyColumn(
                 modifier = modifier,
@@ -281,7 +283,7 @@ fun ShowListOfRoles(
                         SingleRoleCard(role, onSaveRoleClicked = {
                             saveRole(it)
                         }, onReportRoleBtnClick = {
-                            onReportRoleBtnClick(role.roleId)
+                            onReportRoleBtnClick(role.postId)
                         }, isSaved = false)
                     }
                 }

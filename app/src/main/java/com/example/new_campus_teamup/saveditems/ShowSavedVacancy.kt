@@ -38,9 +38,9 @@ fun ShowSavedVacancies(
         items(savedVacancy.value) { vacancy ->
             Log.d("FetchingVacancy", "Single Vacancy loads")
             SingleVacancyCard(modifier = Modifier, vacancy, onSaveVacancy = {
-                onVacancyUnsave(it.vacancyId)
+                onVacancyUnsave(it.postId)
             }, onReportVacancyBtnClick = {
-                onReportVacancyBtnClick(vacancy.vacancyId)
+                onReportVacancyBtnClick(vacancy.postId)
             }, true)
         }
 

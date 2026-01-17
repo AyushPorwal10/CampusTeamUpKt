@@ -71,7 +71,7 @@ fun PostVacancy(
 
     val isLoading = createPostViewModel.isLoading.collectAsState()
 
-    val scrollState = rememberScrollState()
+
     val teamName = remember { mutableStateOf("") }
     val roleLookingFor = remember { mutableStateOf("") }
     val hackathonName = remember { mutableStateOf("") }
@@ -82,6 +82,17 @@ fun PostVacancy(
 
     var selectedTeamLogo by remember { mutableStateOf<String>("") }
 
+    LaunchedEffect(Unit) {
+        createPostViewModel.postUiEvent.collect { message ->
+            teamName.value = ""
+            hackathonName.value = ""
+            roleDescription.value = ""
+            skills.value = ""
+            roleLookingFor.value = ""
+            roleDescription.value = ""
+            ToastHelper.showToast(context, message)
+        }
+    }
 
     LaunchedEffect(Unit) {
         createPostViewModel.errorMessage.collect { error ->
@@ -291,37 +302,15 @@ fun PostVacancy(
                             )
 
                             if (isAllRequiredFieldsCorrect) {
-
-                                createPostViewModel.uploadTeamLogo(selectedTeamLogo) { canPost, url ->
-
-                                    if (canPost) {
-                                        val downloadImageUrl = url ?: ""
-                                        createPostViewModel.postVacancy(
-                                            LocalDate.now().toString(),
-                                            downloadImageUrl,
-                                            teamName.value,
-                                            hackathonName.value,
-                                            roleLookingFor.value,
-                                            skills.value,
-                                            roleDescription.value, onVacancyPosted = {
-                                                teamName.value = ""
-                                                hackathonName.value = ""
-                                                roleDescription.value = ""
-                                                skills.value = ""
-                                                roleLookingFor.value = ""
-                                                roleDescription.value = ""
-                                                ToastHelper.showToast(
-                                                    context,
-                                                    "Vacancy Posted Successfully"
-                                                )
-                                            })
-                                    } else
-                                        ToastHelper.showToast(
-                                            context,
-                                            "You can post only 4 vacancy"
-                                        )
-
-                                }
+                                createPostViewModel.postVacancy(
+                                    LocalDate.now().toString(),
+                                    teamLogo = selectedTeamLogo,// this is uri
+                                    teamName.value,
+                                    hackathonName.value,
+                                    roleLookingFor.value,
+                                    skills.value,
+                                    roleDescription.value
+                                )
                             } else {
                                 ToastHelper.showToast(context, "All * marked fields are required")
                             }

@@ -38,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.new_campus_teamup.R
 import com.example.new_campus_teamup.UiState
+import com.example.new_campus_teamup.clean_code.PostType
 import com.example.new_campus_teamup.helper.LoadAnimation
 import com.example.new_campus_teamup.helper.ReportPostDialog
 import com.example.new_campus_teamup.helper.ShimmerEffect
@@ -54,7 +55,6 @@ import com.example.new_campus_teamup.viewmodels.HomeScreenViewModel
 fun ProjectsScreen(
     homeScreenViewModel: HomeScreenViewModel,
     navController: NavController,
-    saveProject: (ProjectDetails) -> Unit
 ) {
 
     val projects = homeScreenViewModel.listOfAllProjects.collectAsStateWithLifecycle()
@@ -89,7 +89,7 @@ fun ProjectsScreen(
     ReportPostDialog(showReportDialog,isLoading = reportPostUiState is UiState.Loading, onDismiss = {
         showReportDialog = false
     }, onConfirm = {
-        homeScreenViewModel.reportPost("projects" , postIdToReport!!)
+        homeScreenViewModel.reportPost(PostType.PROJECT , postIdToReport!!)
         postIdToReport = null
     })
 
@@ -147,13 +147,13 @@ fun ProjectsScreen(
                             val savedProjectIdSet = listOfSavedProjects.map { it.projectId }
 
                             // this means user saved this and no need to show this project again
-                            if (!savedProjectIdSet.contains(project.projectId)) {
+                            if (!savedProjectIdSet.contains(project.postId)) {
                                 Log.d("ProjectId", "Showing Project")
                                 SingleProject(project, onSaveProjectClicked = { projectId ->
-                                    saveProject(project)
+                                    homeScreenViewModel.saveProject(projectDetails = project)
                                 }, onReportProjectBtnClick = {
                                     showReportDialog= true
-                                    postIdToReport = project.projectId
+                                    postIdToReport = project.postId
                                 }, isSaved = false)
                             }
 

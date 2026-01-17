@@ -4,11 +4,15 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -64,16 +70,20 @@ import com.example.new_campus_teamup.ui.theme.White
 import com.example.new_campus_teamup.viewmodels.CreatePostViewModel
 import kotlinx.coroutines.delay
 import java.time.LocalDate
-
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PostRole(createPostViewModel: CreatePostViewModel) {
     val context = LocalContext.current
 
     val isLoading = createPostViewModel.isLoading.collectAsState()
+    var role by remember { mutableStateOf("") }
 
-
+    LaunchedEffect(Unit) {
+        createPostViewModel.postUiEvent.collect { message->
+            role = ""
+            ToastHelper.showToast(context , message)
+        }
+    }
     LaunchedEffect(Unit){
         createPostViewModel.errorMessage.collect{error->
             error?.let {
@@ -83,7 +93,6 @@ fun PostRole(createPostViewModel: CreatePostViewModel) {
         }
     }
 
-    var role by remember { mutableStateOf("") }
     val placeholders = listOf(
         "Android App Developer", "IOS App Developer",
         "Web Fronted Developer",
@@ -91,7 +100,6 @@ fun PostRole(createPostViewModel: CreatePostViewModel) {
         "Web Backend Developer",
         "Web Full Stack Developer", ""
     )
-
 
     var currentPlaceholderIndex by remember { mutableIntStateOf(0) }
 
@@ -102,72 +110,120 @@ fun PostRole(createPostViewModel: CreatePostViewModel) {
         }
     }
 
+    val primaryBlue = Color(0xFF1565C0)
+    val lightBackground = Color(0xFFF8FAFC)
+    val cardBackground = Color(0xFFFFFFFF)
+    val textPrimary = Color(0xFF1E293B)
+    val textSecondary = Color(0xFF64748B)
+    val infoBackground = Color(0xFFF1F5F9)
+    val borderColor = Color(0xFFE2E8F0)
 
-    Box(modifier = Modifier.fillMaxSize()
-        .background(
-            brush = Brush.verticalGradient(
-                colors = BackgroundGradientColor,
-                startY = 0f,
-                endY = Float.POSITIVE_INFINITY
-            )
-        ),
-    ){
-
-        FloatingBubbles()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(lightBackground)
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp)
+                .padding(horizontal = 20.dp, vertical = 24.dp)
                 .systemBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
 
-
-            Card(modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 8.dp),
-                shape = RoundedCornerShape(28.dp),
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color.White.copy(alpha = 0.95f)
+                    containerColor = cardBackground
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 20.dp)
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 8.dp
+                ),
+                border = BorderStroke(1.dp, borderColor)
             ) {
                 Column(
-                    modifier = Modifier.padding(32.dp),
+                    modifier = Modifier.padding(28.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         text = "Post Role",
-                        fontSize = 28.sp,
+                        fontSize = 26.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF2D3748)
+                        color = textPrimary,
+                        letterSpacing = (-0.5).sp
                     )
-                    Spacer(modifier = Modifier.height(32.dp))
 
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    Box(modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .fillMaxWidth()
-                        .background(Color(0xFFEFEEFF))) {
-                        Text(
-                            text = stringResource(id = R.string.note_for_making_post),
-                            color = Black,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.padding(12.dp)
-                        )
+                    Text(
+                        text = "Find the perfect team member",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = textSecondary
+                    )
+
+                    Spacer(modifier = Modifier.height(28.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .fillMaxWidth()
+                            .background(infoBackground)
+                            .border(
+                                width = 1.dp,
+                                color = borderColor,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.information),
+                                contentDescription = "Info",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = stringResource(id = R.string.note_for_making_post),
+                                color = textSecondary,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontSize = 13.sp,
+                                lineHeight = 20.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
 
+                    Spacer(modifier = Modifier.height(24.dp))
 
-
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    OutlinedTextField(value = role,
+                    OutlinedTextField(
+                        value = role,
                         onValueChange = { role = it },
-                        colors = TextFieldStyle.myTextFieldColor(),
-                        shape = TextFieldStyle.defaultShape,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            focusedBorderColor = primaryBlue,
+                            unfocusedBorderColor = borderColor,
+                            focusedTextColor = textPrimary,
+                            unfocusedTextColor = textPrimary,
+                            cursorColor = primaryBlue,
+                            focusedLeadingIconColor = primaryBlue,
+                            unfocusedLeadingIconColor = textSecondary,
+                            focusedPlaceholderColor = textSecondary,
+                            unfocusedPlaceholderColor = textSecondary
+                        ),
+                        shape = RoundedCornerShape(12.dp),
                         maxLines = 2,
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
                         placeholder = {
                             Box(
                                 modifier = Modifier.animateContentSize(),
@@ -175,20 +231,23 @@ fun PostRole(createPostViewModel: CreatePostViewModel) {
                             ) {
                                 Text(
                                     text = placeholders[currentPlaceholderIndex],
-                                    style = MaterialTheme.typography.titleMedium,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = textSecondary
                                 )
                             }
                         },
                         leadingIcon = {
                             Icon(
-                                painterResource(id = R.drawable.roles), contentDescription = "Email Icon",
-                                modifier = Modifier.size(22.dp), tint = IconColor
+                                painterResource(id = R.drawable.roles),
+                                contentDescription = "Role Icon",
+                                modifier = Modifier.size(22.dp)
                             )
-                        }, modifier = Modifier
-                            .fillMaxWidth())
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
+                    Spacer(modifier = Modifier.height(28.dp))
 
-                    Spacer(modifier = Modifier.size(20.dp))
                     Button(
                         onClick = {
                             if (role.isEmpty()) {
@@ -197,56 +256,42 @@ fun PostRole(createPostViewModel: CreatePostViewModel) {
                                 Log.d("PostRole", "Post Button Clicked ${LocalDate.now()}")
                                 createPostViewModel.postRole(
                                     role,
-                                    LocalDate.now().toString(),
-                                    canPostRole = {
-                                        // user is allowed to post only three roles
-                                        role = ""
-                                        if (it)
-                                            ToastHelper.showToast(context, "Role Posted Successfully")
-                                        else
-                                            ToastHelper.showToast(context, "You can post only 3 roles")
-                                    })
-
+                                    LocalDate.now().toString()
+                                )
                             }
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(16.dp),
+                            .height(54.dp),
+                        shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent
+                            containerColor = primaryBlue,
+                            disabledContainerColor = primaryBlue.copy(alpha = 0.6f)
                         ),
-                        contentPadding = PaddingValues(0.dp)
+                        enabled = !isLoading.value,
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 4.dp,
+                            pressedElevation = 2.dp
+                        )
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    brush = Brush.horizontalGradient(
-                                        colors = ButtonColor
-                                    ),
-                                    shape = RoundedCornerShape(16.dp)
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (isLoading.value) {
-                                CircularProgressIndicator(
-                                    color = Color.White,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            } else {
-                                Text(
-                                    text = "Post",
-                                    color = Color.White,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
+                        if (isLoading.value) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.5.dp
+                            )
+                        } else {
+                            Text(
+                                text = "Post Role",
+                                color = Color.White,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                letterSpacing = 0.25.sp
+                            )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
-
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
             }
         }
