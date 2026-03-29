@@ -12,7 +12,6 @@ class SearchRoleVacancyRepository @Inject constructor(
 ) {
 
      fun fetchRolesFromFirebase(query: String , onStateChange  : (UiState<List<RoleDetails>>) -> Unit){
-
          onStateChange(UiState.Loading)
          try {
              firebaseFirestore.collection("all_roles")

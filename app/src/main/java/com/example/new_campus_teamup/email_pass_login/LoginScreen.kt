@@ -101,12 +101,10 @@ fun LoginScreen(
     val showPassword = remember { mutableStateOf(false) }
 
 
-    val snackbarHostState = remember { SnackbarHostState() }
 
      val isLoading = loginSignUpViewModel.isLoading.collectAsState()
 
     val context = LocalContext.current
-    val textColor = White
 
 
     LaunchedEffect(Unit){

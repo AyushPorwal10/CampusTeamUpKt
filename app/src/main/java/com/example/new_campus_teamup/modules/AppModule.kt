@@ -3,6 +3,7 @@ package com.example.new_campus_teamup.modules
 import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.new_campus_teamup.roles.RolesDao
 import com.example.new_campus_teamup.room.AppDatabase
 import com.example.new_campus_teamup.room.PostDao
 import dagger.Module
@@ -31,5 +32,10 @@ object AppModule {
     @Provides
     fun providesPostDao(appDatabase: AppDatabase) : PostDao{
         return appDatabase.postDao()
+    }
+    @Singleton
+    @Provides
+    fun providesRolesDao(appDatabase: AppDatabase) : RolesDao {
+        return appDatabase.rolesDao()
     }
 }
