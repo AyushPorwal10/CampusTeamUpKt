@@ -32,8 +32,7 @@ class SearchRoleVacancy @Inject constructor(
     private val _searchVacancyText = MutableStateFlow("")
     val searchVacancyText = _searchVacancyText.asStateFlow()
 
-    private val _isVacancySearching = MutableStateFlow(false)
-    val isVacancySearching = _isVacancySearching.asStateFlow()
+
 
     private val _searchedVacanciesUiState = MutableStateFlow<UiState<List<VacancyDetails>>>(UiState.Idle)
     val searchedVacanciesUiState: StateFlow<UiState<List<VacancyDetails>>> get() = _searchedVacanciesUiState
@@ -95,7 +94,6 @@ class SearchRoleVacancy @Inject constructor(
     }
 
     fun onSearchedVacancyTextChange(text: String) {
-        _isVacancySearching.value = true
         _searchVacancyText.value = text
     }
 }

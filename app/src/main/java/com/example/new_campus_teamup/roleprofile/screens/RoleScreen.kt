@@ -32,6 +32,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -111,7 +112,7 @@ fun RolesScreen(
         })
 
     LaunchedEffect(Unit) {
-        homeScreenViewModel.observeRolesInRealTime()
+        homeScreenViewModel.getRoles()
     }
 
 
@@ -226,18 +227,23 @@ fun RolesScreen(
                     .weight(1f)
                     .padding(10.dp)
             ) {
-                ShowListOfRoles(
-                    modifier = Modifier.fillMaxSize(),
-                    rolesUiState = roles,
-                    saveRole = {
-                        homeScreenViewModel.saveRole(roleDetails = it)
-                    },
-                    idOfSavedRoles = idOfSavedRoles,
-                    onReportRoleBtnClick = {
-                        showReportDialog = true
-                        postId = it
-                    }
-                )
+
+                PullToRefreshBox(isRefreshing = roles is UiState.Loading, onRefresh = {
+                    homeScreenViewModel
+                }) {
+                    ShowListOfRoles(
+                        modifier = Modifier.fillMaxSize(),
+                        rolesUiState = roles,
+                        saveRole = {
+                            homeScreenViewModel.saveRole(roleDetails = it)
+                        },
+                        idOfSavedRoles = idOfSavedRoles,
+                        onReportRoleBtnClick = {
+                            showReportDialog = true
+                            postId = it
+                        }
+                    )
+                }
             }
         }
     }
@@ -260,7 +266,6 @@ fun ShowListOfRoles(
             val savedRoleIdsSet = idOfSavedRoles.map { it.roleId }.toSet()
 
             val filteredRoles = rolesUiState.data.filter { !savedRoleIdsSet.contains(it.postId) }
-
             LazyColumn(
                 modifier = modifier,
                 horizontalAlignment = Alignment.CenterHorizontally,

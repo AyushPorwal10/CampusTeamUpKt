@@ -11,21 +11,19 @@ import coil.imageLoader
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import coil.util.DebugLogger
-import com.google.firebase.BuildConfig
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
-import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import dagger.hilt.android.HiltAndroidApp
 
 
 @HiltAndroidApp
-class MyApplication : Application() ,ImageLoaderFactory {
+class MyApplication : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
 
-        Log.d("AppCheck","Application Class onCreate")
+        Log.d("AppCheck", "Application Class onCreate")
 
 
         FirebaseApp.initializeApp(this)
@@ -33,12 +31,12 @@ class MyApplication : Application() ,ImageLoaderFactory {
         val firebaseAppCheck = FirebaseAppCheck.getInstance()
 
 
-       // if (BuildConfig.DEBUG) { // Only use debug provider in debug builds
-       //     Log.d("AppCheck", "Using DEBUG App Check Provider")
-            firebaseAppCheck.installAppCheckProviderFactory(
-                DebugAppCheckProviderFactory.getInstance()
-            )
-      //  } else {
+        // if (BuildConfig.DEBUG) { // Only use debug provider in debug builds
+        //     Log.d("AppCheck", "Using DEBUG App Check Provider")
+        firebaseAppCheck.installAppCheckProviderFactory(
+            DebugAppCheckProviderFactory.getInstance()
+        )
+        //  } else {
 //            Log.d("AppCheck", "Using Play Integrity App Check Provider")
 //            firebaseAppCheck.installAppCheckProviderFactory(
 //                PlayIntegrityAppCheckProviderFactory.getInstance()
@@ -54,14 +52,14 @@ class MyApplication : Application() ,ImageLoaderFactory {
     override fun newImageLoader(): ImageLoader {
         return ImageLoader(this).newBuilder()
             .memoryCachePolicy(CachePolicy.ENABLED) // many option inside this bracket
-            .memoryCache{
+            .memoryCache {
                 MemoryCache.Builder(this)
                     .maxSizePercent(0.1)
                     .strongReferencesEnabled(true)
                     .build()
             }
             .diskCachePolicy(CachePolicy.ENABLED)
-            .diskCache{
+            .diskCache {
                 DiskCache.Builder()
                     .maxSizePercent(0.03)
                     .directory(cacheDir)

@@ -8,6 +8,8 @@ import com.example.new_campus_teamup.clean_code_1.SavePostConfig
 import com.example.new_campus_teamup.mydataclass.ProjectDetails
 import com.example.new_campus_teamup.mydataclass.RoleDetails
 import com.example.new_campus_teamup.mydataclass.VacancyDetails
+import com.example.new_campus_teamup.network.NetworkMonitor
+import com.example.new_campus_teamup.roles.RolesDao
 import com.example.new_campus_teamup.room.PostDao
 import com.example.new_campus_teamup.room.ProjectEntity
 import com.example.new_campus_teamup.room.RoleEntity
@@ -28,64 +30,46 @@ import javax.inject.Inject
 
 class HomeScreenRepository @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
-    private val postDao: PostDao
+    private val postDao: PostDao,
+    private val networkMonitor: NetworkMonitor,
+    private val roleDao : RolesDao
 ) {
 
 
 
-    fun observeRoles(): Flow<UiState<List<RoleDetails>>> = callbackFlow {
+    fun getRoles() : Flow<List<RoleDetails>> {
+       return roleDao.getRoles()
+    }
 
-        trySend(UiState.Loading)
+    suspend fun syncRoles(lastVisible: DocumentSnapshot? = null): DocumentSnapshot? {
+        if (!networkMonitor.isOnline()) return null
 
-        val listenerRegistration = try {
-            val reference = firebaseFirestore
+        return try {
+            var query = firebaseFirestore
                 .collection("all_roles")
                 .orderBy("postedOn", Query.Direction.DESCENDING)
+                .limit(25)
 
-            reference.addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    trySend(UiState.Error(error.message ?: "Unknown Firestore error"))
-                    return@addSnapshotListener
-                }
+            lastVisible?.let { query = query.startAfter(it) }
 
-                val roles = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject(RoleDetails::class.java)
-                } ?: emptyList()
+            val snapshot = query.get().await()
+            val roles = snapshot.documents.mapNotNull { it.toObject(RoleDetails::class.java) }
 
-                trySend(UiState.Success(roles))
+            val isFirstPage = lastVisible == null
+            if (isFirstPage) {
+                roleDao.syncRoles(roles)   // refreshing new roles
+            } else {
+                roleDao.insertRoles(roles) // just appending roles
             }
+
+            snapshot.documents.lastOrNull()
+
         } catch (e: Exception) {
-            trySend(UiState.Error(e.message ?: "Unexpected error"))
-            close(e)
             null
         }
-
-        awaitClose {
-            listenerRegistration?.remove()
-        }
-
     }
 
     // Vacancy Section for observing and fetching initial and paginated vacancy
-
-
-    suspend fun fetchInitialOrPaginatedVacancy(lastVisible: DocumentSnapshot?): QuerySnapshot {
-
-        return if (lastVisible == null) {
-            firebaseFirestore.collection("all_vacancy")
-                .orderBy("postedOn", Query.Direction.DESCENDING)
-                .limit(15)
-                .get()
-                .await()
-        } else {
-            firebaseFirestore.collection("all_vacancy")
-                .orderBy("postedOn", Query.Direction.DESCENDING)
-                .limit(15)
-                .startAfter(lastVisible)
-                .get()
-                .await()
-        }
-    }
 
     fun observeVacancy(
     ) = callbackFlow {
