@@ -278,19 +278,26 @@ class HomeScreenViewModel @Inject constructor(
     }
 
 
-    fun observeRolesInRealTime() {
-        Log.d("Roles", "ViewModel Observing roles in real-time")
-
+    fun getRoles() {
         viewModelScope.launch {
-            homeScreenRepository.observeRoles().collect {
-                _rolesUiState.value = it
+            _rolesUiState.value = UiState.Loading
+            launch {
+                homeScreenRepository.getRoles().collect { listOfRoles ->
+                    _rolesUiState.value = if (listOfRoles.isNotEmpty())
+                        UiState.Success(data = listOfRoles)
+                    else
+                        UiState.Error("No Roles Found")
+                }
+            }
+
+            launch {
+                 homeScreenRepository.syncRoles(lastVisible = null)
             }
         }
     }
 
 
     // vacancy section
-
 
     fun observeVacancyInRealTime() {
         startOperation {
