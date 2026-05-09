@@ -12,10 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
@@ -36,6 +36,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -59,7 +60,6 @@ import com.example.new_campus_teamup.clean_code.PostType
 import com.example.new_campus_teamup.helper.LoadAnimation
 import com.example.new_campus_teamup.helper.ReportPostDialog
 import com.example.new_campus_teamup.helper.ToastHelper
-import com.example.new_campus_teamup.helper.show
 import com.example.new_campus_teamup.mydataclass.RoleDetails
 import com.example.new_campus_teamup.room.RoleEntity
 import com.example.new_campus_teamup.screens.homescreens.CustomRoundedCorner
@@ -85,7 +85,7 @@ fun RolesScreen(
     val idOfSavedRoles by homeScreenViewModel.idsOfSavedRoles.collectAsStateWithLifecycle()
 
 //    Log.d("RoleScreen","Saved id from room ${idOfSavedRoles.size}")
-
+    val listState = rememberLazyListState()
 
     var postId by remember { mutableStateOf<String?>(null) }
     val reportPostUiState by homeScreenViewModel.reportPostUiState.collectAsStateWithLifecycle()
@@ -137,7 +137,19 @@ fun RolesScreen(
         }
     }
 
+    val reachedEnd by remember {
+        derivedStateOf {
+            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()
+            val total = listState.layoutInfo.totalItemsCount
+            total > 0 && lastVisible != null && lastVisible.index >= total - 1
+        }
+    }
 
+    LaunchedEffect(reachedEnd) {
+        if (reachedEnd && searchText.isEmpty()) {
+            homeScreenViewModel.fetchMoreRoles()
+        }
+    }
 
     Scaffold(topBar = {
         TopAppBar(
@@ -165,7 +177,6 @@ fun RolesScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(paddingValues)
                 .background(
                     brush = Brush.verticalGradient(
@@ -229,11 +240,12 @@ fun RolesScreen(
             ) {
 
                 PullToRefreshBox(isRefreshing = roles is UiState.Loading, onRefresh = {
-                    homeScreenViewModel
+                    homeScreenViewModel.refreshRoles()
                 }) {
                     ShowListOfRoles(
                         modifier = Modifier.fillMaxSize(),
                         rolesUiState = roles,
+                        listState,
                         saveRole = {
                             homeScreenViewModel.saveRole(roleDetails = it)
                         },
@@ -253,6 +265,7 @@ fun RolesScreen(
 fun ShowListOfRoles(
     modifier: Modifier,
     rolesUiState: UiState<List<RoleDetails>>,
+    listState: LazyListState,
     saveRole: (RoleDetails) -> Unit,
     idOfSavedRoles: List<RoleEntity>,
     onReportRoleBtnClick: (String) -> Unit = {}
@@ -268,6 +281,7 @@ fun ShowListOfRoles(
             val filteredRoles = rolesUiState.data.filter { !savedRoleIdsSet.contains(it.postId) }
             LazyColumn(
                 modifier = modifier,
+                state = listState,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {

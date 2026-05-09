@@ -48,7 +48,7 @@ class HomeScreenRepository @Inject constructor(
             var query = firebaseFirestore
                 .collection("all_roles")
                 .orderBy("postedOn", Query.Direction.DESCENDING)
-                .limit(25)
+                .limit(3)
 
             lastVisible?.let { query = query.startAfter(it) }
 
@@ -59,7 +59,7 @@ class HomeScreenRepository @Inject constructor(
             if (isFirstPage) {
                 roleDao.syncRoles(roles)   // refreshing new roles
             } else {
-                roleDao.insertRoles(roles) // just appending roles
+                roleDao.insertRoles(roles) // just appending roles scrolling to last item
             }
 
             snapshot.documents.lastOrNull()

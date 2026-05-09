@@ -55,25 +55,11 @@ class HomeScreenViewModel @Inject constructor(
     val userData: StateFlow<UserData?> get() = _userData.asStateFlow()
 
 
-    private val _FCMToken = MutableStateFlow<String>("")
-    val FCMToken: StateFlow<String> get() = _FCMToken.asStateFlow()
-
     // role
     private val _rolesUiState = MutableStateFlow<UiState<List<RoleDetails>>>(UiState.Idle)
     val rolesUiState: StateFlow<UiState<List<RoleDetails>>> get() = _rolesUiState
 
     private var lastVisibleRole: DocumentSnapshot? = null
-    private var lastRolePostedOn: String = ""
-
-
-    init {
-        Log.d("HomeScreenViewModel", "HomeScreenViewModel init called")
-    }
-
-
-    private val _isVacancyLoading = MutableStateFlow(false)
-    val isVacancyLoading: StateFlow<Boolean> = _isVacancyLoading.asStateFlow()
-
     // vacancy
     private val _vacancyUiState = MutableStateFlow<UiState<List<VacancyDetails>>>(UiState.Idle)
     val vacancyUiState: StateFlow<UiState<List<VacancyDetails>>> get() = _vacancyUiState.asStateFlow()
@@ -291,8 +277,24 @@ class HomeScreenViewModel @Inject constructor(
             }
 
             launch {
-                 homeScreenRepository.syncRoles(lastVisible = null)
+                lastVisibleRole = homeScreenRepository.syncRoles(lastVisible = lastVisibleRole)
             }
+        }
+    }
+
+    fun refreshRoles() {
+        // since we want whole list to refresh we are clearing stale data and fetching new instead of appending
+        viewModelScope.launch {
+            _rolesUiState.value = UiState.Loading
+            lastVisibleRole = homeScreenRepository.syncRoles(lastVisible = null)
+        }
+    }
+
+
+    fun fetchMoreRoles() {
+        Log.d("ROLES_FETCHING","Fetching more roles")
+        viewModelScope.launch {
+            lastVisibleRole = homeScreenRepository.syncRoles(lastVisible = lastVisibleRole)
         }
     }
 
@@ -301,7 +303,6 @@ class HomeScreenViewModel @Inject constructor(
 
     fun observeVacancyInRealTime() {
         startOperation {
-            _isVacancyLoading.value = true
             delay(700)
             Log.d("Vacancy", "ViewModel Observing new roles user refresh")
             homeScreenRepository.observeVacancy()
@@ -326,9 +327,6 @@ class HomeScreenViewModel @Inject constructor(
     fun fetchUserData() {
         startOperation {
             _userData.value = userManager.userData.first()
-            _FCMToken.value = userManager.fcmToken.first()
-            Log.d("FCM", "FCM fetched in viewmodel ${_FCMToken.value} <-")
-            // getUserImageUrl()
         }
     }
 
